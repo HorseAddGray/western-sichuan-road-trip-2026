@@ -820,9 +820,10 @@ function renderTodoList(kind) {
   const activeTodos = kind === "packing" && state.selectedPackingSubcategories.size
     ? categoryTodos.filter((todo) => state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo)))
     : kind === "notice" ? categoryTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory) : categoryTodos;
-  const completed = activeTodos.filter((todo) => todo.completed).length;
-  if (kind === "packing") $("#packing-progress").textContent = `${completed} / ${activeTodos.length}`;
-  else $("#notice-count").textContent = `${activeTodos.length} 条信息`;
+  const orderedTodos = kind === "notice" ? window.TravelPrep.sortNoticeItems(activeTodos) : activeTodos;
+  const completed = orderedTodos.filter((todo) => todo.completed).length;
+  if (kind === "packing") $("#packing-progress").textContent = `${completed} / ${orderedTodos.length}`;
+  else $("#notice-count").textContent = `${orderedTodos.length} 条信息`;
   const itemMarkup = (todo) => kind === "notice" ? `
     <article class="notice-item" data-todo-id="${escapeHtml(todo.id)}">
       <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
@@ -835,8 +836,8 @@ function renderTodoList(kind) {
       </label>
       <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
     </div>`;
-  $(`#${kind}-list`).innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
-    const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
+  $(`#${kind}-list`).innerHTML = orderedTodos.length ? Object.entries(labels).map(([key, label]) => {
+    const items = orderedTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
     if (kind === "notice" && items.some((todo) => todo.group)) {

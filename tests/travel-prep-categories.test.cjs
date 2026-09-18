@@ -7,7 +7,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "..", "travel-prep.js"), "utf8");
 const context = {};
 vm.runInNewContext(source, context);
-const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory } = context.TravelPrep;
+const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems } = context.TravelPrep;
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const navigation = fs.readFileSync(path.join(__dirname, "..", "site-navigation.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
@@ -105,4 +105,21 @@ test("oxygen guidance preserves every supplied fee and the full safety reminder"
   assert.equal(oxygen.length, 6);
   assert.ok(oxygen.some((item) => item.text === "理塘县" && item.detail.includes("床位费+取暖费21元/人")));
   assert.ok(reminder?.detail.includes("低海拔地区慢慢过渡到高海拔"));
+});
+
+test("notice details use the defined category and group order without scrambling each group", () => {
+  const notes = [
+    { text: "雷区地点", subcategory: "toilet", group: "雷区警示" },
+    { text: "温馨提示", subcategory: "health", group: "温馨提示" },
+    { text: "第一处吸氧", subcategory: "health", group: "吸氧费用" },
+    { text: "第二处吸氧", subcategory: "health", group: "吸氧费用" },
+    { text: "殿堂地点", subcategory: "toilet", group: "殿堂级" }
+  ];
+
+  assert.deepEqual(sortNoticeItems(notes).map((item) => item.text), ["第一处吸氧", "第二处吸氧", "温馨提示", "殿堂地点", "雷区地点"]);
+});
+
+test("notice cards place a black dot before each detail", () => {
+  assert.match(styles, /\.notice-item::before/);
+  assert.match(styles, /background:\s*#13262f/);
 });
