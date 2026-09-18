@@ -23,8 +23,11 @@ test("missing subcategory becomes other", () => {
   assert.equal(normalizeTodoSubcategory({ category: "packing" }), "other");
 });
 
-test("preparation card provides category controls", () => {
-  assert.match(html, /data-prep-category="notice"/);
-  assert.match(html, /data-prep-category="packing"/);
-  assert.match(html, /id="todo-category"/);
+test("packing and notices have independent navigation and controls", () => {
+  assert.match(html, /href="#packing"[^>]*>行囊清单</);
+  assert.match(html, /href="#notices"[^>]*>注意事项</);
+  assert.match(html, /id="packing-category-filters"/);
+  assert.match(html, /id="notice-category-tabs"/);
+  assert.match(html, /id="packing-list"/);
+  assert.match(html, /id="notice-list"/);
 });

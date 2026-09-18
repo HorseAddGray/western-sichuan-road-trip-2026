@@ -31,9 +31,10 @@
           <a href="#route" role="menuitem" data-module="overview" hidden>路线</a>
           <a href="#itinerary" role="menuitem" data-module="itinerary" hidden>行程</a>
           <a href="#drive" role="menuitem" data-module="driving" hidden>自驾</a>
-          <a href="#prep" role="menuitem" data-module="todo" hidden>Todo</a>
         </div>
       </details>
+      <a class="primary-navigation__ledger" href="#packing" data-module="todo" hidden>行囊清单</a>
+      <a class="primary-navigation__ledger" href="#notices" data-module="todo" hidden>注意事项</a>
       <a class="primary-navigation__ledger" id="ledger-navigation-link" href="#ledger" data-module="ledger" hidden>记账</a>
     </nav>
   </header>
@@ -92,25 +93,38 @@
       <div class="accordion-stack" id="drive-notes"></div>
     </section>
 
-    <section class="section prep-section" id="prep" aria-labelledby="prep-title" data-module="todo" hidden>
+    <section class="section prep-section" id="packing" aria-labelledby="packing-title" data-module="todo" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">BEFORE WE GO</p>
-          <h2 id="prep-title">旅行前准备</h2>
+          <h2 id="packing-title">行囊清单</h2>
         </div>
-        <span class="soft-label" id="todo-progress">0 / 0</span>
+        <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
-      <div class="prep-tabs" role="tablist" aria-label="旅行前准备分类">
-        <button type="button" data-prep-category="notice" aria-selected="true">注意事项</button>
-        <button type="button" data-prep-category="packing" aria-selected="false">行囊清单</button>
-      </div>
-      <form class="todo-form" id="todo-form">
-        <input id="todo-input" type="text" maxlength="80" placeholder="添加一项准备事项" aria-label="准备事项">
-        <select id="todo-category" aria-label="项目分类"><option value="notice">注意事项</option><option value="packing">行囊清单</option></select>
-        <select id="todo-subcategory" aria-label="项目子类别"></select>
+      <div class="prep-tabs" id="packing-category-filters" aria-label="行囊清单分类，可多选"></div>
+      <form class="todo-form" id="packing-form">
+        <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">
+        <select id="packing-subcategory" aria-label="物品类别"></select>
         <button type="submit">添加</button>
       </form>
-      <div class="todo-list" id="todo-list"></div>
+      <div class="todo-list" id="packing-list"></div>
+    </section>
+
+    <section class="section prep-section" id="notices" aria-labelledby="notices-title" data-module="todo" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">TRIP NOTES</p>
+          <h2 id="notices-title">注意事项</h2>
+        </div>
+        <span class="soft-label" id="notice-progress">0 / 0</span>
+      </div>
+      <div class="prep-tabs" id="notice-category-tabs" role="tablist" aria-label="注意事项分类"></div>
+      <form class="todo-form" id="notice-form">
+        <input id="notice-input" type="text" maxlength="80" placeholder="添加一条注意事项" aria-label="注意事项">
+        <select id="notice-subcategory" aria-label="注意事项类别"></select>
+        <button type="submit">添加</button>
+      </form>
+      <div class="todo-list" id="notice-list"></div>
     </section>
 
     <footer class="footer">

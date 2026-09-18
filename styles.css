@@ -356,7 +356,8 @@ main { overflow: hidden; }
 .todo-form button { min-width: 64px; min-height: 48px; border: 0; border-radius: 13px; color: white; background: var(--ink); cursor: pointer; font-size: 12px; font-weight: 750; }
 .todo-form select { min-height: 48px; max-width: 112px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); color: var(--ink); font: inherit; font-size: 12px; }
 .prep-group { border-bottom: 1px solid var(--line); }
-.prep-group summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 750; }
+.prep-group h3 { min-height: 48px; margin: 0; display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: 13px; font-weight: 750; }
+.prep-group h3 span { color: var(--muted); font-size: 11px; font-weight: 600; }
 .prep-group .todo-list { margin-top: 0; }
 .todo-list { margin-top: 13px; }
 .todo-item { min-height: 54px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }

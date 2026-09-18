@@ -6,7 +6,8 @@ const state = {
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
-  activeTodoCategory: "notice"
+  activeNoticeSubcategory: "health",
+  selectedPackingSubcategories: new Set()
 };
 
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
@@ -55,7 +56,7 @@ function applyModuleConfig() {
 
   const hashModules = {
     "#flights": "flights", "#route": "overview", "#itinerary": "itinerary",
-    "#drive": "driving", "#prep": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
+    "#drive": "driving", "#packing": "todo", "#notices": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
   };
   const requestedModule = hashModules[location.hash];
   if (requestedModule && !moduleEnabled(requestedModule)) {
@@ -762,6 +763,7 @@ async function loadSharedState() {
       id: String(item.id || `todo-initial-${index + 1}`),
       text: String(item.text || item.title || "").trim(),
       category: window.TravelPrep.normalizeTodoCategory(item),
+      subcategory: window.TravelPrep.normalizeTodoSubcategory(item),
       completed: Boolean(item.completed)
     })).filter((item) => item.text && !existingIds.has(item.id));
     state.todos.push(...missingTodos);
@@ -777,11 +779,19 @@ async function saveSharedChange(collection, value, op = "upsert") {
 
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
-function renderTodoList() {
-  const activeTodos = window.TravelPrep.filterTodosByCategory(state.todos, state.activeTodoCategory);
+const PREP_LABELS = {
+  notice: { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", trip: "行程与住宿", other: "其他" },
+  packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
+};
+
+function renderTodoList(kind) {
+  const labels = PREP_LABELS[kind];
+  const categoryTodos = window.TravelPrep.filterTodosByCategory(state.todos, kind);
+  const activeTodos = kind === "packing" && state.selectedPackingSubcategories.size
+    ? categoryTodos.filter((todo) => state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo)))
+    : kind === "notice" ? categoryTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory) : categoryTodos;
   const completed = activeTodos.filter((todo) => todo.completed).length;
-  $("#todo-progress").textContent = `${completed} / ${activeTodos.length}`;
-  const labels = state.activeTodoCategory === "notice" ? { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", trip: "行程与住宿", other: "其他" } : { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" };
+  $(`#${kind === "packing" ? "packing" : "notice"}-progress`).textContent = `${completed} / ${activeTodos.length}`;
   const itemMarkup = (todo) => `
     <div class="todo-item${todo.completed ? " is-complete" : ""}" data-todo-id="${escapeHtml(todo.id)}">
       <label>
@@ -791,76 +801,87 @@ function renderTodoList() {
       </label>
       <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
     </div>`;
-  $("#todo-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
+  $(`#${kind}-list`).innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
     const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
-    return `<details class="prep-group"><summary>${label}<span>${done} / ${items.length}</span></summary><div class="todo-list">${items.map(itemMarkup).join("")}</div></details>`;
+    return `<section class="prep-group"><h3>${label}<span>${done} / ${items.length}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
   }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
 }
 
 function renderTravelPrep() {
-  const categorySelect = $("#todo-category");
-  const subcategorySelect = $("#todo-subcategory");
-  const refreshSubcategories = () => {
-    const options = state.activeTodoCategory === "notice" ? [["health", "高反与健康"], ["rental", "租车与验车"], ["road", "路况、补给与设施"], ["trip", "行程与住宿"], ["other", "其他"]] : [["documents", "证件与订单"], ["clothing", "衣物与户外装备"], ["medicine", "药品与卫生用品"], ["electronics", "电子设备"], ["food", "食物与饮水"], ["other", "其他"]];
-    subcategorySelect.innerHTML = options.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+  const preferenceKey = `travel-plan:${state.data.metadata.tripId}:notice-subcategory`;
+  const saved = localStorage.getItem(preferenceKey);
+  if (PREP_LABELS.notice[saved]) state.activeNoticeSubcategory = saved;
+  const optionMarkup = (kind) => Object.entries(PREP_LABELS[kind]).map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+  $("#packing-subcategory").innerHTML = optionMarkup("packing");
+  $("#notice-subcategory").innerHTML = optionMarkup("notice");
+  $("#notice-subcategory").value = state.activeNoticeSubcategory;
+  const renderControls = () => {
+    $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
+    $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
   };
-  categorySelect.value = state.activeTodoCategory;
-  refreshSubcategories();
-  $(".prep-tabs").onclick = (event) => {
-    const button = event.target.closest("[data-prep-category]");
+  const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); };
+  renderAll();
+  $("#packing-category-filters").onclick = (event) => {
+    const button = event.target.closest("[data-packing-subcategory]");
     if (!button) return;
-    state.activeTodoCategory = button.dataset.prepCategory;
-    categorySelect.value = state.activeTodoCategory;
-    refreshSubcategories();
-    $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item === button)));
-    renderTodoList();
+    const key = button.dataset.packingSubcategory;
+    state.selectedPackingSubcategories.has(key) ? state.selectedPackingSubcategories.delete(key) : state.selectedPackingSubcategories.add(key);
+    renderAll();
   };
-  categorySelect.onchange = () => {
-    state.activeTodoCategory = categorySelect.value;
-    refreshSubcategories();
-    $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item.dataset.prepCategory === state.activeTodoCategory)));
-    renderTodoList();
+  $("#notice-category-tabs").onclick = (event) => {
+    const button = event.target.closest("[data-notice-subcategory]");
+    if (!button) return;
+    state.activeNoticeSubcategory = button.dataset.noticeSubcategory;
+    localStorage.setItem(preferenceKey, state.activeNoticeSubcategory);
+    $("#notice-subcategory").value = state.activeNoticeSubcategory;
+    renderAll();
   };
-  renderTodoList();
-  $("#todo-form").onsubmit = (event) => {
+  $("#notice-subcategory").onchange = (event) => {
+    state.activeNoticeSubcategory = event.target.value;
+    localStorage.setItem(preferenceKey, state.activeNoticeSubcategory);
+    renderAll();
+  };
+  const submitForm = (kind) => (event) => {
     event.preventDefault();
-    const input = $("#todo-input");
+    const input = $(`#${kind}-input`);
     const text = input.value.trim();
     if (!text) return;
-    state.todos.push({ id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: categorySelect.value, subcategory: subcategorySelect.value, completed: false });
+    const todo = { id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: kind, subcategory: $(`#${kind}-subcategory`).value, completed: false };
+    state.todos.push(todo);
     input.value = "";
-    saveSharedChange("todos", state.todos.at(-1)).catch(console.error);
-    renderTodoList();
+    saveSharedChange("todos", todo).catch(console.error);
+    renderAll();
   };
-  $("#todo-list").onchange = (event) => {
+  $("#packing-form").onsubmit = submitForm("packing");
+  $("#notice-form").onsubmit = submitForm("notice");
+  const updateTodo = (event) => {
     const item = event.target.closest("[data-todo-id]");
     if (!item || !event.target.matches("input[type='checkbox']")) return;
     const todo = state.todos.find((entry) => entry.id === item.dataset.todoId);
     todo.completed = event.target.checked;
     saveSharedChange("todos", todo).catch(console.error);
-    renderTodoList();
+    renderAll();
   };
-  $("#todo-list").onclick = (event) => {
-    const editButton = event.target.closest(".todo-edit");
-    if (editButton) {
-      const item = editButton.closest("[data-todo-id]");
-      const todo = state.todos.find((entry) => entry.id === item.dataset.todoId);
+  const manageTodo = (event) => {
+    const item = event.target.closest("[data-todo-id]");
+    const todo = item && state.todos.find((entry) => entry.id === item.dataset.todoId);
+    if (!todo) return;
+    if (event.target.closest(".todo-edit")) {
       const text = window.prompt("编辑项目", todo.text)?.trim();
       if (!text) return;
       todo.text = text;
       saveSharedChange("todos", todo).catch(console.error);
-      renderTodoList();
+      renderAll();
       return;
     }
-    const button = event.target.closest(".todo-delete");
-    if (!button) return;
-    const item = button.closest("[data-todo-id]");
-    state.todos = state.todos.filter((todo) => todo.id !== item.dataset.todoId);
-    saveSharedChange("todos", { id: item.dataset.todoId }, "delete").catch(console.error);
-    renderTodoList();
+    if (!event.target.closest(".todo-delete")) return;
+    state.todos = state.todos.filter((entry) => entry.id !== todo.id);
+    saveSharedChange("todos", { id: todo.id }, "delete").catch(console.error);
+    renderAll();
   };
+  ["packing", "notice"].forEach((kind) => { $(`#${kind}-list`).onchange = updateTodo; $(`#${kind}-list`).onclick = manageTodo; });
 }
 
 function safeExternalUrl(value) {
