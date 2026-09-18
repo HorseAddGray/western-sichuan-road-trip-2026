@@ -1,0 +1,1157 @@
+{
+  "$schema": "./schemas/trip-data.schema.json",
+  "schemaVersion": "2.0-lite",
+  "config": {
+    "schemaVersion": "1.0.0",
+    "modules": {
+      "flights": true,
+      "overview": true,
+      "itinerary": true,
+      "todo": true,
+      "driving": true,
+      "ledger": true
+    },
+    "language": "zh-CN",
+    "persistence": {
+      "mode": "local"
+    }
+  },
+  "metadata": {
+    "tripId": "western-sichuan-road-trip-2026",
+    "title": "川西自驾双人成行",
+    "language": "zh-CN",
+    "assets": {
+      "routeMaps": [
+        "assets/maps/templates/template-10-broad-riverland.webp"
+      ]
+    }
+  },
+  "trip": {
+    "status": "draft",
+    "startDate": "2026-09-28",
+    "endDate": "2026-10-02",
+    "dayCount": 5,
+    "nightCountAway": 4,
+    "countries": [
+      {
+        "code": "CN",
+        "nameZh": "中国"
+      }
+    ],
+    "primaryDestinationCountries": [
+      "CN"
+    ],
+    "primaryDestinationName": "川西甘孜",
+    "citiesAndAreas": [
+      "川西甘孜"
+    ],
+    "routeSummary": "成都—康定—新都桥—甘孜—理塘—雅江—成都",
+    "groupSize": 2
+  },
+  "flightJourneys": [
+    {
+      "id": "outbound",
+      "title": "深圳 → 成都",
+      "status": "booked"
+    },
+    {
+      "id": "return",
+      "title": "成都 → 深圳",
+      "status": "booked"
+    }
+  ],
+  "flights": [
+    {
+      "id": "cz5861",
+      "journeyId": "outbound",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "南方航空"
+      },
+      "flightNumber": "CZ5861",
+      "departure": {
+        "airportCode": "SZX",
+        "city": "深圳",
+        "date": "2026-09-28",
+        "time": "06:55",
+        "utcOffset": "+08:00"
+      },
+      "arrival": {
+        "airportCode": "CTU",
+        "city": "成都",
+        "date": "2026-09-28",
+        "time": "09:35",
+        "utcOffset": "+08:00"
+      }
+    },
+    {
+      "id": "zh9418",
+      "journeyId": "return",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "深圳航空"
+      },
+      "flightNumber": "ZH9418",
+      "departure": {
+        "airportCode": "CTU",
+        "city": "成都",
+        "date": "2026-10-02",
+        "time": "22:00",
+        "utcOffset": "+08:00"
+      },
+      "arrival": {
+        "airportCode": "SZX",
+        "city": "深圳",
+        "date": "2026-10-03",
+        "time": "00:30",
+        "utcOffset": "+08:00"
+      }
+    }
+  ],
+  "accommodations": [
+    {
+      "id": "stay-xdq",
+      "name": "藏地心宿·Holiday View私汤轻奢酒店（康定新都桥木雅白塔店）",
+      "address": "四川康定新都桥镇瓦泽村一组17号",
+      "checkIn": "2026-09-28",
+      "checkOut": "2026-09-29",
+      "checkInTime": "14:00后",
+      "checkOutTime": "12:00前",
+      "room": "光影｜揽山观景大床房（弥散供氧＋地暖＋极米影音）",
+      "status": "已预订"
+    }
+  ],
+  "groundTransport": {
+    "rentalCar": {
+      "company": "云驰千里租车",
+      "rentalPeriodDays": 4,
+      "vehicle": {
+        "example": "坦克300",
+        "class": "3年内车龄 · 4个24寸行李箱"
+      },
+      "unlimitedKilometers": true,
+      "price": {
+        "currency": "CNY",
+        "payAtCounter": 2237
+      },
+      "insurance": [
+        "基础安心保障：1500元内自付（不含车轮）",
+        "50万元三者保障"
+      ],
+      "pickup": {
+        "date": "2026-09-28",
+        "time": "10:30",
+        "location": "成都双流国际机场",
+        "address": "成都双流国际机场",
+        "utcOffset": "+08:00"
+      },
+      "dropoff": {
+        "date": "2026-10-02",
+        "time": "20:30",
+        "timeZoneLabel": "北京时间",
+        "vehicleReturnPoint": "成都双流国际机场",
+        "deadlineWarning": "请预留加油、验车、还车及值机时间。",
+        "recommendedArrivalTime": "20:00",
+        "utcOffset": "+08:00"
+      }
+    },
+    "rentalChecklist": [
+      "取车前核对驾驶员身份证、驾驶证原件或电子驾照。",
+      "取车时确认车辆外观、轮胎、油量与随车工具，并拍照留存。",
+      "还车前按订单要求补足油量，并保留加油凭证。",
+      "还车时与门店共同验车，确认无新增损伤后完成交接。"
+    ],
+    "drivingNotes": [
+      "川西高海拔路段请根据当日身体状态调整行程与住宿。",
+      "部分路段可能受天气、施工或限行影响，出发前请自行确认。"
+    ],
+    "drivingReferenceLinks": [],
+    "plannedRoadLegs": [],
+    "publicTransitAndRail": []
+  },
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-09-28",
+      "title": "往川西起点",
+      "locations": [
+        "成都双流国际机场",
+        "天全服务区",
+        "康定市",
+        "红海子",
+        "新都桥",
+        "鱼子西星空营地"
+      ],
+      "schedule": [
+        {
+          "id": "d1-flight",
+          "time": "06:55",
+          "type": "flight",
+          "text": "深圳宝安T3起飞，09:35抵达成都双流T1。"
+        },
+        {
+          "id": "d1-rental",
+          "time": "10:30",
+          "type": "drive",
+          "text": "成都双流国际机场取车。"
+        },
+        {
+          "id": "d1-route",
+          "time": "全天",
+          "type": "drive",
+          "text": "成都双流国际机场 → 天全服务区（雅叶高速雅安方向） → 康定市 → 红海子 → 新都桥风情小镇 → 鱼子西星空营地。"
+        },
+        {
+          "id": "d1-stay",
+          "time": "抵达后",
+          "type": "check-in",
+          "text": "入住藏地心宿·Holiday View私汤轻奢酒店。"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-09-29",
+      "title": "直往甘孜",
+      "locations": [
+        "新都桥",
+        "道孚县",
+        "炉霍县",
+        "格萨尔王城",
+        "甘孜县"
+      ],
+      "schedule": [
+        {
+          "id": "d2-route",
+          "time": "全天",
+          "type": "drive",
+          "text": "新都桥风情小镇 → 道孚县 → 炉霍县 → 格萨尔王城 → 甘孜县。"
+        },
+        {
+          "id": "d2-stay",
+          "time": "晚间",
+          "type": "note",
+          "text": "住宿待补充：根据第一天高海拔适应情况决定。"
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-09-30",
+      "title": "甘孜玉龙拉措",
+      "locations": [
+        "甘孜县",
+        "马尼干戈",
+        "雀儿山冰川观景台",
+        "玉龙拉措风景区"
+      ],
+      "schedule": [
+        {
+          "id": "d3-route",
+          "time": "全天",
+          "type": "drive",
+          "text": "甘孜县 → 马尼干戈 → 雀儿山冰川观景台 → 玉龙拉措风景区 → 甘孜县。"
+        },
+        {
+          "id": "d3-stay",
+          "time": "晚间",
+          "type": "note",
+          "text": "住宿待补充：根据身体状态决定。"
+        }
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2026-10-01",
+      "title": "甘白路理塘",
+      "locations": [
+        "甘孜县",
+        "拉龙措",
+        "亚青寺",
+        "理塘县",
+        "雅江县",
+        "松茸村"
+      ],
+      "schedule": [
+        {
+          "id": "d4-route",
+          "time": "全天",
+          "type": "drive",
+          "text": "甘孜县 → 甘白路与317国道交叉口 → 拉龙措 → 亚青寺 → 理塘县 → 雅江县 → 松茸村。"
+        },
+        {
+          "id": "d4-stay",
+          "time": "晚间",
+          "type": "note",
+          "text": "住宿待补充：根据身体状态决定。"
+        }
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2026-10-02",
+      "title": "回家",
+      "locations": [
+        "松茸村",
+        "新都桥",
+        "康定市",
+        "天全服务区",
+        "成都双流国际机场"
+      ],
+      "schedule": [
+        {
+          "id": "d5-route",
+          "time": "全天",
+          "type": "drive",
+          "text": "松茸村 → 新都桥风情小镇 → 康定市 → 天全服务区（雅叶高速雅安方向） → 成都双流国际机场。"
+        },
+        {
+          "id": "d5-rental",
+          "time": "20:30",
+          "type": "return",
+          "text": "成都双流国际机场还车。"
+        },
+        {
+          "id": "d5-flight",
+          "time": "22:00",
+          "type": "flight",
+          "text": "成都双流T2起飞，次日00:30抵达深圳宝安T3。"
+        }
+      ]
+    }
+  ],
+  "places": [],
+  "restaurants": [],
+  "bookingsAndTickets": [],
+  "ticketPlanning": {
+    "statusStorage": "local",
+    "statusStorageNote": "门票状态默认只保存在当前浏览器。",
+    "items": []
+  },
+  "preTrip": {
+    "packingItems": [
+      {
+        "id": "fuel",
+        "text": "还车前按订单要求补足油量并保留加油凭证",
+        "completed": false
+      },
+      {
+        "id": "inspect",
+        "text": "还车时与门店共同验车，确认交接",
+        "completed": false
+      },
+      {
+        "id": "licence",
+        "text": "取车时携带驾驶员身份证与驾驶证",
+        "completed": false
+      }
+    ],
+    "preparationsExplicitlyMentioned": [
+      "取还车检查与加油提醒"
+    ],
+    "missingNote": "后续住宿将根据高海拔身体适应情况决定。"
+  },
+  "mapLinks": {
+    "providedGoogleMapsLinks": [],
+    "note": "路线为行程示意，不代表实时导航。",
+    "cityLevelNavigationDisabled": false,
+    "navigationPolicy": {
+      "noNavigationTypes": [
+        "flight",
+        "note",
+        "rest"
+      ],
+      "selfNavigationTypes": [
+        "drive",
+        "return",
+        "transfer",
+        "check-in",
+        "check-out",
+        "restaurant",
+        "attraction",
+        "walk",
+        "hike"
+      ]
+    },
+    "navigationPlaces": []
+  },
+  "issuesAndUncertainties": [
+    {
+      "type": "missing-material",
+      "status": "accepted-for-preview",
+      "title": "9月29日至10月1日住宿待定",
+      "detail": "因首次前往高海拔地区，将根据第一天身体状态决定后续酒店。"
+    }
+  ],
+  "map": {
+    "schemaVersion": "1.0-lite",
+    "mapMode": "template-auto",
+    "templateId": "auto",
+    "region": {
+      "id": "western-sichuan",
+      "label": "川西甘孜",
+      "countryCode": "CN",
+      "heading": "川西甘孜 · 自驾路线"
+    },
+    "defaultRegionId": "western-sichuan",
+    "disclaimer": "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。",
+    "places": [
+      {
+        "id": "cd",
+        "nameZh": "成都双流机场",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30.58,
+          "lng": 103.95
+        }
+      },
+      {
+        "id": "kangding",
+        "nameZh": "康定",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30.05,
+          "lng": 101.97
+        }
+      },
+      {
+        "id": "xinduqiao",
+        "nameZh": "新都桥",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30.04,
+          "lng": 101.49
+        }
+      },
+      {
+        "id": "daofu",
+        "nameZh": "道孚",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30.98,
+          "lng": 101.13
+        }
+      },
+      {
+        "id": "ganzi",
+        "nameZh": "甘孜",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 31.62,
+          "lng": 100
+        }
+      },
+      {
+        "id": "manigango",
+        "nameZh": "马尼干戈",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 31.91,
+          "lng": 99.85
+        }
+      },
+      {
+        "id": "yulong",
+        "nameZh": "玉龙拉措",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 31.66,
+          "lng": 100.2
+        }
+      },
+      {
+        "id": "yaqing",
+        "nameZh": "亚青寺",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 32.95,
+          "lng": 100.03
+        }
+      },
+      {
+        "id": "litang",
+        "nameZh": "理塘",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30,
+          "lng": 100.27
+        }
+      },
+      {
+        "id": "yajiang",
+        "nameZh": "雅江",
+        "countryCode": "CN",
+        "geo": {
+          "lat": 30.03,
+          "lng": 101.02
+        }
+      }
+    ],
+    "routes": [
+      {
+        "day": 1,
+        "placeIds": [
+          "cd",
+          "kangding",
+          "xinduqiao"
+        ]
+      },
+      {
+        "day": 2,
+        "placeIds": [
+          "xinduqiao",
+          "daofu",
+          "ganzi"
+        ]
+      },
+      {
+        "day": 3,
+        "placeIds": [
+          "ganzi",
+          "manigango",
+          "yulong",
+          "ganzi"
+        ]
+      },
+      {
+        "day": 4,
+        "placeIds": [
+          "ganzi",
+          "yaqing",
+          "litang",
+          "yajiang"
+        ]
+      },
+      {
+        "day": 5,
+        "placeIds": [
+          "yajiang",
+          "xinduqiao",
+          "kangding",
+          "cd"
+        ]
+      }
+    ],
+    "dailyRoutes": [
+      {
+        "day": 1,
+        "placeIds": [
+          "cd",
+          "kangding",
+          "xinduqiao"
+        ]
+      },
+      {
+        "day": 2,
+        "placeIds": [
+          "xinduqiao",
+          "daofu",
+          "ganzi"
+        ]
+      },
+      {
+        "day": 3,
+        "placeIds": [
+          "ganzi",
+          "manigango",
+          "yulong",
+          "ganzi"
+        ]
+      },
+      {
+        "day": 4,
+        "placeIds": [
+          "ganzi",
+          "yaqing",
+          "litang",
+          "yajiang"
+        ]
+      },
+      {
+        "day": 5,
+        "placeIds": [
+          "yajiang",
+          "xinduqiao",
+          "kangding",
+          "cd"
+        ]
+      }
+    ]
+  },
+  "routeMap": {
+    "defaultRegionId": "western-sichuan",
+    "regions": [
+      {
+        "id": "western-sichuan",
+        "label": "川西甘孜",
+        "countryCode": "CN",
+        "scope": "template-schematic",
+        "mapMode": "frozen-template",
+        "templateId": "broad-riverland",
+        "mapModeReason": "separated-clusters-or-long-jump",
+        "mapModeMetrics": {
+          "placeCount": 10,
+          "geoPlaceCount": 10,
+          "widthKm": 390.17,
+          "heightKm": 327.45,
+          "spanKm": 454.68,
+          "averageNearestKm": 70.52,
+          "components": 1,
+          "largestLegKm": 328.81,
+          "jumpRatio": 4.55
+        },
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "canvas": {
+          "width": 1448,
+          "height": 1086
+        },
+        "projection": {
+          "type": "relative-schematic",
+          "bounds": null
+        },
+        "baseImage": "assets/maps/templates/template-10-broad-riverland.webp",
+        "title": "川西甘孜 · 旅行路线",
+        "ariaLabel": "川西甘孜模板化旅行路线示意图，共5天",
+        "disclaimer": "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。",
+        "heading": {
+          "text": "川西甘孜 · 自驾路线",
+          "x": 33,
+          "y": 105,
+          "size": 40
+        },
+        "legend": {
+          "x": 35,
+          "y": 168,
+          "gap": 43
+        },
+        "annotations": [],
+        "routes": [
+          {
+            "day": 1,
+            "color": "#397dc1",
+            "placeIds": [
+              "cd",
+              "kangding",
+              "xinduqiao"
+            ],
+            "paths": [
+              "M1055.06 700.63 C962.3 763.3 859.9 797.4 754.15 801.12 C720.1 792.0 686.3 792.8 654.72 803.54"
+            ],
+            "overviewPaths": [
+              "M1055.06 700.63 C962.3 763.3 859.9 797.4 754.15 801.12 C720.1 792.0 686.3 792.8 654.72 803.54"
+            ]
+          },
+          {
+            "day": 2,
+            "color": "#e77e22",
+            "placeIds": [
+              "xinduqiao",
+              "daofu",
+              "ganzi"
+            ],
+            "paths": [
+              "M654.72 803.54 C652.0 736.6 631.4 675.6 594.15 624.37 C514.8 614.0 444.6 582.9 387.62 533.05"
+            ],
+            "overviewPaths": [
+              "M654.72 803.54 C652.0 736.6 631.4 675.6 594.15 624.37 C514.8 614.0 444.6 582.9 387.62 533.05"
+            ]
+          },
+          {
+            "day": 3,
+            "color": "#618344",
+            "placeIds": [
+              "ganzi",
+              "manigango",
+              "yulong",
+              "ganzi"
+            ],
+            "paths": [
+              "M387.62 533.05 C374.9 499.8 372.2 465.7 379.67 432.89 C405.6 457.3 436.0 472.7 469.24 478.22 C447.0 505.0 419.2 523.7 387.62 533.05"
+            ],
+            "overviewPaths": [
+              "M387.62 533.05 C374.9 499.8 372.2 465.7 379.67 432.89 C405.6 457.3 436.0 472.7 469.24 478.22 C447.0 505.0 419.2 523.7 387.62 533.05"
+            ]
+          },
+          {
+            "day": 4,
+            "color": "#209aaa",
+            "placeIds": [
+              "ganzi",
+              "yaqing",
+              "litang",
+              "yajiang"
+            ],
+            "paths": [
+              "M387.62 533.05 C425.1 439.1 434.2 342.4 414.36 248.8 C456.8 438.1 469.3 629.4 451.15 811.33 C486.7 819.8 521.7 818.0 554.16 805.94"
+            ],
+            "overviewPaths": [
+              "M387.62 533.05 C425.1 439.1 434.2 342.4 414.36 248.8 C456.8 438.1 469.3 629.4 451.15 811.33 C486.7 819.8 521.7 818.0 554.16 805.94"
+            ]
+          },
+          {
+            "day": 5,
+            "color": "#8865a5",
+            "placeIds": [
+              "yajiang",
+              "xinduqiao",
+              "kangding",
+              "cd"
+            ],
+            "paths": [
+              "M554.16 805.94 C588.1 795.1 622.3 794.3 654.72 803.54 C688.8 812.7 722.6 811.8 754.15 801.12 C847.0 738.5 949.3 704.3 1055.06 700.63"
+            ],
+            "overviewPaths": [
+              "M554.16 805.94 C588.1 795.1 622.3 794.3 654.72 803.54 C688.8 812.7 722.6 811.8 754.15 801.12 C847.0 738.5 949.3 704.3 1055.06 700.63"
+            ]
+          }
+        ],
+        "places": [
+          {
+            "id": "cd",
+            "x": 1055.06,
+            "y": 700.63,
+            "color": "#397dc1",
+            "tx": 1087.06,
+            "ty": 668.63,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "成都双流机场"
+            ],
+            "query": "成都双流机场 川西甘孜",
+            "geo": {
+              "lat": 30.58,
+              "lng": 103.95
+            },
+            "days": [
+              1,
+              5
+            ]
+          },
+          {
+            "id": "kangding",
+            "x": 754.15,
+            "y": 801.12,
+            "color": "#397dc1",
+            "tx": 722.15,
+            "ty": 851.12,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "康定"
+            ],
+            "query": "康定 川西甘孜",
+            "geo": {
+              "lat": 30.05,
+              "lng": 101.97
+            },
+            "days": [
+              1,
+              5
+            ]
+          },
+          {
+            "id": "xinduqiao",
+            "x": 654.72,
+            "y": 803.54,
+            "color": "#397dc1",
+            "tx": 732.72,
+            "ty": 741.54,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "新都桥"
+            ],
+            "query": "新都桥 川西甘孜",
+            "geo": {
+              "lat": 30.04,
+              "lng": 101.49
+            },
+            "days": [
+              1,
+              2,
+              5
+            ]
+          },
+          {
+            "id": "daofu",
+            "x": 594.15,
+            "y": 624.37,
+            "color": "#e77e22",
+            "tx": 516.15,
+            "ty": 700.37,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "道孚"
+            ],
+            "query": "道孚 川西甘孜",
+            "geo": {
+              "lat": 30.98,
+              "lng": 101.13
+            },
+            "days": [
+              2
+            ]
+          },
+          {
+            "id": "ganzi",
+            "x": 387.62,
+            "y": 533.05,
+            "color": "#e77e22",
+            "tx": 525.62,
+            "ty": 445.05,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "甘孜"
+            ],
+            "query": "甘孜 川西甘孜",
+            "geo": {
+              "lat": 31.62,
+              "lng": 100
+            },
+            "days": [
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "id": "manigango",
+            "x": 379.67,
+            "y": 432.89,
+            "color": "#618344",
+            "tx": 517.67,
+            "ty": 534.89,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "马尼干戈"
+            ],
+            "query": "马尼干戈 川西甘孜",
+            "geo": {
+              "lat": 31.91,
+              "lng": 99.85
+            },
+            "days": [
+              3
+            ]
+          },
+          {
+            "id": "yulong",
+            "x": 469.24,
+            "y": 478.22,
+            "color": "#618344",
+            "tx": 331.24,
+            "ty": 580.22,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "玉龙拉措"
+            ],
+            "query": "玉龙拉措 川西甘孜",
+            "geo": {
+              "lat": 31.66,
+              "lng": 100.2
+            },
+            "days": [
+              3
+            ]
+          },
+          {
+            "id": "yaqing",
+            "x": 414.36,
+            "y": 248.8,
+            "color": "#209aaa",
+            "tx": 492.36,
+            "ty": 186.8,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "亚青寺"
+            ],
+            "query": "亚青寺 川西甘孜",
+            "geo": {
+              "lat": 32.95,
+              "lng": 100.03
+            },
+            "days": [
+              4
+            ]
+          },
+          {
+            "id": "litang",
+            "x": 451.15,
+            "y": 811.33,
+            "color": "#209aaa",
+            "tx": 529.15,
+            "ty": 749.33,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "理塘"
+            ],
+            "query": "理塘 川西甘孜",
+            "geo": {
+              "lat": 30,
+              "lng": 100.27
+            },
+            "days": [
+              4
+            ]
+          },
+          {
+            "id": "yajiang",
+            "x": 554.16,
+            "y": 805.94,
+            "color": "#209aaa",
+            "tx": 476.16,
+            "ty": 881.94,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "雅江"
+            ],
+            "query": "雅江 川西甘孜",
+            "geo": {
+              "lat": 30.03,
+              "lng": 101.02
+            },
+            "days": [
+              4,
+              5
+            ]
+          }
+        ],
+        "overviewPlaceIds": [
+          "cd",
+          "kangding",
+          "xinduqiao",
+          "daofu",
+          "ganzi",
+          "manigango",
+          "yulong",
+          "yaqing",
+          "litang",
+          "yajiang"
+        ],
+        "dailyLayouts": {
+          "1": {
+            "places": [
+              "cd",
+              "kangding",
+              "xinduqiao"
+            ],
+            "labels": {
+              "cd": {
+                "x": 1087.06,
+                "y": 668.63,
+                "anchor": "start"
+              },
+              "kangding": {
+                "x": 722.15,
+                "y": 851.12,
+                "anchor": "end"
+              },
+              "xinduqiao": {
+                "x": 732.72,
+                "y": 741.54,
+                "anchor": "start"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 904.61,
+                "y": 750.88
+              },
+              {
+                "items": [],
+                "x": 704.43,
+                "y": 802.33
+              }
+            ]
+          },
+          "2": {
+            "places": [
+              "xinduqiao",
+              "daofu",
+              "ganzi"
+            ],
+            "labels": {
+              "xinduqiao": {
+                "x": 732.72,
+                "y": 741.54,
+                "anchor": "start"
+              },
+              "daofu": {
+                "x": 516.15,
+                "y": 700.37,
+                "anchor": "end"
+              },
+              "ganzi": {
+                "x": 525.62,
+                "y": 445.05,
+                "anchor": "start"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 624.43,
+                "y": 713.95
+              },
+              {
+                "items": [],
+                "x": 490.88,
+                "y": 578.71
+              }
+            ]
+          },
+          "3": {
+            "places": [
+              "ganzi",
+              "manigango",
+              "yulong"
+            ],
+            "labels": {
+              "ganzi": {
+                "x": 525.62,
+                "y": 445.05,
+                "anchor": "start"
+              },
+              "manigango": {
+                "x": 517.67,
+                "y": 534.89,
+                "anchor": "start"
+              },
+              "yulong": {
+                "x": 331.24,
+                "y": 580.22,
+                "anchor": "end"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 383.64,
+                "y": 482.97
+              },
+              {
+                "items": [],
+                "x": 424.46,
+                "y": 455.56
+              },
+              {
+                "items": [],
+                "x": 428.43,
+                "y": 505.63
+              }
+            ]
+          },
+          "4": {
+            "places": [
+              "ganzi",
+              "yaqing",
+              "litang",
+              "yajiang"
+            ],
+            "labels": {
+              "ganzi": {
+                "x": 525.62,
+                "y": 445.05,
+                "anchor": "start"
+              },
+              "yaqing": {
+                "x": 492.36,
+                "y": 186.8,
+                "anchor": "start"
+              },
+              "litang": {
+                "x": 529.15,
+                "y": 749.33,
+                "anchor": "start"
+              },
+              "yajiang": {
+                "x": 476.16,
+                "y": 881.94,
+                "anchor": "end"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 400.99,
+                "y": 390.92
+              },
+              {
+                "items": [],
+                "x": 432.75,
+                "y": 530.07
+              },
+              {
+                "items": [],
+                "x": 502.65,
+                "y": 808.63
+              }
+            ]
+          },
+          "5": {
+            "places": [
+              "yajiang",
+              "xinduqiao",
+              "kangding",
+              "cd"
+            ],
+            "labels": {
+              "yajiang": {
+                "x": 476.16,
+                "y": 881.94,
+                "anchor": "end"
+              },
+              "xinduqiao": {
+                "x": 732.72,
+                "y": 741.54,
+                "anchor": "start"
+              },
+              "kangding": {
+                "x": 722.15,
+                "y": 851.12,
+                "anchor": "end"
+              },
+              "cd": {
+                "x": 1087.06,
+                "y": 668.63,
+                "anchor": "start"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 604.44,
+                "y": 804.74
+              },
+              {
+                "items": [],
+                "x": 704.43,
+                "y": 802.33
+              },
+              {
+                "items": [],
+                "x": 904.61,
+                "y": 750.88
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
