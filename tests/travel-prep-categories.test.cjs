@@ -28,9 +28,9 @@ test("missing subcategory becomes other", () => {
 });
 
 test("packing and notices have independent navigation and controls", () => {
-  assert.match(html, /href="#packing"[^>]*>行囊清单</);
+  assert.match(html, /id="packing-navigation"/);
   assert.match(html, /href="#notices"[^>]*>注意事项</);
-  assert.match(html, /id="packing-category-filters"/);
+  assert.match(html, /id="packing-category-filter-select"/);
   assert.match(html, /id="notice-category-manager"/);
   assert.match(html, /id="packing-list"/);
   assert.match(html, /id="notice-list"/);
@@ -43,8 +43,11 @@ test("packing exposes five editable luggage filters", () => {
   assert.match(app, /data-packing-luggage-label/);
 });
 
-test("packing workspace has details, purchase, and one-by-one checking controls", () => {
-  assert.match(html, /id="packing-workspace-tabs"/);
+test("packing workspace has navigation children for details, purchases, and checks", () => {
+  assert.match(html, /id="packing-navigation"/);
+  assert.match(html, /href="#packing-details"[^>]*>行囊明细</);
+  assert.match(html, /href="#packing-purchase"[^>]*>采购清单</);
+  assert.match(html, /href="#packing-check"[^>]*>检查行囊</);
   assert.match(html, /id="packing-purchase-list"/);
   assert.match(html, /id="packing-checker"/);
   assert.match(app, /data-packing-owner/);
@@ -60,6 +63,15 @@ test("packing uses short bag names, a single owner filter, and selected-bag chec
   assert.match(app, /data-packing-check-luggage/);
   assert.match(app, /data-packing-check-reset/);
   assert.match(app, /data-packing-check-reselect/);
+});
+
+test("packing filters use list selectors with a reset action and compact luggage controls", () => {
+  assert.match(html, /id="packing-owner-filter-select"/);
+  assert.match(html, /id="packing-category-filter-select"/);
+  assert.match(html, /data-packing-filter-reset/);
+  assert.match(app, /data-packing-filter-reset/);
+  assert.doesNotMatch(app, /packing-luggage-filter--all/);
+  assert.match(app, /packing-item-title/);
 });
 
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
@@ -104,11 +116,11 @@ test("three top-level areas are marked as independent display panels", () => {
 test("travel information orders route before flights and uses a fresh navigation script version", () => {
   assert.ok(html.indexOf('id="route"') < html.indexOf('id="flights"'));
   assert.ok(html.indexOf('href="#route"') < html.indexOf('href="#flights"'));
-  assert.match(html, /site-navigation\.js\?v=20260918-2/);
+  assert.match(html, /site-navigation\.js\?v=20260919-3/);
 });
 
 test("navigation marks the selected top-level panel as current", () => {
-  assert.match(navigation, /packingLink/);
+  assert.match(navigation, /packingTrigger/);
   assert.match(navigation, /noticesLink/);
   assert.match(navigation, /activePanel === "packing"/);
 });

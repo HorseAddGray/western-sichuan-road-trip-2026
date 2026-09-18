@@ -73,7 +73,7 @@ function applyModuleConfig() {
 
   const hashModules = {
     "#flights": "flights", "#route": "overview", "#itinerary": "itinerary",
-    "#drive": "driving", "#packing": "todo", "#notices": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
+    "#drive": "driving", "#packing": "todo", "#packing-details": "todo", "#packing-purchase": "todo", "#packing-check": "todo", "#notices": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
   };
   const requestedModule = hashModules[location.hash];
   if (requestedModule && !moduleEnabled(requestedModule)) {
@@ -871,6 +871,9 @@ function packingPropertyFor(todo) {
   return Number(todo.usesTotal || 0) > 0 ? "consumable" : "common";
 }
 function packingContainerFor(todo) { return todo.container || packingLuggageFor(todo); }
+function packingWorkspaceFromHash(hash = location.hash) {
+  return { "#packing": "details", "#packing-details": "details", "#packing-purchase": "purchase", "#packing-check": "check" }[hash] || null;
+}
 function packingWorkspaceKey() { return `travel-plan:${state.data.metadata.tripId}:packing-workspace`; }
 function savePackingWorkspace() {
   localStorage.setItem(packingWorkspaceKey(), JSON.stringify({ purchases: state.packingPurchases, removedPurchaseIds: [...state.removedPurchaseIds], check: state.packingCheck }));
@@ -973,7 +976,7 @@ function renderTodoList(kind) {
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
         <span class="todo-check" aria-hidden="true">✓</span>
-        <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}<span class="packing-item-meta"><span class="packing-property">${PACKING_PROPERTY_LABELS[property]}</span><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select><select data-packing-container="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}位置">${containerOptions(todo)}</select>${property === "consumable" && usesTotal > 0 ? `<button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button>` : ""}</span></span>
+        <span class="todo-copy"><span class="packing-item-title"><strong class="todo-text">${escapeHtml(todo.text)}</strong><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}<span class="packing-item-meta"><span class="packing-property">${PACKING_PROPERTY_LABELS[property]}</span><select data-packing-container="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}位置">${containerOptions(todo)}</select>${property === "consumable" && usesTotal > 0 ? `<button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button>` : ""}</span></span>
       </label>
       <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
     </div>`;
@@ -994,9 +997,6 @@ function renderPackingWorkspace() {
   details.hidden = state.activePackingWorkspace !== "details";
   purchases.hidden = state.activePackingWorkspace !== "purchase";
   checker.hidden = state.activePackingWorkspace !== "check";
-  $$("#packing-workspace-tabs [data-packing-workspace]").forEach((button) => {
-    button.setAttribute("aria-selected", String(button.dataset.packingWorkspace === state.activePackingWorkspace));
-  });
   $("#packing-purchase-list").innerHTML = state.packingPurchases.length ? state.packingPurchases.map((item) => {
     const property = packingPropertyFor(item);
     return `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span>${item.detail ? `<span class="todo-detail">${escapeHtml(item.detail)}</span>` : ""}<span class="todo-detail">${PACKING_PROPERTY_LABELS[property]}${property === "consumable" && item.usesTotal ? ` · 可用 ${item.usesTotal} 次` : ""}</span></span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`;
@@ -1018,6 +1018,8 @@ function renderPackingWorkspace() {
 }
 
 function renderTravelPrep() {
+  const workspaceFromHash = packingWorkspaceFromHash();
+  if (workspaceFromHash) state.activePackingWorkspace = workspaceFromHash;
   const preferenceKey = `travel-plan:${state.data.metadata.tripId}:notice-subcategory`;
   const saved = localStorage.getItem(preferenceKey);
   if (PREP_LABELS.notice[saved]) state.activeNoticeSubcategory = saved;
@@ -1085,29 +1087,20 @@ function renderTravelPrep() {
   $("#notice-subcategory").value = state.activeNoticeSubcategory;
   const renderControls = () => {
     const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
-    $("#packing-luggage-filters").innerHTML = `<button type="button" class="packing-luggage-filter packing-luggage-filter--all" data-packing-luggage="" aria-pressed="${!state.selectedPackingLuggage}"><span>全部</span><small>${packingTodos.length} 件</small></button>${PACKING_LUGGAGE.map((luggage) => {
-      const count = packingTodos.filter((todo) => packingLuggageFor(todo) === luggage.key).length;
-      return `<button type="button" class="packing-luggage-filter packing-luggage-filter--${luggage.kind}" data-packing-luggage="${luggage.key}" aria-pressed="${state.selectedPackingLuggage === luggage.key}"><b aria-hidden="true">${luggage.icon}</b><span>${escapeHtml(packingLuggageLabel(luggage))}</span><small>${count} 件</small></button>`;
-    }).join("")}`;
+    $("#packing-luggage-filters").innerHTML = PACKING_LUGGAGE.map((luggage) => `<button type="button" class="packing-luggage-filter" data-packing-luggage="${luggage.key}" aria-pressed="${state.selectedPackingLuggage === luggage.key}"><b aria-hidden="true">${luggage.icon}</b><span>${escapeHtml(packingLuggageLabel(luggage))}</span></button>`).join("");
     const containers = PACKING_CONTAINERS.filter((item) => item.parent === state.selectedPackingLuggage);
     $("#packing-container-filter-group").hidden = containers.length === 0;
     $("#packing-container-filters").innerHTML = containers.map((container) => `<button type="button" data-packing-container="${container.key}" aria-pressed="${state.selectedPackingContainer === container.key}">${container.icon} ${container.label}</button>`).join("");
-    $("#packing-owner-filters").innerHTML = Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<button type="button" data-packing-owner-filter="${key}" aria-pressed="${state.selectedPackingOwner === key}">${label}</button>`).join("");
     $("#packing-luggage-settings").innerHTML = PACKING_LUGGAGE.map((luggage) => `<label><span>${luggage.icon}</span><input type="text" maxlength="24" value="${escapeHtml(packingLuggageLabel(luggage))}" data-packing-luggage-label="${luggage.key}" aria-label="${escapeHtml(luggage.label)}名称"></label>`).join("");
-    $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
+    $("#packing-owner-filter-select").innerHTML = `<option value="">全部归属</option>${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${state.selectedPackingOwner === key ? "selected" : ""}>${label}</option>`).join("")}`;
+    const selectedCategory = [...state.selectedPackingSubcategories][0] || "";
+    $("#packing-category-filter-select").innerHTML = `<option value="">全部类别</option>${Object.entries(PREP_LABELS.packing).map(([key, label]) => `<option value="${key}" ${selectedCategory === key ? "selected" : ""}>${label}</option>`).join("")}`;
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
     const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
   renderAll();
-  $("#packing-category-filters").onclick = (event) => {
-    const button = event.target.closest("[data-packing-subcategory]");
-    if (!button) return;
-    const key = button.dataset.packingSubcategory;
-    state.selectedPackingSubcategories.has(key) ? state.selectedPackingSubcategories.delete(key) : state.selectedPackingSubcategories.add(key);
-    renderAll();
-  };
   $("#packing-luggage-filters").onclick = (event) => {
     const button = event.target.closest("[data-packing-luggage]");
     if (!button) return;
@@ -1123,17 +1116,19 @@ function renderTravelPrep() {
     state.selectedPackingContainer = state.selectedPackingContainer === key ? "" : key;
     renderAll();
   };
-  $("#packing-owner-filters").onclick = (event) => {
-    const button = event.target.closest("[data-packing-owner-filter]");
-    if (!button) return;
-    const key = button.dataset.packingOwnerFilter;
-    state.selectedPackingOwner = state.selectedPackingOwner === key ? "" : key;
+  $("#packing-owner-filter-select").onchange = (event) => {
+    state.selectedPackingOwner = event.target.value;
     renderAll();
   };
-  $("#packing-workspace-tabs").onclick = (event) => {
-    const button = event.target.closest("[data-packing-workspace]");
-    if (!button) return;
-    state.activePackingWorkspace = button.dataset.packingWorkspace;
+  $("#packing-category-filter-select").onchange = (event) => {
+    state.selectedPackingSubcategories = event.target.value ? new Set([event.target.value]) : new Set();
+    renderAll();
+  };
+  $("[data-packing-filter-reset]").onclick = () => {
+    state.selectedPackingLuggage = "";
+    state.selectedPackingContainer = "";
+    state.selectedPackingOwner = "";
+    state.selectedPackingSubcategories = new Set();
     renderAll();
   };
   $("#packing-luggage-settings").onchange = (event) => {
@@ -1525,5 +1520,15 @@ async function init() {
     $("#loading-error").hidden = false;
   }
 }
+
+function syncPackingWorkspace(hash = location.hash) {
+  const workspace = packingWorkspaceFromHash(hash);
+  if (!workspace || workspace === state.activePackingWorkspace || !state.data) return;
+  state.activePackingWorkspace = workspace;
+  renderTravelPrep();
+}
+
+window.addEventListener("hashchange", () => syncPackingWorkspace());
+window.addEventListener("travel-navigation:navigate", (event) => syncPackingWorkspace(event.detail?.hash));
 
 document.addEventListener("DOMContentLoaded", init);

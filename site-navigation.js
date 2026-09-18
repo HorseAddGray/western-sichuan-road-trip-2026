@@ -1,9 +1,10 @@
 (() => {
-  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#route", "#itinerary", "#drive", "#packing", "#notices"]);
+  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#route", "#itinerary", "#drive", "#packing", "#packing-details", "#packing-purchase", "#packing-check", "#notices"]);
   const isLedgerHash = (hash) => hash === "#ledger" || hash.startsWith("#ledger-");
   const ledgerEnabled = () => !document.querySelector("#ledger-navigation-link")?.hidden;
   const viewForHash = (hash) => isLedgerHash(hash) && ledgerEnabled() ? "ledger" : "travel";
-  const panelForHash = (hash) => hash === "#packing" ? "packing" : hash === "#notices" ? "notices" : "info";
+  const panelForHash = (hash) => hash.startsWith("#packing") ? "packing" : hash === "#notices" ? "notices" : "info";
+  const travelTargetId = (hash) => hash.startsWith("#packing-") ? "packing" : hash.slice(1);
   const setCurrent = (element, active) => {
     if (!element) return;
     if (active) element.setAttribute("aria-current", "page");
@@ -22,7 +23,8 @@
       ledgerView: document.querySelector('[data-site-view="ledger"]'),
       travelMenu: document.querySelector("#travel-navigation"),
       travelTrigger: document.querySelector("#travel-navigation-trigger"),
-      packingLink: document.querySelector('a[href="#packing"]'),
+      packingMenu: document.querySelector("#packing-navigation"),
+      packingTrigger: document.querySelector("#packing-navigation-trigger"),
       noticesLink: document.querySelector('a[href="#notices"]'),
       ledgerLink: document.querySelector("#ledger-navigation-link"),
       skipLink: document.querySelector("#skip-link")
@@ -30,7 +32,7 @@
   }
 
   function setVisibleView(nextView, options = {}) {
-    const { travelView, ledgerView, travelTrigger, packingLink, noticesLink, ledgerLink, skipLink } = elements();
+    const { travelView, ledgerView, travelTrigger, packingTrigger, noticesLink, ledgerLink, skipLink } = elements();
     if (!travelView || !ledgerView) return;
 
     const viewChanged = activeView !== nextView;
@@ -52,7 +54,7 @@
       });
     }
     setCurrent(travelTrigger, activePanel === "info");
-    setCurrent(packingLink, activePanel === "packing");
+    setCurrent(packingTrigger, activePanel === "packing");
     setCurrent(noticesLink, activePanel === "notices");
     setCurrent(ledgerLink, ledgerActive);
     if (skipLink) skipLink.href = ledgerActive ? "#ledger-root" : "#main";
@@ -79,7 +81,7 @@
   function routeFromLocation(options = {}) {
     const hash = location.hash;
     const nextView = viewForHash(hash);
-    const targetId = nextView === "travel" && TRAVEL_HASHES.has(hash) ? hash.slice(1) : "";
+    const targetId = nextView === "travel" && TRAVEL_HASHES.has(hash) ? travelTargetId(hash) : "";
     setVisibleView(nextView, { ...options, targetId });
   }
 
@@ -87,11 +89,13 @@
     const nextView = viewForHash(hash);
     scrollPositions[activeView] = window.scrollY;
     if (location.hash === hash) {
-      setVisibleView(nextView, { targetId: nextView === "travel" ? hash.slice(1) : "" });
+      setVisibleView(nextView, { targetId: nextView === "travel" ? travelTargetId(hash) : "" });
+      window.dispatchEvent(new CustomEvent("travel-navigation:navigate", { detail: { hash } }));
       return;
     }
     history.pushState({ view: nextView }, "", hash);
-    setVisibleView(nextView, { targetId: nextView === "travel" ? hash.slice(1) : "" });
+    setVisibleView(nextView, { targetId: nextView === "travel" ? travelTargetId(hash) : "" });
+    window.dispatchEvent(new CustomEvent("travel-navigation:navigate", { detail: { hash } }));
   }
 
   function scheduleBrowserRoute({ restore = false } = {}) {
@@ -106,7 +110,7 @@
   }
 
   function setup() {
-    const { travelMenu } = elements();
+    const { travelMenu, packingMenu } = elements();
     history.scrollRestoration = "manual";
     activeView = viewForHash(location.hash);
     routeFromLocation({ restore: false, forceScroll: true });
@@ -116,6 +120,7 @@
       if (ledgerLink) {
         event.preventDefault();
         travelMenu?.removeAttribute("open");
+        packingMenu?.removeAttribute("open");
         navigate("#ledger");
         return;
       }
@@ -124,11 +129,13 @@
       if (travelLink) {
         event.preventDefault();
         travelMenu?.removeAttribute("open");
+        packingMenu?.removeAttribute("open");
         navigate(travelLink.getAttribute("href") || "#top");
         return;
       }
 
       if (travelMenu?.open && !event.target.closest("#travel-navigation")) travelMenu.removeAttribute("open");
+      if (packingMenu?.open && !event.target.closest("#packing-navigation")) packingMenu.removeAttribute("open");
     });
 
     window.addEventListener("popstate", () => scheduleBrowserRoute({ restore: true }));

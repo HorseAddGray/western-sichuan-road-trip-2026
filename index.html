@@ -8,16 +8,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260919-10">
+  <link rel="stylesheet" href="styles.css?v=20260919-11">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260919-16" defer></script>
+  <script src="app.js?v=20260919-17" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
-  <script src="site-navigation.js?v=20260918-2" defer></script>
+  <script src="site-navigation.js?v=20260919-3" defer></script>
 </head>
 <body>
   <a class="skip-link" id="skip-link" href="#main">跳到主要内容</a>
@@ -33,7 +33,14 @@
           <a href="#drive" role="menuitem" data-module="driving" hidden>自驾</a>
         </div>
       </details>
-      <a class="primary-navigation__ledger" href="#packing" data-module="todo" hidden>行囊清单</a>
+      <details class="travel-navigation" id="packing-navigation" data-module="todo" hidden>
+        <summary id="packing-navigation-trigger">行囊清单</summary>
+        <div class="travel-navigation-menu" role="menu" aria-label="行囊清单栏目">
+          <a href="#packing-details" role="menuitem" data-module="todo" hidden>行囊明细</a>
+          <a href="#packing-purchase" role="menuitem" data-module="todo" hidden>采购清单</a>
+          <a href="#packing-check" role="menuitem" data-module="todo" hidden>检查行囊</a>
+        </div>
+      </details>
       <a class="primary-navigation__ledger" href="#notices" data-module="todo" hidden>注意事项</a>
       <a class="primary-navigation__ledger" id="ledger-navigation-link" href="#ledger" data-module="ledger" hidden>记账</a>
     </nav>
@@ -101,20 +108,10 @@
         </div>
         <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
-      <div class="prep-tabs" id="packing-workspace-tabs" role="tablist" aria-label="行囊工作区">
-        <button type="button" data-packing-workspace="details" aria-selected="true">行囊明细</button>
-        <button type="button" data-packing-workspace="purchase" aria-selected="false">采购清单</button>
-        <button type="button" data-packing-workspace="check" aria-selected="false">检查行囊</button>
-      </div>
       <div id="packing-details">
-        <section class="packing-filter-section"><div class="packing-filter-heading"><strong>行囊用途</strong><span>按物品所在箱包查看</span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
+        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看</small></span><details class="packing-luggage-manager" id="packing-luggage-manager"><summary>编辑</summary><div id="packing-luggage-settings" aria-label="行李用途名称"></div></details></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
         <section class="packing-filter-section" id="packing-container-filter-group" hidden><div class="packing-filter-heading"><strong>收纳位置</strong><span>查看选定行囊中的内置收纳包</span></div><div class="packing-container-filters" id="packing-container-filters" aria-label="内置收纳包筛选"></div></section>
-        <section class="packing-filter-section"><div class="packing-filter-heading"><strong>人物归属</strong><span>单选查看一位成员的物品</span></div><div class="prep-tabs" id="packing-owner-filters" aria-label="物品归属筛选，可单选"></div></section>
-        <details class="packing-luggage-manager" id="packing-luggage-manager">
-          <summary>编辑行李用途名称</summary>
-          <div id="packing-luggage-settings" aria-label="行李用途名称"></div>
-        </details>
-        <section class="packing-filter-section"><div class="packing-filter-heading"><strong>物品类别</strong><span>可同时选择多个类别</span></div><div class="prep-tabs" id="packing-category-filters" aria-label="行囊清单分类，可多选"></div></section>
+        <section class="packing-filter-toolbar" aria-label="物品筛选"><label><span>人物归属</span><select id="packing-owner-filter-select" aria-label="按人物归属筛选"></select></label><label><span>物品类别</span><select id="packing-category-filter-select" aria-label="按物品类别筛选"></select></label><button type="button" data-packing-filter-reset>重置筛选</button></section>
         <form class="todo-form" id="packing-form">
           <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">
           <select id="packing-subcategory" aria-label="物品类别"></select>
