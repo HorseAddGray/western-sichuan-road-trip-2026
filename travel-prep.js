@@ -7,5 +7,9 @@
     return todos.filter((todo) => normalizeTodoCategory(todo) === category);
   }
 
-  globalThis.TravelPrep = { normalizeTodoCategory, filterTodosByCategory };
+  function normalizeTodoSubcategory(todo) {
+    return String(todo?.subcategory || "other");
+  }
+
+  globalThis.TravelPrep = { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory };
 })();

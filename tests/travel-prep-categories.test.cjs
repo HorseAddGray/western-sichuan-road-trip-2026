@@ -7,7 +7,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "..", "travel-prep.js"), "utf8");
 const context = {};
 vm.runInNewContext(source, context);
-const { normalizeTodoCategory, filterTodosByCategory } = context.TravelPrep;
+const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory } = context.TravelPrep;
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 
 test("uncategorized items belong to notices", () => {
@@ -17,6 +17,10 @@ test("uncategorized items belong to notices", () => {
 test("filters only the selected category", () => {
   const todos = [{ text: "验车" }, { text: "氧气瓶", category: "packing" }];
   assert.deepEqual(filterTodosByCategory(todos, "packing"), [todos[1]]);
+});
+
+test("missing subcategory becomes other", () => {
+  assert.equal(normalizeTodoSubcategory({ category: "packing" }), "other");
 });
 
 test("preparation card provides category controls", () => {

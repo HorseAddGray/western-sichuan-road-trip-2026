@@ -781,7 +781,8 @@ function renderTodoList() {
   const activeTodos = window.TravelPrep.filterTodosByCategory(state.todos, state.activeTodoCategory);
   const completed = activeTodos.filter((todo) => todo.completed).length;
   $("#todo-progress").textContent = `${completed} / ${activeTodos.length}`;
-  $("#todo-list").innerHTML = activeTodos.length ? activeTodos.map((todo) => `
+  const labels = state.activeTodoCategory === "notice" ? { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", trip: "行程与住宿", other: "其他" } : { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" };
+  const itemMarkup = (todo) => `
     <div class="todo-item${todo.completed ? " is-complete" : ""}" data-todo-id="${escapeHtml(todo.id)}">
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
@@ -789,22 +790,36 @@ function renderTodoList() {
         <span class="todo-text">${escapeHtml(todo.text)}</span>
       </label>
       <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
-    </div>`).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
+    </div>`;
+  $("#todo-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
+    const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
+    if (!items.length) return "";
+    const done = items.filter((todo) => todo.completed).length;
+    return `<details class="prep-group"><summary>${label}<span>${done} / ${items.length}</span></summary><div class="todo-list">${items.map(itemMarkup).join("")}</div></details>`;
+  }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
 }
 
 function renderTravelPrep() {
   const categorySelect = $("#todo-category");
+  const subcategorySelect = $("#todo-subcategory");
+  const refreshSubcategories = () => {
+    const options = state.activeTodoCategory === "notice" ? [["health", "高反与健康"], ["rental", "租车与验车"], ["road", "路况、补给与设施"], ["trip", "行程与住宿"], ["other", "其他"]] : [["documents", "证件与订单"], ["clothing", "衣物与户外装备"], ["medicine", "药品与卫生用品"], ["electronics", "电子设备"], ["food", "食物与饮水"], ["other", "其他"]];
+    subcategorySelect.innerHTML = options.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+  };
   categorySelect.value = state.activeTodoCategory;
+  refreshSubcategories();
   $(".prep-tabs").onclick = (event) => {
     const button = event.target.closest("[data-prep-category]");
     if (!button) return;
     state.activeTodoCategory = button.dataset.prepCategory;
     categorySelect.value = state.activeTodoCategory;
+    refreshSubcategories();
     $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item === button)));
     renderTodoList();
   };
   categorySelect.onchange = () => {
     state.activeTodoCategory = categorySelect.value;
+    refreshSubcategories();
     $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item.dataset.prepCategory === state.activeTodoCategory)));
     renderTodoList();
   };
@@ -814,7 +829,7 @@ function renderTravelPrep() {
     const input = $("#todo-input");
     const text = input.value.trim();
     if (!text) return;
-    state.todos.push({ id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: categorySelect.value, completed: false });
+    state.todos.push({ id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: categorySelect.value, subcategory: subcategorySelect.value, completed: false });
     input.value = "";
     saveSharedChange("todos", state.todos.at(-1)).catch(console.error);
     renderTodoList();
