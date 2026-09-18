@@ -123,6 +123,17 @@ test("health notices retain every new travel tip and separate medical guidance f
   assert.match(app, /legacyOxygenReminder/);
 });
 
+test("oxygen equipment guidance retains all purchase, use, and safety details", () => {
+  const equipment = tripData.preTrip.packingItems.filter((item) => item.subcategory === "health" && ["装备购买建议", "使用经验与消耗"].includes(item.group));
+  const find = (id) => equipment.find((item) => item.id === id);
+  assert.equal(equipment.length, 8);
+  assert.ok(find("oxygen-bag-buying")?.detail.includes("60L"));
+  assert.ok(find("oxygen-nasal-tube")?.detail.includes("不配鼻氧管"));
+  assert.ok(find("oxygen-connector")?.detail.includes("连不上"));
+  assert.ok(find("oxygen-medical-purity")?.detail.includes("医用纯氧"));
+  assert.ok(find("oxygen-not-overfill")?.detail.includes("容易炸（胀破）"));
+});
+
 test("notice details use the defined category and group order without scrambling each group", () => {
   const notes = [
     { text: "雷区地点", subcategory: "toilet", group: "雷区警示" },

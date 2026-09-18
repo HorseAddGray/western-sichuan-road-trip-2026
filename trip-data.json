@@ -607,6 +607,78 @@
         "completed": false
       },
       {
+        "id": "oxygen-bag-buying",
+        "text": "氧气袋",
+        "detail": "建议提前网购，有40L和60L两种，价格20-30元。充气价格都一样，建议直接买大号（如60L）。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "装备购买建议",
+        "completed": false
+      },
+      {
+        "id": "oxygen-nasal-tube",
+        "text": "鼻氧管（耗材）",
+        "detail": "氧气袋自带只有袋子和带开关的白色管子，不配鼻氧管。建议单独买鼻氧管，躺着、坐着都能挂在耳朵上，不占手。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "装备购买建议",
+        "completed": false
+      },
+      {
+        "id": "oxygen-connector",
+        "text": "连接头（必买）",
+        "detail": "记得买连接头！没有连接头，鼻氧管和氧气袋管连不上。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "装备购买建议",
+        "completed": false
+      },
+      {
+        "id": "oxygen-advanced-equipment",
+        "text": "进阶装备",
+        "detail": "如果自驾且担心高反严重，也有人直接从成都购买蓝色氧气钢瓶（视个人体质和空间决定）。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "装备购买建议",
+        "completed": false
+      },
+      {
+        "id": "oxygen-medical-purity",
+        "text": "使用经验与消耗",
+        "detail": "氧气袋里充的是医用纯氧，效果和那种便携的小氧气瓶完全不同。轻微高反可以用小氧气瓶缓解，比较难受时吸氧气袋效果更好。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "使用经验与消耗",
+        "completed": false
+      },
+      {
+        "id": "oxygen-bag-consumption",
+        "text": "氧气袋使用时长",
+        "detail": "氧气袋看着很大，其实吸不了多久，吸到后面需要用手给氧气袋施加压力压着才会出氧。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "使用经验与消耗",
+        "completed": false
+      },
+      {
+        "id": "oxygen-intermittent-use",
+        "text": "持续、间断吸氧",
+        "detail": "持续、间断地吸氧，其实可以辅助你更好地适应高原。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "使用经验与消耗",
+        "completed": false
+      },
+      {
+        "id": "oxygen-not-overfill",
+        "text": "氧气袋不要充太满",
+        "detail": "氧气袋不用充太满！上高海拔容易炸（胀破），安全第一。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "使用经验与消耗",
+        "completed": false
+      },
+      {
         "id": "toilet-shuangqiaogou",
         "text": "四姑娘山双桥沟",
         "detail": "这里的厕所是5A级待遇，全自动感应冲水，干净得让你怀疑是不是走进了哪家星级酒店。高原冻土？不存在的，像有地暖（大概吧），总之屁屁不受罪。",
