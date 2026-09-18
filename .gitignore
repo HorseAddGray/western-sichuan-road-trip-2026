@@ -11,3 +11,4 @@ source-files/
 private/
 source-facts.json
 reports/private/
+.worktrees/
