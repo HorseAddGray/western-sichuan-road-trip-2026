@@ -39,3 +39,13 @@
 - [ ] Run `npm run build:map`, `npm run validate`, and `node --test tests/runtime/runtime-storage.test.cjs tests/travel-prep-categories.test.cjs`; expect all checks PASS.
 - [ ] Commit with `git commit -m "data: categorize travel preparation reminders"`.
 - [ ] Push with `git push origin main`, then deploy with `npx --yes wrangler pages deploy . --project-name western-sichuan-road-trip-2026 --branch main`; expect Cloudflare deployment completion.
+
+### Task 4: Add collapsible subcategories
+
+**Files:** Modify `travel-prep.js`, `app.js`, `index.html`, `styles.css`, `trip-data.json`, and `tests/travel-prep-categories.test.cjs`.
+
+- [ ] Write failing tests for subcategory normalization and filtering.
+- [ ] Add a `subcategory` field to authored preparation items and normalize missing values to `other`.
+- [ ] Render a subcategory accordion within the selected main category; default every panel closed and close peers when one opens.
+- [ ] Show each subcategory's completion progress and create new items in the active subcategory.
+- [ ] Run map validation and all Node tests; commit, push `main`, and deploy to Cloudflare Pages.
