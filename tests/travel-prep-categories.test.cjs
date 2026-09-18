@@ -59,6 +59,7 @@ test("packing uses short bag names, a single owner filter, and selected-bag chec
   assert.match(app, /selectedPackingOwner/);
   assert.match(app, /data-packing-check-luggage/);
   assert.match(app, /data-packing-check-reset/);
+  assert.match(app, /data-packing-check-reselect/);
 });
 
 test("packing additions collect an owner and a property with conditional consumable uses", () => {

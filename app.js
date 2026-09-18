@@ -1009,10 +1009,10 @@ function renderPackingWorkspace() {
   }
   const current = checkTodos[state.packingCheck.index];
   if (!current) {
-    checker.innerHTML = `<p class="packing-check-complete">检查已完成 · ${checkTodos.length} 件物品均已核对无误。</p><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button>`;
+    checker.innerHTML = `<p class="packing-check-complete">检查已完成 · ${checkTodos.length} 件物品均已核对无误。</p><div><button type="button" class="packing-check-button" data-packing-check-reselect>重新选择行囊</button><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button></div>`;
     return;
   }
-  checker.innerHTML = `<p class="section-kicker">CHECK ${state.packingCheck.index + 1} / ${checkTodos.length}</p><article class="packing-check-card"><strong>${escapeHtml(current.text)}</strong><span>${escapeHtml(PACKING_OWNER_LABELS[packingOwnerFor(current)])} · ${escapeHtml(packingContainerFor(current))}</span><div><button type="button" class="packing-check-button" data-packing-check-next="${escapeHtml(current.id)}">确认无误，检查下一件</button><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button></div></article>`;
+  checker.innerHTML = `<p class="section-kicker">CHECK ${state.packingCheck.index + 1} / ${checkTodos.length}</p><article class="packing-check-card"><strong>${escapeHtml(current.text)}</strong><span>${escapeHtml(PACKING_OWNER_LABELS[packingOwnerFor(current)])} · ${escapeHtml(packingContainerFor(current))}</span><div><button type="button" class="packing-check-button" data-packing-check-next="${escapeHtml(current.id)}">确认无误，检查下一件</button><button type="button" class="packing-check-button" data-packing-check-reselect>重新选择行囊</button><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button></div></article>`;
 }
 
 function renderTravelPrep() {
@@ -1225,6 +1225,13 @@ function renderTravelPrep() {
       state.packingCheck.openLuggage = openLuggage.includes(luggage.dataset.packingCheckLuggage)
         ? openLuggage.filter((key) => key !== luggage.dataset.packingCheckLuggage)
         : [...openLuggage, luggage.dataset.packingCheckLuggage];
+      savePackingWorkspace();
+      renderAll();
+      return;
+    }
+    const reselect = event.target.closest("[data-packing-check-reselect]");
+    if (reselect) {
+      state.packingCheck = { active: false, index: 0, completed: false, openLuggage: state.packingCheck.openLuggage || [] };
       savePackingWorkspace();
       renderAll();
       return;
