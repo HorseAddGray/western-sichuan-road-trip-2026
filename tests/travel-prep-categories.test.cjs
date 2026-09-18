@@ -90,6 +90,15 @@ test("notices are information cards, while the toilet map supports day filters a
   assert.doesNotMatch(app, /\$\("#notice-list"\)\.onchange = updateTodo/);
 });
 
+test("toilet map appears below the notice information form and above the notice cards", () => {
+  const formPosition = html.indexOf('id="notice-form"');
+  const mapPosition = html.indexOf('id="toilet-map"');
+  const listPosition = html.indexOf('id="notice-list"');
+
+  assert.ok(formPosition < mapPosition, "the map should follow the notice form");
+  assert.ok(mapPosition < listPosition, "the map should precede the notice cards");
+});
+
 test("oxygen guidance preserves every supplied fee and the full safety reminder", () => {
   const oxygen = tripData.preTrip.packingItems.filter((item) => item.subcategory === "health" && item.group === "吸氧费用");
   const reminder = tripData.preTrip.packingItems.find((item) => item.id === "oxygen-reminder");
