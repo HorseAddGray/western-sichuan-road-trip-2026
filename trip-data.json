@@ -391,6 +391,132 @@
         "completed": false
       },
       {
+        "id": "toilet-shuangqiaogou",
+        "text": "四姑娘山双桥沟",
+        "detail": "这里的厕所是5A级待遇，全自动感应冲水，干净得让你怀疑是不是走进了哪家星级酒店。高原冻土？不存在的，像有地暖（大概吧），总之屁屁不受罪。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-yading-center",
+        "text": "稻城亚丁游客中心/大巴终点",
+        "detail": "泡沫封堵式黑科技，还带热水洗手！在这儿方便完，你甚至想发个朋友圈定位。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-dagu-glacier",
+        "text": "达古冰川山顶（4860米）",
+        "detail": "在有暖气的房间里，隔着玻璃窗凝视雪山，了悟人生大事。这可能是你海拔较高、视野较辽阔的一次“释放”，堪称人生体验。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-kangding-square",
+        "text": "康定情歌广场旁商场",
+        "detail": "文明的灯塔，洗手液管够。记住晚上9点关门，进城先不是看折多河，是先来这儿报个到。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-xinduqiao-corridor",
+        "text": "新都桥摄影长廊停车区",
+        "detail": "收费2，多花2💰买的不只是干净，更是对生命的尊重。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-balangshengdu",
+        "text": "巴郎生都",
+        "detail": "不仅干净，居然还配了制氧室！高反了能吸氧，想拉了能如厕，一站式了解高原两大难题。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-gas-station",
+        "text": "🚨沿途加油站",
+        "detail": "川西公路上闪耀的灯塔，通常比路边那些“远古遗迹”干净两个世纪，路过别犹豫，进去看一眼不亏。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-yuzixi",
+        "text": "鱼子西星空营地观景台",
+        "detail": "简易板房+排队人龙。建议在这里，把注意力放在远方的雪山和夕阳上，生理需求可以靠意志力压制，下山再说。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-luorong-milk-lake",
+        "text": "稻城亚丁洛绒牛场/牛奶海",
+        "detail": "海拔4600米的“原始旱厕”，味道极其上头，专治各种不服，因为蹲下去的那一刻，你会被熏得只想立刻提裤子逃跑，高反和晕厥只在一瞬间。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-seda",
+        "text": "色达佛学院坛城附近",
+        "detail": "海拔4000+，排队半小时起步，卫生状况属于“开盲盒”。建议去之前先清空内存，带着虔诚的心来，别带着满腹的委屈走。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-tagong",
+        "text": "塔公草原各日马村公厕",
+        "detail": "无人区中的无人打扫区。不如多走两步去木雅大寺停车场，花2💰买个得体。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-zheduo",
+        "text": "折多山观景台旱厕",
+        "detail": "川西旱厕界的“扛把子”，威力巨大。强烈建议在康定市区排空一切再翻山，不然折多山会让你“折”在这里。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-dry-toilet-warning",
+        "text": "红海子/雅拉雪山观景台/格底拉姆/斯丁措/卡子拉山",
+        "detail": "统一颁发“旱厕警告”，属于非战斗人员请迅速撤离的区域。里面的风景，不看也罢。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
+        "id": "toilet-moshi-park",
+        "text": "墨石公园厕所",
+        "detail": "那股味道属于复合型攻击——先派气味先锋部队攻击你的鼻子，等你头晕目眩时，再派视觉脑补大军攻击你的脑子，哦……不是脑补，为什么要搅拌阿……",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
         "id": "packing-documents",
         "text": "身份证、驾驶证、行驶证/租车订单、保险与预订凭证",
         "category": "packing",

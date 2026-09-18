@@ -11,6 +11,8 @@ const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory }
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const navigation = fs.readFileSync(path.join(__dirname, "..", "site-navigation.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
+const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+const tripData = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "trip-data.json"), "utf8"));
 
 test("uncategorized items belong to notices", () => {
   assert.equal(normalizeTodoCategory({ text: "验车" }), "notice");
@@ -54,4 +56,18 @@ test("navigation marks the selected top-level panel as current", () => {
 test("all top-level navigation items share the current-page highlight", () => {
   assert.match(styles, /\.topbar nav a\[aria-current="page"\]/);
   assert.match(styles, /#travel-navigation-trigger\[aria-current="page"\]/);
+});
+
+test("toilet notes retain every supplied location in separate trusted and warning groups", () => {
+  const toilets = tripData.preTrip.packingItems.filter((item) => item.subcategory === "toilet");
+  assert.equal(toilets.filter((item) => item.group === "殿堂级").length, 7);
+  assert.equal(toilets.filter((item) => item.group === "雷区警示").length, 7);
+  assert.ok(toilets.some((item) => item.text === "四姑娘山双桥沟" && item.detail.includes("全自动感应冲水")));
+  assert.ok(toilets.some((item) => item.text === "墨石公园厕所" && item.detail.includes("为什么要搅拌阿")));
+});
+
+test("toilet category renders supplied detail under its trusted and warning groups", () => {
+  assert.match(app, /toilet: "厕所"/);
+  assert.match(app, /todo\.group/);
+  assert.match(app, /todo\.detail/);
 });

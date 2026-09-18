@@ -764,6 +764,8 @@ async function loadSharedState() {
       text: String(item.text || item.title || "").trim(),
       category: window.TravelPrep.normalizeTodoCategory(item),
       subcategory: window.TravelPrep.normalizeTodoSubcategory(item),
+      detail: String(item.detail || "").trim(),
+      group: String(item.group || "").trim(),
       completed: Boolean(item.completed)
     })).filter((item) => item.text && !existingIds.has(item.id));
     state.todos.push(...missingTodos);
@@ -780,7 +782,7 @@ async function saveSharedChange(collection, value, op = "upsert") {
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
 const PREP_LABELS = {
-  notice: { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", trip: "行程与住宿", other: "其他" },
+  notice: { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", toilet: "厕所", trip: "行程与住宿", other: "其他" },
   packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
 };
 
@@ -797,7 +799,7 @@ function renderTodoList(kind) {
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
         <span class="todo-check" aria-hidden="true">✓</span>
-        <span class="todo-text">${escapeHtml(todo.text)}</span>
+        <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </label>
       <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
     </div>`;
@@ -805,6 +807,14 @@ function renderTodoList(kind) {
     const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
+    if (kind === "notice" && key === "toilet") {
+      return ["殿堂级", "雷区警示"].map((group) => {
+        const groupedItems = items.filter((todo) => todo.group === group);
+        if (!groupedItems.length) return "";
+        const groupedDone = groupedItems.filter((todo) => todo.completed).length;
+        return `<section class="prep-group prep-group--${group === "殿堂级" ? "trusted" : "warning"}"><h3>${group}<span>${groupedDone} / ${groupedItems.length}</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
+      }).join("");
+    }
     return `<section class="prep-group"><h3>${label}<span>${done} / ${items.length}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
   }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
 }
