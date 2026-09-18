@@ -805,6 +805,60 @@
         "completed": false
       },
       {
+        "id": "toilet-manigango-petrochina",
+        "text": "中国石油马尼干戈加油站厕所",
+        "detail": "出甘孜县沿317往德格方向走，这是出甘孜后遇到的第一个比较不错的厕所，虽然标识不明显容易开车错过，但只需询问工作人员即可，十分推荐。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-yulong-visitor-center",
+        "text": "玉龙拉措（新路海）游客中心厕所",
+        "detail": "位于售票处附近，绝对是TOP级别，“任何人没上过这个厕所我都会伤心的”；虽然玉龙拉措是“景区里面没有外面好看”，但这个厕所绝对不能错过。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "殿堂级",
+        "completed": false
+      },
+      {
+        "id": "toilet-queershan-tunnel",
+        "text": "雀儿山隧道口厕所",
+        "detail": "这个厕所没有实地进去过，具体情况暂不明。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "情况待确认",
+        "completed": false
+      },
+      {
+        "id": "toilet-dege-printing-house",
+        "text": "德格印经院附近厕所",
+        "detail": "出德格印经院右转过马路有一个，一楼女厕二楼男厕，属于传统学院派风格，底下是连通沟渠（懂的都懂），仅供应急。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "仅供应急",
+        "completed": false
+      },
+      {
+        "id": "toilet-gatuo-temple",
+        "text": "噶坨寺厕所",
+        "detail": "噶坨寺沿山而建的红房子与坛城非常震撼，大坛城下和香积厨附近都有厕所，大概是两星水平，但鉴于寺庙太棒，我主观给它加一星！",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "仅供应急",
+        "completed": false
+      },
+      {
+        "id": "toilet-bluesong-lake",
+        "text": "巴巴沟蓝松湖厕所",
+        "detail": "上蓝松湖的盘山路上有一个凭国人直觉就能确认的厕所建筑，但尚未修好且无男女标识，工作人员虽说不推荐但可以上，进去浅看一眼果然所言不虚（极其不推荐）；不过蓝松湖景色不错，上山路也没传说中那么烂。",
+        "category": "notice",
+        "subcategory": "toilet",
+        "group": "雷区警示",
+        "completed": false
+      },
+      {
         "id": "packing-documents",
         "text": "身份证、驾驶证、行驶证/租车订单、保险与预订凭证",
         "category": "packing",
@@ -861,7 +915,13 @@
       { "todoId": "toilet-tagong", "x": 641, "y": 661 },
       { "todoId": "toilet-zheduo", "x": 721, "y": 765 },
       { "todoId": "toilet-dry-toilet-warning", "x": 524, "y": 787 },
-      { "todoId": "toilet-moshi-park", "x": 575, "y": 701 }
+      { "todoId": "toilet-moshi-park", "x": 575, "y": 701 },
+      { "todoId": "toilet-manigango-petrochina", "x": 374, "y": 426 },
+      { "todoId": "toilet-yulong-visitor-center", "x": 470, "y": 483 },
+      { "todoId": "toilet-queershan-tunnel", "x": 425, "y": 453 },
+      { "todoId": "toilet-dege-printing-house", "x": 262, "y": 404 },
+      { "todoId": "toilet-gatuo-temple", "x": 210, "y": 322 },
+      { "todoId": "toilet-bluesong-lake", "x": 240, "y": 362 }
     ],
     "preparationsExplicitlyMentioned": [
       "取还车检查与加油提醒"

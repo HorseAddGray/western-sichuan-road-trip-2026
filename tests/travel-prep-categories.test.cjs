@@ -59,12 +59,26 @@ test("all top-level navigation items share the current-page highlight", () => {
   assert.match(styles, /#travel-navigation-trigger\[aria-current="page"\]/);
 });
 
-test("toilet notes retain every supplied location in separate trusted and warning groups", () => {
+test("toilet notes retain every supplied location across trusted and warning groups", () => {
   const toilets = tripData.preTrip.packingItems.filter((item) => item.subcategory === "toilet");
-  assert.equal(toilets.filter((item) => item.group === "殿堂级").length, 7);
-  assert.equal(toilets.filter((item) => item.group === "雷区警示").length, 7);
+  assert.equal(toilets.filter((item) => item.group === "殿堂级").length, 9);
+  assert.equal(toilets.filter((item) => item.group === "雷区警示").length, 8);
   assert.ok(toilets.some((item) => item.text === "四姑娘山双桥沟" && item.detail.includes("全自动感应冲水")));
   assert.ok(toilets.some((item) => item.text === "墨石公园厕所" && item.detail.includes("为什么要搅拌阿")));
+});
+
+test("Dege-area toilet notes retain all supplied conditions and are mapped", () => {
+  const toilets = tripData.preTrip.packingItems.filter((item) => item.subcategory === "toilet");
+  const pins = tripData.preTrip.toiletMapPins || [];
+  const find = (id) => toilets.find((item) => item.id === id);
+  assert.ok(find("toilet-manigango-petrochina")?.detail.includes("第一个比较不错的厕所"));
+  assert.ok(find("toilet-yulong-visitor-center")?.detail.includes("绝对是TOP级别"));
+  assert.ok(find("toilet-queershan-tunnel")?.detail.includes("具体情况暂不明"));
+  assert.ok(find("toilet-dege-printing-house")?.detail.includes("仅供应急"));
+  assert.ok(find("toilet-gatuo-temple")?.detail.includes("两星水平"));
+  assert.ok(find("toilet-bluesong-lake")?.detail.includes("极其不推荐"));
+  assert.ok(pins.some((pin) => pin.todoId === "toilet-manigango-petrochina"));
+  assert.ok(pins.some((pin) => pin.todoId === "toilet-bluesong-lake"));
 });
 
 test("toilet category renders supplied detail under its trusted and warning groups", () => {
