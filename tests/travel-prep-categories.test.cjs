@@ -7,7 +7,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "..", "travel-prep.js"), "utf8");
 const context = {};
 vm.runInNewContext(source, context);
-const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems } = context.TravelPrep;
+const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems, normalizeNoticeCategorySettings } = context.TravelPrep;
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const navigation = fs.readFileSync(path.join(__dirname, "..", "site-navigation.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
@@ -31,7 +31,7 @@ test("packing and notices have independent navigation and controls", () => {
   assert.match(html, /href="#packing"[^>]*>行囊清单</);
   assert.match(html, /href="#notices"[^>]*>注意事项</);
   assert.match(html, /id="packing-category-filters"/);
-  assert.match(html, /id="notice-category-tabs"/);
+  assert.match(html, /id="notice-category-manager"/);
   assert.match(html, /id="packing-list"/);
   assert.match(html, /id="notice-list"/);
 });
@@ -138,4 +138,23 @@ test("notice details use the defined category and group order without scrambling
 test("notice cards place a black dot before each detail", () => {
   assert.match(styles, /\.notice-item::before/);
   assert.match(styles, /background:\s*#13262f/);
+});
+
+test("notice category settings preserve a manual order, edited names, and collapsed categories", () => {
+  const settings = normalizeNoticeCategorySettings({
+    order: ["toilet", "health", "unknown"],
+    labels: { toilet: "如厕指南", health: "高原健康", unknown: "忽略" },
+    collapsed: ["toilet", "unknown"]
+  }, ["health", "rental", "toilet"]);
+
+  assert.deepEqual([...settings.order], ["toilet", "health", "rental"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(settings.labels)), { toilet: "如厕指南", health: "高原健康" });
+  assert.deepEqual([...settings.collapsed], ["toilet"]);
+});
+
+test("notices provide collapsible category panels and local category management", () => {
+  assert.match(html, /id="notice-category-manager"/);
+  assert.match(app, /collapsedNoticeSubcategories/);
+  assert.match(app, /data-notice-category-move/);
+  assert.match(app, /data-notice-category-label/);
 });

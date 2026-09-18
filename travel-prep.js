@@ -28,5 +28,18 @@
     ).map(({ item }) => item);
   }
 
-  globalThis.TravelPrep = { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems };
+  function normalizeNoticeCategorySettings(settings, categoryKeys) {
+    const keys = [...new Set(categoryKeys.map(String))];
+    const requestedOrder = Array.isArray(settings?.order) ? settings.order.map(String) : [];
+    const order = [...requestedOrder.filter((key) => keys.includes(key)), ...keys.filter((key) => !requestedOrder.includes(key))]
+      .filter((key, index, all) => all.indexOf(key) === index);
+    const labels = Object.fromEntries(Object.entries(settings?.labels || {}).filter(([key, value]) =>
+      keys.includes(key) && typeof value === "string" && value.trim()
+    ).map(([key, value]) => [key, value.trim().slice(0, 24)]));
+    const collapsed = (Array.isArray(settings?.collapsed) ? settings.collapsed : []).map(String)
+      .filter((key, index, all) => keys.includes(key) && all.indexOf(key) === index);
+    return { order, labels, collapsed };
+  }
+
+  globalThis.TravelPrep = { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems, normalizeNoticeCategorySettings };
 })();
