@@ -347,6 +347,90 @@
         "text": "取车时携带驾驶员身份证与驾驶证",
         "category": "notice",
         "completed": false
+      },
+      {
+        "id": "altitude-response",
+        "text": "高海拔不适及时休息；症状明显或加重时就近求助，不强行赶路",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "oxygen-refill",
+        "text": "氧气用品不足或高反不适时，先确认就近卫生院/医院的实际供氧情况",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "rental-record",
+        "text": "取车核对合同、车牌和车型；绕车、机盖、轮胎、玻璃、仪表和随车工具拍照录像留档",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "rental-spare",
+        "text": "确认备胎、千斤顶、换胎工具、三角架和反光背心齐全；检查轮胎胎压与机油",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "rental-terms",
+        "text": "取车前确认限行、跨区、保险、GPS及违约条款；不购买或签署未看清的附加项目",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "road-facilities",
+        "text": "高海拔和偏远路段的厕所、加油站、服务设施以现场实际为准，提前补给并预留时间",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "medicine-consult",
+        "text": "按自身情况和医生/药师建议准备常用药；不要因攻略自行加量或混用药物",
+        "category": "notice",
+        "completed": false
+      },
+      {
+        "id": "packing-documents",
+        "text": "身份证、驾驶证、行驶证/租车订单、保险与预订凭证",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-clothes",
+        "text": "冲锋衣/保暖中层、保暖袜、帽子、手套、登山鞋或运动鞋",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-medicines",
+        "text": "按医嘱准备的高反用品、感冒药、肠胃药、止痛药及个人常用药",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-hygiene",
+        "text": "湿厕纸、湿巾、免洗洗手液、口罩、便携尿袋",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-weather",
+        "text": "折叠伞/雨衣、小帐篷或遮挡用品、防晒霜和润唇膏",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-electronics",
+        "text": "手机、充电器、充电宝、耳机和车载充电设备",
+        "category": "packing",
+        "completed": false
+      },
+      {
+        "id": "packing-supplies",
+        "text": "饮用水、能量零食/巧克力、保温杯、少量现金",
+        "category": "packing",
+        "completed": false
       }
     ],
     "preparationsExplicitlyMentioned": [

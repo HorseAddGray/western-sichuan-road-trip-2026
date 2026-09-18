@@ -749,11 +749,6 @@ function createRuntimeAdapters() {
 async function loadSharedState() {
   const adapters = [...new Set(Object.values(state.runtimeAdapters).filter(Boolean))];
   const todoAdapter = state.runtimeAdapters.todos;
-  let hasLocalTodoSnapshot = true;
-  if (todoAdapter?.mode === "local" && todoAdapter.storageKey) {
-    try { hasLocalTodoSnapshot = localStorage.getItem(todoAdapter.storageKey) !== null; }
-    catch { hasLocalTodoSnapshot = false; }
-  }
   const snapshots = await Promise.all(adapters.map(async (adapter) => [adapter, await adapter.load()]));
   const snapshotFor = (collection) => snapshots.find(([adapter]) => adapter === state.runtimeAdapters[collection])?.[1] || {};
   const todoSnapshot = snapshotFor("todos");
@@ -761,13 +756,16 @@ async function loadSharedState() {
   state.todos = Array.isArray(todoSnapshot.todos) ? todoSnapshot.todos : [];
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
   const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
-  if (todoAdapter?.mode === "local" && !hasLocalTodoSnapshot && !state.todos.length && authoredTodos.length) {
-    state.todos = authoredTodos.map((item, index) => ({
+  if (todoAdapter?.mode === "local" && authoredTodos.length) {
+    const existingIds = new Set(state.todos.map((item) => String(item.id)));
+    const missingTodos = authoredTodos.map((item, index) => ({
       id: String(item.id || `todo-initial-${index + 1}`),
       text: String(item.text || item.title || "").trim(),
+      category: window.TravelPrep.normalizeTodoCategory(item),
       completed: Boolean(item.completed)
-    })).filter((item) => item.text);
-    await Promise.all(state.todos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
+    })).filter((item) => item.text && !existingIds.has(item.id));
+    state.todos.push(...missingTodos);
+    await Promise.all(missingTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
   }
 }
 
