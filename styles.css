@@ -397,6 +397,10 @@ main { overflow: hidden; }
 .packing-check-button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 11px; background: var(--ink); color: white; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
 .packing-check-card, .packing-check-complete { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.72); }
 .packing-check-card span { color: var(--muted); font-size: 12px; }
+.packing-check-picker { display: grid; gap: 10px; margin-bottom: 14px; }
+.packing-check-picker div { display: flex; flex-wrap: wrap; gap: 7px; }
+.packing-check-picker button { min-height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
+.packing-check-picker button[aria-pressed="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); }
 .packing-luggage-manager { margin: 0 0 12px; border-bottom: 1px solid var(--line); }
 .packing-luggage-manager summary { min-height: 40px; display: flex; align-items: center; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
 .packing-luggage-manager[open] summary { color: var(--ink); }

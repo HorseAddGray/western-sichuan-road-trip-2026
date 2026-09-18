@@ -53,6 +53,14 @@ test("packing workspace has details, purchase, and one-by-one checking controls"
   assert.match(app, /data-todo-use/);
 });
 
+test("packing uses short bag names, a single owner filter, and selected-bag checking", () => {
+  assert.match(app, /label: "衣箱"/);
+  assert.match(app, /label: "随包"/);
+  assert.match(app, /selectedPackingOwner/);
+  assert.match(app, /data-packing-check-luggage/);
+  assert.match(app, /data-packing-check-reset/);
+});
+
 test("packing data keeps every supplied item on its own row and assigns luggage", () => {
   const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
   assert.equal(packing.length, 99);

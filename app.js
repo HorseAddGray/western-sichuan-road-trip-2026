@@ -14,11 +14,11 @@ const state = {
   selectedPackingSubcategories: new Set(),
   selectedPackingLuggage: "",
   selectedPackingContainer: "",
-  selectedPackingOwners: new Set(),
+  selectedPackingOwner: "",
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
   packingPurchases: [],
-  packingCheck: { active: false, index: 0, completed: false },
+  packingCheck: { active: false, index: 0, completed: false, openLuggage: [] },
   activeToiletMapDay: 0
 };
 
@@ -826,11 +826,11 @@ const PREP_LABELS = {
 };
 
 const PACKING_LUGGAGE = [
-  { key: "clothes-case", icon: "🧳", label: "衣物与穿搭行李箱", kind: "case" },
-  { key: "care-case", icon: "🧳", label: "洗护与防晒行李箱", kind: "case" },
-  { key: "medicine-pack", icon: "🎒", label: "药品与急救背包", kind: "pack" },
-  { key: "camera-pack", icon: "🎒", label: "电子与拍摄设备背包", kind: "pack" },
-  { key: "daily-bag", icon: "👜", label: "证件与生活杂物挎包", kind: "bag" }
+  { key: "clothes-case", icon: "🧳", label: "衣箱", kind: "case" },
+  { key: "care-case", icon: "🧳", label: "洗箱", kind: "case" },
+  { key: "medicine-pack", icon: "🎒", label: "药包", kind: "pack" },
+  { key: "camera-pack", icon: "🎒", label: "相包", kind: "pack" },
+  { key: "daily-bag", icon: "👜", label: "随包", kind: "bag" }
 ];
 
 const PACKING_LUGGAGE_BY_SUBCATEGORY = {
@@ -842,12 +842,12 @@ const PACKING_LUGGAGE_BY_SUBCATEGORY = {
   other: "daily-bag"
 };
 
-const PACKING_OWNER_LABELS = { "ma-jia": "马甲", "zai-zai": "仔仔", shared: "共同", unassigned: "待分配" };
+const PACKING_OWNER_LABELS = { shared: "共同", "ma-jia": "马甲", "zai-zai": "仔仔", unassigned: "待分配" };
 const PACKING_CONTAINERS = [
-  { key: "skincare-pouch", parent: "care-case", label: "护肤包", icon: "🧴" },
-  { key: "makeup-pouch", parent: "care-case", label: "化妆包", icon: "💄" },
-  { key: "wash-pouch", parent: "care-case", label: "洗漱包", icon: "🧼" },
-  { key: "camera-pouch", parent: "camera-pack", label: "相机包", icon: "📷" }
+  { key: "skincare-pouch", parent: "care-case", label: "护包", icon: "🧴" },
+  { key: "makeup-pouch", parent: "care-case", label: "妆包", icon: "💄" },
+  { key: "wash-pouch", parent: "care-case", label: "洗包", icon: "🧼" },
+  { key: "camera-pouch", parent: "camera-pack", label: "相袋", icon: "📷" }
 ];
 
 function packingLuggageSettingsKey() {
@@ -950,7 +950,7 @@ function renderTodoList(kind) {
     const matchesCategory = !state.selectedPackingSubcategories.size || state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo));
     const matchesLuggage = !state.selectedPackingLuggage || packingLuggageFor(todo) === state.selectedPackingLuggage;
     const matchesContainer = !state.selectedPackingContainer || packingContainerFor(todo) === state.selectedPackingContainer;
-    const matchesOwner = !state.selectedPackingOwners.size || state.selectedPackingOwners.has(packingOwnerFor(todo));
+    const matchesOwner = !state.selectedPackingOwner || state.selectedPackingOwner === packingOwnerFor(todo);
     return matchesCategory && matchesLuggage && matchesContainer && matchesOwner;
   });
   const completed = activeTodos.filter((todo) => todo.completed).length;
@@ -991,16 +991,19 @@ function renderPackingWorkspace() {
   });
   $("#packing-purchase-list").innerHTML = state.packingPurchases.length ? state.packingPurchases.map((item) => `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span>${item.usesTotal ? `<span class="todo-detail">一次性用品 · ${item.usesTotal} 次</span>` : ""}</span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`).join("") : `<p class="todo-empty">还没有采购项。</p>`;
   const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
+  const openLuggage = state.packingCheck.openLuggage || [];
+  const checkPicker = `<div class="packing-check-picker"><strong>选择已打开的行李</strong><div>${PACKING_LUGGAGE.map((luggage) => `<button type="button" data-packing-check-luggage="${luggage.key}" aria-pressed="${openLuggage.includes(luggage.key)}">${luggage.icon} ${escapeHtml(packingLuggageLabel(luggage))}</button>`).join("")}</div></div>`;
+  const checkTodos = packingTodos.filter((todo) => openLuggage.includes(packingLuggageFor(todo)));
   if (!state.packingCheck.active) {
-    checker.innerHTML = `<p class="todo-empty">开始后会从第一件物品起逐件核对。</p><button type="button" class="packing-check-button" data-packing-check-start>开始检查</button>`;
+    checker.innerHTML = `${checkPicker}<p class="todo-empty">选择已打开的行李后，会从第一件物品起逐件核对。</p><button type="button" class="packing-check-button" data-packing-check-start ${openLuggage.length ? "" : "disabled"}>开始检查 ${openLuggage.length ? `${openLuggage.length} 个行李` : ""}</button>`;
     return;
   }
-  const current = packingTodos[state.packingCheck.index];
+  const current = checkTodos[state.packingCheck.index];
   if (!current) {
-    checker.innerHTML = `<p class="packing-check-complete">检查已完成 · ${packingTodos.length} 件物品均已核对无误。</p><button type="button" class="packing-check-button" data-packing-check-restart>重新检查</button>`;
+    checker.innerHTML = `<p class="packing-check-complete">检查已完成 · ${checkTodos.length} 件物品均已核对无误。</p><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button>`;
     return;
   }
-  checker.innerHTML = `<p class="section-kicker">CHECK ${state.packingCheck.index + 1} / ${packingTodos.length}</p><article class="packing-check-card"><strong>${escapeHtml(current.text)}</strong><span>${escapeHtml(PACKING_OWNER_LABELS[packingOwnerFor(current)])} · ${escapeHtml(packingContainerFor(current))}</span><button type="button" class="packing-check-button" data-packing-check-next="${escapeHtml(current.id)}">确认无误，检查下一件</button></article>`;
+  checker.innerHTML = `<p class="section-kicker">CHECK ${state.packingCheck.index + 1} / ${checkTodos.length}</p><article class="packing-check-card"><strong>${escapeHtml(current.text)}</strong><span>${escapeHtml(PACKING_OWNER_LABELS[packingOwnerFor(current)])} · ${escapeHtml(packingContainerFor(current))}</span><div><button type="button" class="packing-check-button" data-packing-check-next="${escapeHtml(current.id)}">确认无误，检查下一件</button><button type="button" class="packing-check-button" data-packing-check-reset>重置检查</button></div></article>`;
 }
 
 function renderTravelPrep() {
@@ -1036,10 +1039,11 @@ function renderTravelPrep() {
   try {
     const workspace = JSON.parse(localStorage.getItem(packingWorkspaceKey()) || "{}");
     state.packingPurchases = Array.isArray(workspace.purchases) ? workspace.purchases : [];
-    state.packingCheck = workspace.check && typeof workspace.check === "object" ? workspace.check : { active: false, index: 0, completed: false };
+    state.packingCheck = workspace.check && typeof workspace.check === "object" ? workspace.check : { active: false, index: 0, completed: false, openLuggage: [] };
+    if (!Array.isArray(state.packingCheck.openLuggage)) state.packingCheck.openLuggage = [];
   } catch {
     state.packingPurchases = [];
-    state.packingCheck = { active: false, index: 0, completed: false };
+    state.packingCheck = { active: false, index: 0, completed: false, openLuggage: [] };
   }
   const optionMarkup = (kind) => Object.entries(kind === "notice" ? PREP_LABELS.notice : PREP_LABELS.packing).map(([key, label]) => ({ key, label }))
     .map(({ key, label }) => `<option value="${key}">${escapeHtml(label)}</option>`).join("");
@@ -1055,7 +1059,7 @@ function renderTravelPrep() {
     const containers = PACKING_CONTAINERS.filter((item) => item.parent === state.selectedPackingLuggage);
     $("#packing-container-filters").hidden = containers.length === 0;
     $("#packing-container-filters").innerHTML = containers.map((container) => `<button type="button" data-packing-container="${container.key}" aria-pressed="${state.selectedPackingContainer === container.key}">${container.icon} ${container.label}</button>`).join("");
-    $("#packing-owner-filters").innerHTML = Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<button type="button" data-packing-owner-filter="${key}" aria-pressed="${state.selectedPackingOwners.has(key)}">${label}</button>`).join("");
+    $("#packing-owner-filters").innerHTML = Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<button type="button" data-packing-owner-filter="${key}" aria-pressed="${state.selectedPackingOwner === key}">${label}</button>`).join("");
     $("#packing-luggage-settings").innerHTML = PACKING_LUGGAGE.map((luggage) => `<label><span>${luggage.icon}</span><input type="text" maxlength="24" value="${escapeHtml(packingLuggageLabel(luggage))}" data-packing-luggage-label="${luggage.key}" aria-label="${escapeHtml(luggage.label)}名称"></label>`).join("");
     $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
@@ -1090,7 +1094,7 @@ function renderTravelPrep() {
     const button = event.target.closest("[data-packing-owner-filter]");
     if (!button) return;
     const key = button.dataset.packingOwnerFilter;
-    state.selectedPackingOwners.has(key) ? state.selectedPackingOwners.delete(key) : state.selectedPackingOwners.add(key);
+    state.selectedPackingOwner = state.selectedPackingOwner === key ? "" : key;
     renderAll();
   };
   $("#packing-workspace-tabs").onclick = (event) => {
@@ -1196,10 +1200,21 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#packing-checker").onclick = (event) => {
-    const start = event.target.closest("[data-packing-check-start], [data-packing-check-restart]");
-    if (start) {
-      state.todos.filter((todo) => window.TravelPrep.normalizeTodoCategory(todo) === "packing").forEach((todo) => { todo.checked = false; saveSharedChange("todos", todo).catch(console.error); });
-      state.packingCheck = { active: true, index: 0, completed: false };
+    const luggage = event.target.closest("[data-packing-check-luggage]");
+    if (luggage && !state.packingCheck.active) {
+      const openLuggage = state.packingCheck.openLuggage || [];
+      state.packingCheck.openLuggage = openLuggage.includes(luggage.dataset.packingCheckLuggage)
+        ? openLuggage.filter((key) => key !== luggage.dataset.packingCheckLuggage)
+        : [...openLuggage, luggage.dataset.packingCheckLuggage];
+      savePackingWorkspace();
+      renderAll();
+      return;
+    }
+    const reset = event.target.closest("[data-packing-check-start], [data-packing-check-reset]");
+    if (reset) {
+      const openLuggage = state.packingCheck.openLuggage || [];
+      state.todos.filter((todo) => window.TravelPrep.normalizeTodoCategory(todo) === "packing" && openLuggage.includes(packingLuggageFor(todo))).forEach((todo) => { todo.checked = false; saveSharedChange("todos", todo).catch(console.error); });
+      state.packingCheck = { active: true, index: 0, completed: false, openLuggage };
       savePackingWorkspace();
       renderAll();
       return;
@@ -1209,7 +1224,7 @@ function renderTravelPrep() {
     const todo = state.todos.find((item) => item.id === next.dataset.packingCheckNext);
     if (todo) { todo.checked = true; saveSharedChange("todos", todo).catch(console.error); }
     state.packingCheck.index += 1;
-    state.packingCheck.completed = state.packingCheck.index >= window.TravelPrep.filterTodosByCategory(state.todos, "packing").length;
+    state.packingCheck.completed = state.packingCheck.index >= window.TravelPrep.filterTodosByCategory(state.todos, "packing").filter((item) => (state.packingCheck.openLuggage || []).includes(packingLuggageFor(item))).length;
     savePackingWorkspace();
     renderAll();
   };
