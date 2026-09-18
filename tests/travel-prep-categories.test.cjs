@@ -7,7 +7,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "..", "travel-prep.js"), "utf8");
 const context = {};
 vm.runInNewContext(source, context);
-const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems, normalizeNoticeCategorySettings } = context.TravelPrep;
+const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory, sortNoticeItems, normalizeNoticeSubcategorySettings } = context.TravelPrep;
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const navigation = fs.readFileSync(path.join(__dirname, "..", "site-navigation.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
@@ -151,21 +151,22 @@ test("notice cards place a black dot before each detail", () => {
   assert.match(styles, /background:\s*#13262f/);
 });
 
-test("notice category settings preserve a manual order, edited names, and collapsed categories", () => {
-  const settings = normalizeNoticeCategorySettings({
-    order: ["toilet", "health", "unknown"],
-    labels: { toilet: "如厕指南", health: "高原健康", unknown: "忽略" },
-    collapsed: ["toilet", "unknown"]
-  }, ["health", "rental", "toilet"]);
+test("notice subcategory settings preserve a manual group order and collapsed groups", () => {
+  const settings = normalizeNoticeSubcategorySettings({
+    order: ["使用经验与消耗", "装备购买建议", "未知分组"],
+    collapsed: ["装备购买建议", "未知分组"]
+  }, ["装备购买建议", "使用经验与消耗", "科学用药指南"]);
 
-  assert.deepEqual([...settings.order], ["toilet", "health", "rental"]);
-  assert.deepEqual(JSON.parse(JSON.stringify(settings.labels)), { toilet: "如厕指南", health: "高原健康" });
-  assert.deepEqual([...settings.collapsed], ["toilet"]);
+  assert.deepEqual([...settings.order], ["使用经验与消耗", "装备购买建议", "科学用药指南"]);
+  assert.deepEqual([...settings.collapsed], ["装备购买建议"]);
 });
 
-test("notices provide collapsible category panels and local category management", () => {
+test("notices provide a single-category selector and drag-managed collapsible subcategories", () => {
+  assert.match(html, /id="notice-category-tabs"/);
   assert.match(html, /id="notice-category-manager"/);
-  assert.match(app, /collapsedNoticeSubcategories/);
-  assert.match(app, /data-notice-category-move/);
-  assert.match(app, /data-notice-category-label/);
+  assert.match(app, /collapsedNoticeGroups/);
+  assert.match(app, /draggable="true"/);
+  assert.match(app, /ondrop/);
+  assert.match(app, /data-notice-group-label/);
+  assert.doesNotMatch(app, /data-notice-category-move/);
 });

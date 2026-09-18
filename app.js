@@ -7,9 +7,10 @@ const state = {
   purchasedTickets: new Set(),
   todos: [],
   activeNoticeSubcategory: "health",
-  noticeCategoryOrder: [],
-  noticeCategoryLabels: {},
-  collapsedNoticeSubcategories: new Set(),
+  noticeGroupOrder: {},
+  noticeGroupLabels: {},
+  collapsedNoticeGroups: new Set(),
+  draggedNoticeGroup: "",
   selectedPackingSubcategories: new Set(),
   activeToiletMapDay: 0
 };
@@ -802,26 +803,41 @@ const PREP_LABELS = {
   packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
 };
 
-function noticeCategorySettingsKey() {
-  return `travel-plan:${state.data.metadata.tripId}:notice-category-settings`;
+function noticeGroupSettingsKey() {
+  return `travel-plan:${state.data.metadata.tripId}:notice-group-settings`;
 }
 
-function noticeCategories() {
-  return state.noticeCategoryOrder.map((key) => ({ key, label: state.noticeCategoryLabels[key] || PREP_LABELS.notice[key] }));
+function noticeGroupId(category, group) {
+  return `${category}::${group}`;
 }
 
-function saveNoticeCategorySettings() {
-  localStorage.setItem(noticeCategorySettingsKey(), JSON.stringify({
-    order: state.noticeCategoryOrder,
-    labels: state.noticeCategoryLabels,
-    collapsed: [...state.collapsedNoticeSubcategories]
+function noticeGroups(category, items) {
+  const groups = [...new Set(items.map((todo) => todo.group || "其他信息"))];
+  const settings = window.TravelPrep.normalizeNoticeSubcategorySettings({
+    order: state.noticeGroupOrder[category],
+    collapsed: groups.filter((group) => state.collapsedNoticeGroups.has(noticeGroupId(category, group)))
+  }, groups);
+  state.noticeGroupOrder[category] = settings.order;
+  return settings.order.map((group) => ({
+    group,
+    id: noticeGroupId(category, group),
+    label: state.noticeGroupLabels[noticeGroupId(category, group)] || group,
+    collapsed: state.collapsedNoticeGroups.has(noticeGroupId(category, group))
+  }));
+}
+
+function saveNoticeGroupSettings() {
+  localStorage.setItem(noticeGroupSettingsKey(), JSON.stringify({
+    order: state.noticeGroupOrder,
+    labels: state.noticeGroupLabels,
+    collapsed: [...state.collapsedNoticeGroups]
   }));
 }
 
 function renderToiletMap() {
   const root = $("#toilet-map");
   if (!root) return;
-  const visible = state.activeNoticeSubcategory === "toilet" && !state.collapsedNoticeSubcategories.has("toilet");
+  const visible = state.activeNoticeSubcategory === "toilet";
   root.hidden = !visible;
   if (!visible) return;
   const source = travelMapSource(state.data.routeMap, state.data.routeMap?.defaultRegionId);
@@ -849,28 +865,18 @@ function renderTodoList(kind) {
   const labels = PREP_LABELS[kind];
   const categoryTodos = window.TravelPrep.filterTodosByCategory(state.todos, kind);
   if (kind === "notice") {
-    const orderedTodos = window.TravelPrep.sortNoticeItems(categoryTodos);
+    const activeCategory = state.activeNoticeSubcategory;
+    const orderedTodos = window.TravelPrep.sortNoticeItems(categoryTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === activeCategory));
     $("#notice-count").textContent = `${orderedTodos.length} 条信息`;
     const itemMarkup = (todo) => `
       <article class="notice-item" data-todo-id="${escapeHtml(todo.id)}">
         <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </article>`;
-    const groupMarkup = (key, items) => {
-      if (!items.length) return `<p class="todo-empty">该分类还没有信息。</p>`;
-      if (!items.some((todo) => todo.group)) return `<div class="todo-list">${items.map(itemMarkup).join("")}</div>`;
-      const groups = key === "toilet" ? ["殿堂级", "雷区警示"] : [...new Set(items.map((todo) => todo.group || "其他信息"))];
-      return groups.map((group) => {
-        const groupedItems = items.filter((todo) => (todo.group || "其他信息") === group);
-        if (!groupedItems.length) return "";
-        const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
-        return `<section class="prep-group${tone ? ` prep-group--${tone}` : ""}"><h3>${escapeHtml(group)}<span>${groupedItems.length} 条</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
-      }).join("");
-    };
-    $("#notice-list").innerHTML = noticeCategories().map(({ key, label }) => {
-      const items = orderedTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
-      const expanded = !state.collapsedNoticeSubcategories.has(key);
-      return `<section class="notice-category" data-notice-category="${escapeHtml(key)}"><button type="button" class="notice-category__toggle" data-notice-subcategory="${escapeHtml(key)}" aria-expanded="${expanded}"><span>${escapeHtml(label)}</span><small>${items.length} 条</small><i aria-hidden="true">⌄</i></button><div class="notice-category__panel" ${expanded ? "" : "hidden"}>${groupMarkup(key, items)}</div></section>`;
-    }).join("");
+    $("#notice-list").innerHTML = orderedTodos.length ? noticeGroups(activeCategory, orderedTodos).map(({ group, id, label, collapsed }) => {
+      const groupedItems = orderedTodos.filter((todo) => (todo.group || "其他信息") === group);
+      const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
+      return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span>${escapeHtml(label)}</span><small>${groupedItems.length} 条</small><i aria-hidden="true">⌄</i></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
+    }).join("") : `<p class="todo-empty">该类别还没有信息。</p>`;
     return;
   }
 
@@ -901,20 +907,20 @@ function renderTravelPrep() {
   const saved = localStorage.getItem(preferenceKey);
   if (PREP_LABELS.notice[saved]) state.activeNoticeSubcategory = saved;
   let storedSettings = null;
-  try { storedSettings = JSON.parse(localStorage.getItem(noticeCategorySettingsKey()) || "null"); } catch { storedSettings = null; }
-  const categoryKeys = Object.keys(PREP_LABELS.notice);
-  const settings = window.TravelPrep.normalizeNoticeCategorySettings(storedSettings, categoryKeys);
-  state.noticeCategoryOrder = settings.order;
-  state.noticeCategoryLabels = settings.labels;
-  state.collapsedNoticeSubcategories = new Set(storedSettings ? settings.collapsed : categoryKeys.filter((key) => key !== state.activeNoticeSubcategory));
-  const optionMarkup = (kind) => (kind === "notice" ? noticeCategories() : Object.entries(PREP_LABELS.packing).map(([key, label]) => ({ key, label })))
+  try { storedSettings = JSON.parse(localStorage.getItem(noticeGroupSettingsKey()) || "null"); } catch { storedSettings = null; }
+  state.noticeGroupOrder = storedSettings?.order && typeof storedSettings.order === "object" ? storedSettings.order : {};
+  state.noticeGroupLabels = storedSettings?.labels && typeof storedSettings.labels === "object" ? storedSettings.labels : {};
+  state.collapsedNoticeGroups = new Set(Array.isArray(storedSettings?.collapsed) ? storedSettings.collapsed : []);
+  const optionMarkup = (kind) => Object.entries(kind === "notice" ? PREP_LABELS.notice : PREP_LABELS.packing).map(([key, label]) => ({ key, label }))
     .map(({ key, label }) => `<option value="${key}">${escapeHtml(label)}</option>`).join("");
   $("#packing-subcategory").innerHTML = optionMarkup("packing");
   $("#notice-subcategory").innerHTML = optionMarkup("notice");
   $("#notice-subcategory").value = state.activeNoticeSubcategory;
   const renderControls = () => {
     $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
-    $("#notice-category-settings").innerHTML = noticeCategories().map(({ key, label }, index) => `<div class="notice-category-setting"><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-category-label="${escapeHtml(key)}" aria-label="${escapeHtml(label)}名称"><div><button type="button" data-notice-category-move="-1" data-notice-category-key="${escapeHtml(key)}" ${index === 0 ? "disabled" : ""} aria-label="${escapeHtml(label)}上移">↑</button><button type="button" data-notice-category-move="1" data-notice-category-key="${escapeHtml(key)}" ${index === state.noticeCategoryOrder.length - 1 ? "disabled" : ""} aria-label="${escapeHtml(label)}下移">↓</button></div></div>`).join("");
+    $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
+    const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
+    $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); };
   renderAll();
@@ -925,42 +931,62 @@ function renderTravelPrep() {
     state.selectedPackingSubcategories.has(key) ? state.selectedPackingSubcategories.delete(key) : state.selectedPackingSubcategories.add(key);
     renderAll();
   };
-  $("#notice-list").onclick = (event) => {
+  $("#notice-category-tabs").onclick = (event) => {
     const button = event.target.closest("[data-notice-subcategory]");
     if (!button) return;
-    const key = button.dataset.noticeSubcategory;
-    state.activeNoticeSubcategory = key;
-    state.collapsedNoticeSubcategories.has(key) ? state.collapsedNoticeSubcategories.delete(key) : state.collapsedNoticeSubcategories.add(key);
+    state.activeNoticeSubcategory = button.dataset.noticeSubcategory;
     localStorage.setItem(preferenceKey, state.activeNoticeSubcategory);
-    saveNoticeCategorySettings();
     $("#notice-subcategory").value = state.activeNoticeSubcategory;
     renderAll();
   };
-  $("#notice-category-settings").onclick = (event) => {
-    const button = event.target.closest("[data-notice-category-move]");
+  $("#notice-list").onclick = (event) => {
+    const button = event.target.closest("[data-notice-group-toggle]");
     if (!button) return;
-    const index = state.noticeCategoryOrder.indexOf(button.dataset.noticeCategoryKey);
-    const target = index + Number(button.dataset.noticeCategoryMove);
-    if (index < 0 || target < 0 || target >= state.noticeCategoryOrder.length) return;
-    [state.noticeCategoryOrder[index], state.noticeCategoryOrder[target]] = [state.noticeCategoryOrder[target], state.noticeCategoryOrder[index]];
-    saveNoticeCategorySettings();
+    const id = noticeGroupId(state.activeNoticeSubcategory, button.dataset.noticeGroupToggle);
+    state.collapsedNoticeGroups.has(id) ? state.collapsedNoticeGroups.delete(id) : state.collapsedNoticeGroups.add(id);
+    saveNoticeGroupSettings();
     renderAll();
   };
   $("#notice-category-settings").onchange = (event) => {
-    const input = event.target.closest("[data-notice-category-label]");
+    const input = event.target.closest("[data-notice-group-label]");
     if (!input) return;
-    const key = input.dataset.noticeCategoryLabel;
+    const key = noticeGroupId(state.activeNoticeSubcategory, input.dataset.noticeGroupLabel);
     const label = input.value.trim();
-    if (label) state.noticeCategoryLabels[key] = label;
-    else delete state.noticeCategoryLabels[key];
-    saveNoticeCategorySettings();
+    if (label) state.noticeGroupLabels[key] = label;
+    else delete state.noticeGroupLabels[key];
+    saveNoticeGroupSettings();
     renderAll();
   };
+  $("#notice-category-settings").ondragstart = (event) => {
+    const row = event.target.closest("[data-notice-group]");
+    if (!row) return;
+    state.draggedNoticeGroup = row.dataset.noticeGroup;
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", state.draggedNoticeGroup);
+  };
+  $("#notice-category-settings").ondragover = (event) => {
+    if (event.target.closest("[data-notice-group]")) event.preventDefault();
+  };
+  $("#notice-category-settings").ondrop = (event) => {
+    event.preventDefault();
+    const row = event.target.closest("[data-notice-group]");
+    const source = state.draggedNoticeGroup || event.dataTransfer.getData("text/plain");
+    const target = row?.dataset.noticeGroup;
+    const order = state.noticeGroupOrder[state.activeNoticeSubcategory] || [];
+    const sourceIndex = order.indexOf(source);
+    const targetIndex = order.indexOf(target);
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+    order.splice(sourceIndex, 1);
+    order.splice(targetIndex, 0, source);
+    state.noticeGroupOrder[state.activeNoticeSubcategory] = order;
+    state.draggedNoticeGroup = "";
+    saveNoticeGroupSettings();
+    renderAll();
+  };
+  $("#notice-category-settings").ondragend = () => { state.draggedNoticeGroup = ""; };
   $("#notice-subcategory").onchange = (event) => {
     state.activeNoticeSubcategory = event.target.value;
-    state.collapsedNoticeSubcategories.delete(state.activeNoticeSubcategory);
     localStorage.setItem(preferenceKey, state.activeNoticeSubcategory);
-    saveNoticeCategorySettings();
     renderAll();
   };
   const submitForm = (kind) => (event) => {
