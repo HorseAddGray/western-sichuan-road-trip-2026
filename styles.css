@@ -395,7 +395,7 @@ main { overflow: hidden; }
 .todo-check { width: 22px; height: 22px; flex: 0 0 22px; border: 1.5px solid #93a5a2; border-radius: 7px; color: transparent; display: grid; place-items: center; font-size: 12px; }
 .todo-copy { min-width: 0; display: grid; gap: 4px; }
 .todo-text { min-width: 0; font-size: 13px; overflow-wrap: anywhere; }
-.todo-detail { color: var(--muted); font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+.todo-detail { color: var(--muted); font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-line; }
 .todo-item.is-complete .todo-check { border-color: var(--forest); color: white; background: var(--forest); }
 .todo-item.is-complete .todo-text { color: #87928f; text-decoration: line-through; }
 .notice-item { min-height: 54px; padding: 14px 0; border-bottom: 1px solid var(--line); transition: background .25s ease, box-shadow .25s ease; }

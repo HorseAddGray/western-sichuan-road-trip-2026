@@ -89,3 +89,11 @@ test("notices are information cards, while the toilet map supports day filters a
   assert.match(app, /notice-item/);
   assert.doesNotMatch(app, /\$\("#notice-list"\)\.onchange = updateTodo/);
 });
+
+test("oxygen guidance preserves every supplied fee and the full safety reminder", () => {
+  const oxygen = tripData.preTrip.packingItems.filter((item) => item.subcategory === "health" && item.group === "吸氧费用");
+  const reminder = tripData.preTrip.packingItems.find((item) => item.id === "oxygen-reminder");
+  assert.equal(oxygen.length, 6);
+  assert.ok(oxygen.some((item) => item.text === "理塘县" && item.detail.includes("床位费+取暖费21元/人")));
+  assert.ok(reminder?.detail.includes("低海拔地区慢慢过渡到高海拔"));
+});

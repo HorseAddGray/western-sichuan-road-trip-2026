@@ -391,6 +391,69 @@
         "completed": false
       },
       {
+        "id": "oxygen-kangding",
+        "text": "康定市",
+        "detail": "甘孜藏族自治州人民医院——挂号费11元，充氧7元/袋",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-yajiang",
+        "text": "雅江县",
+        "detail": "雅江县人民医院——充氧15元/袋（不好停车，雅江县整个县城都不好停车）",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-batang",
+        "text": "巴塘县",
+        "detail": "巴塘县人民医院——充氧7元/袋",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-genie",
+        "text": "格聂镇",
+        "detail": "格聂镇章纳村卫生院——吸氧10元/人，充氧不需额外收费（此处因前一天晚上高反不舒服第二天去吸了半小时氧气，吸氧时就很快缓解）",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-litang",
+        "text": "理塘县",
+        "detail": "理塘县人民医院——挂号费5元/人，吸氧+床位费+取暖费21元/人，充氧10元/袋（理塘县人民医院充氧需要额外付钱，且仅吸氧还要收取床位费等费用，并且吸氧一个小时后仅吃个饭的功夫又开始高反，个人建议还是不要在理塘多待）",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-xinduqiao",
+        "text": "新都桥镇",
+        "detail": "新都桥镇卫生院——充氧8元/袋",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "吸氧费用",
+        "completed": false
+      },
+      {
+        "id": "oxygen-reminder",
+        "text": "温馨提示",
+        "detail": "氧气袋每到个地方都充满（低海拔地区充更合适）\n\n高反不舒服一定要及时吸氧，如果氧气袋或者氧气瓶作用不大就去最近的卫生院吸氧，乡镇的卫生院可能还比县城等大点的地方收费便宜，如果吸氧还不能缓解就及时下撤到低海拔地区。低海拔地区慢慢过渡到高海拔，住宿尽量选择住在低海拔地区。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
         "id": "toilet-shuangqiaogou",
         "text": "四姑娘山双桥沟",
         "detail": "这里的厕所是5A级待遇，全自动感应冲水，干净得让你怀疑是不是走进了哪家星级酒店。高原冻土？不存在的，像有地暖（大概吧），总之屁屁不受罪。",

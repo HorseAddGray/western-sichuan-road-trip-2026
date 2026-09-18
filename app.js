@@ -839,11 +839,13 @@ function renderTodoList(kind) {
     const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
-    if (kind === "notice" && key === "toilet") {
-      return ["殿堂级", "雷区警示"].map((group) => {
+    if (kind === "notice" && items.some((todo) => todo.group)) {
+      const groups = key === "toilet" ? ["殿堂级", "雷区警示"] : [...new Set(items.map((todo) => todo.group || "其他信息"))];
+      return groups.map((group) => {
         const groupedItems = items.filter((todo) => todo.group === group);
         if (!groupedItems.length) return "";
-        return `<section class="prep-group prep-group--${group === "殿堂级" ? "trusted" : "warning"}"><h3>${group}<span>${groupedItems.length} 条</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
+        const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
+        return `<section class="prep-group${tone ? ` prep-group--${tone}` : ""}"><h3>${group}<span>${groupedItems.length} 条</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
       }).join("");
     }
     return `<section class="prep-group"><h3>${label}<span>${kind === "notice" ? `${items.length} 条` : `${done} / ${items.length}`}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
