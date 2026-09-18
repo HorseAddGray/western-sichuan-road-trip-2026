@@ -12,7 +12,7 @@
   }
 
   const noticeSubcategoryOrder = ["health", "rental", "road", "toilet", "trip", "other"];
-  const noticeGroupOrder = ["吸氧费用", "温馨提示", "殿堂级", "雷区警示"];
+  const noticeGroupOrder = ["吸氧费用", "温馨提示", "科学用药指南", "殿堂级", "雷区警示"];
 
   function sortNoticeItems(items) {
     const subcategoryRank = (item) => {

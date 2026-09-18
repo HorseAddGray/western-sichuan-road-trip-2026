@@ -771,6 +771,18 @@ async function loadSharedState() {
     })).filter((item) => item.text && !existingIds.has(item.id));
     state.todos.push(...missingTodos);
     await Promise.all(missingTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
+    const legacyOxygenReminder = state.todos.find((todo) => todo.id === "oxygen-reminder");
+    const splitOxygenReminder = authoredTodos.find((todo) => todo.id === "oxygen-reminder");
+    if (legacyOxygenReminder?.detail?.includes("如果氧气袋或者氧气瓶作用不大") && splitOxygenReminder) {
+      Object.assign(legacyOxygenReminder, {
+        text: splitOxygenReminder.text,
+        detail: splitOxygenReminder.detail,
+        category: window.TravelPrep.normalizeTodoCategory(splitOxygenReminder),
+        subcategory: window.TravelPrep.normalizeTodoSubcategory(splitOxygenReminder),
+        group: splitOxygenReminder.group || ""
+      });
+      await todoAdapter.applyChange("todos", legacyOxygenReminder, "upsert");
+    }
   }
 }
 

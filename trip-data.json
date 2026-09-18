@@ -446,11 +446,164 @@
       },
       {
         "id": "oxygen-reminder",
-        "text": "温馨提示",
-        "detail": "氧气袋每到个地方都充满（低海拔地区充更合适）\n\n高反不舒服一定要及时吸氧，如果氧气袋或者氧气瓶作用不大就去最近的卫生院吸氧，乡镇的卫生院可能还比县城等大点的地方收费便宜，如果吸氧还不能缓解就及时下撤到低海拔地区。低海拔地区慢慢过渡到高海拔，住宿尽量选择住在低海拔地区。",
+        "text": "氧气袋补充",
+        "detail": "氧气袋每到个地方都充满（低海拔地区充更合适）",
         "category": "notice",
         "subcategory": "health",
         "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "oxygen-response-reminder",
+        "text": "高反处理与住宿",
+        "detail": "高反不舒服一定要及时吸氧，如果氧气袋或者氧气瓶作用不大就去最近的卫生院吸氧，乡镇的卫生院可能还比县城等大点的地方收费便宜，如果吸氧还不能缓解就及时下撤到低海拔地区。低海拔地区慢慢过渡到高海拔，住宿尽量选择住在低海拔地区。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-meals",
+        "text": "三餐与饮水",
+        "detail": "早餐正常吃，别太饱。不暴饮暴食，但也不能空腹，三顿饭的碳水一定要吃够。只喝保温杯里的热水，小口慢喝。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-energy",
+        "text": "能量与饮品",
+        "detail": "温水冲一包葡萄糖粉（粉状直接倒嘴里再喝水，更快）。有条件的话，每天早上来一杯藏式热奶茶或酥油茶（热量高，预防高反）。常备可口可乐和葡萄糖水，在高原期间可以当水喝。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-supplies",
+        "text": "随身补给",
+        "detail": "随身带高能量食品（如士力架、巧克力、糖块等），预防高反且以防买不到。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-pace",
+        "text": "行动节奏",
+        "detail": "走路速度控制在平地的1/3，不跑不跳不弯腰捡东西。可以备个鼻通棒随时吸两口，缓解胸闷感（算心理外挂）。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-bathing",
+        "text": "洗澡洗头",
+        "detail": "前2天不洗头洗澡（消耗氧气，极易诱发高反）。即便2天后洗，只要还在高原，一是确保房间温度足够高；二是时间不要太长，最好五六分钟搞定。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-warmth",
+        "text": "做好保暖",
+        "detail": "高原白天和晚上、山上和山下温差极大，必须适时增减衣服。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-no-alcohol",
+        "text": "禁酒禁熬夜",
+        "detail": "高原旅行期间绝对禁酒、禁熬夜。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-blood-oxygen",
+        "text": "血氧监测",
+        "detail": "晚上到住处先测血氧。平原静息血氧一般95%以上，上高原会低一些。低于90%，先吸氧、多休息；一直上不去还伴着头疼呕吐，就别硬撑。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-severe-signals",
+        "text": "严重高反信号",
+        "detail": "静坐也呼吸困难、咳白色或粉红色泡沫痰、嘴唇发紫、剧烈头痛伴呕吐、走路不稳或意识模糊——这是严重高原病的信号。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-urgent-response",
+        "text": "紧急处理",
+        "detail": "出现上述严重信号，不要犹豫，马上往低海拔走、去医院，别等天亮！吸氧若不能缓解，必须及时下撤到低海拔地区缓慢过渡。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "health-lodging",
+        "text": "住宿建议",
+        "detail": "住宿尽量选择住在低海拔地区。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "温馨提示",
+        "completed": false
+      },
+      {
+        "id": "medical-safety",
+        "text": "重要：用药请先咨询医生/药师",
+        "detail": "以下为旅行攻略收集信息，不构成个人处方。乙酰唑胺、地塞米松、硝苯地平及安眠药等均可能有禁忌、相互作用或个体风险；请先咨询医生/药师，并结合既往病史和正在使用的药物决定，出现严重高反应优先下撤并就医。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "科学用药指南",
+        "completed": false
+      },
+      {
+        "id": "medical-headache",
+        "text": "头痛用药（二选一，不叠加）",
+        "detail": "布洛芬：提前1小时吃（只吃这一种，不叠别的），预防血管扩张性头痛。\n\n阿咖酚散：如果当天没吃布洛芬，可以吃一包（当地药店1块钱），含咖啡因还能提神。\n\n注意：布洛芬和阿咖酚散选一种就行，若需换药，间隔必须超过24小时。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "科学用药指南",
+        "completed": false
+      },
+      {
+        "id": "medical-altitude",
+        "text": "高反预防与治疗用药",
+        "detail": "乙酰唑胺：可预防和缓解高反，治疗高原脑水肿。高反时吃，或进高原前一天开始吃，每天两次，一次半片。\n\n氯化钾缓释片：每天两次，一次一片。乙酰唑胺副作用可能引起低钾（出现手麻等症状），必须搭配氯化钾缓释片或吃富含钾的水果。\n\n地塞米松：预防和治疗高原脑水肿。\n\n硝苯地平缓释片：预防和治疗高原肺水肿。\n\n葡萄糖口服液：补充能量，有助缓解一下高反（作用不是很大）。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "科学用药指南",
+        "completed": false
+      },
+      {
+        "id": "medical-other",
+        "text": "其他常备药",
+        "detail": "感冒药、藿香正气水（片）、肠胃药、晕车药等，也可以备点安眠药以防晚上高反睡不着。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "科学用药指南",
+        "completed": false
+      },
+      {
+        "id": "medical-oxygen-equipment",
+        "text": "氧气与器械",
+        "detail": "适当备点医用氧气以防不时之需，常备血氧仪。",
+        "category": "notice",
+        "subcategory": "health",
+        "group": "科学用药指南",
         "completed": false
       },
       {

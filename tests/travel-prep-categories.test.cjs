@@ -99,12 +99,28 @@ test("toilet map appears below the notice information form and above the notice 
   assert.ok(mapPosition < listPosition, "the map should precede the notice cards");
 });
 
-test("oxygen guidance preserves every supplied fee and the full safety reminder", () => {
+test("oxygen guidance preserves every supplied fee and splits the two existing reminders", () => {
   const oxygen = tripData.preTrip.packingItems.filter((item) => item.subcategory === "health" && item.group === "吸氧费用");
-  const reminder = tripData.preTrip.packingItems.find((item) => item.id === "oxygen-reminder");
+  const refillReminder = tripData.preTrip.packingItems.find((item) => item.id === "oxygen-reminder");
+  const responseReminder = tripData.preTrip.packingItems.find((item) => item.id === "oxygen-response-reminder");
   assert.equal(oxygen.length, 6);
   assert.ok(oxygen.some((item) => item.text === "理塘县" && item.detail.includes("床位费+取暖费21元/人")));
-  assert.ok(reminder?.detail.includes("低海拔地区慢慢过渡到高海拔"));
+  assert.equal(refillReminder?.detail, "氧气袋每到个地方都充满（低海拔地区充更合适）");
+  assert.ok(responseReminder?.detail.includes("低海拔地区慢慢过渡到高海拔"));
+});
+
+test("health notices retain every new travel tip and separate medical guidance from safety advice", () => {
+  const health = tripData.preTrip.packingItems.filter((item) => item.subcategory === "health");
+  const find = (id) => health.find((item) => item.id === id);
+  assert.ok(find("health-meals")?.detail.includes("三顿饭的碳水一定要吃够"));
+  assert.ok(find("health-energy")?.detail.includes("藏式热奶茶或酥油茶"));
+  assert.ok(find("health-bathing")?.detail.includes("前2天不洗头洗澡"));
+  assert.ok(find("health-severe-signals")?.detail.includes("粉红色泡沫痰"));
+  assert.ok(find("health-urgent-response")?.detail.includes("别等天亮"));
+  assert.ok(find("medical-headache")?.detail.includes("间隔必须超过24小时"));
+  assert.ok(find("medical-altitude")?.detail.includes("氯化钾缓释片"));
+  assert.ok(find("medical-safety")?.detail.includes("咨询医生/药师"));
+  assert.match(app, /legacyOxygenReminder/);
 });
 
 test("notice details use the defined category and group order without scrambling each group", () => {
