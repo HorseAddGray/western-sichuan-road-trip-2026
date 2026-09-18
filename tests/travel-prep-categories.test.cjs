@@ -71,6 +71,16 @@ test("packing additions collect an owner and a property with conditional consuma
   assert.match(app, /property === "consumable"/);
 });
 
+test("authored purchase items seed the purchase list and retain local removals", () => {
+  const purchases = tripData.preTrip.purchaseItems || [];
+  assert.equal(purchases.length, 4);
+  assert.ok(purchases.some((item) => item.text.includes("佳能R50相机兔笼")));
+  assert.ok(purchases.some((item) => item.text.includes("旅行枕")));
+  assert.ok(purchases.some((item) => item.text.includes("Glasslock")));
+  assert.match(app, /authoredPurchases/);
+  assert.match(app, /removedPurchaseIds/);
+});
+
 test("packing data keeps every supplied item on its own row and assigns luggage", () => {
   const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
   assert.equal(packing.length, 99);

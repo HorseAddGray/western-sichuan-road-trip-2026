@@ -18,6 +18,7 @@ const state = {
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
   packingPurchases: [],
+  removedPurchaseIds: new Set(),
   packingCheck: { active: false, index: 0, completed: false, openLuggage: [] },
   activeToiletMapDay: 0
 };
@@ -787,6 +788,7 @@ async function loadSharedState() {
       subcategory: window.TravelPrep.normalizeTodoSubcategory(item),
       luggage: String(item.luggage || "").trim(),
       owner: String(item.owner || "unassigned").trim(),
+      property: String(item.property || "").trim(),
       container: String(item.container || "").trim(),
       usesTotal: Number(item.usesTotal || 0),
       usesRemaining: Number(item.usesRemaining || 0),
@@ -871,7 +873,7 @@ function packingPropertyFor(todo) {
 function packingContainerFor(todo) { return todo.container || packingLuggageFor(todo); }
 function packingWorkspaceKey() { return `travel-plan:${state.data.metadata.tripId}:packing-workspace`; }
 function savePackingWorkspace() {
-  localStorage.setItem(packingWorkspaceKey(), JSON.stringify({ purchases: state.packingPurchases, check: state.packingCheck }));
+  localStorage.setItem(packingWorkspaceKey(), JSON.stringify({ purchases: state.packingPurchases, removedPurchaseIds: [...state.removedPurchaseIds], check: state.packingCheck }));
 }
 
 function noticeGroupSettingsKey() {
@@ -997,7 +999,7 @@ function renderPackingWorkspace() {
   });
   $("#packing-purchase-list").innerHTML = state.packingPurchases.length ? state.packingPurchases.map((item) => {
     const property = packingPropertyFor(item);
-    return `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span><span class="todo-detail">${PACKING_PROPERTY_LABELS[property]}${property === "consumable" && item.usesTotal ? ` · 可用 ${item.usesTotal} 次` : ""}</span></span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`;
+    return `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span>${item.detail ? `<span class="todo-detail">${escapeHtml(item.detail)}</span>` : ""}<span class="todo-detail">${PACKING_PROPERTY_LABELS[property]}${property === "consumable" && item.usesTotal ? ` · 可用 ${item.usesTotal} 次` : ""}</span></span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`;
   }).join("") : `<p class="todo-empty">还没有采购项。</p>`;
   const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
   const openLuggage = state.packingCheck.openLuggage || [];
@@ -1046,12 +1048,29 @@ function renderTravelPrep() {
     state.packingLuggageLabels = {};
   }
   try {
+    const authoredPurchases = (Array.isArray(state.data.preTrip?.purchaseItems) ? state.data.preTrip.purchaseItems : []).map((item, index) => ({
+      id: String(item.id || `purchase-initial-${index + 1}`),
+      text: String(item.text || item.title || "").trim(),
+      detail: String(item.detail || "").trim(),
+      property: packingPropertyFor(item),
+      usesTotal: Number(item.usesTotal || 0)
+    })).filter((item) => item.text);
     const workspace = JSON.parse(localStorage.getItem(packingWorkspaceKey()) || "{}");
-    state.packingPurchases = Array.isArray(workspace.purchases) ? workspace.purchases : [];
+    state.removedPurchaseIds = new Set(Array.isArray(workspace.removedPurchaseIds) ? workspace.removedPurchaseIds.map(String) : []);
+    const storedPurchases = Array.isArray(workspace.purchases) ? workspace.purchases : [];
+    state.packingPurchases = [...new Map([...authoredPurchases, ...storedPurchases].map((item) => [String(item.id), item])).values()]
+      .filter((item) => !state.removedPurchaseIds.has(String(item.id)));
     state.packingCheck = workspace.check && typeof workspace.check === "object" ? workspace.check : { active: false, index: 0, completed: false, openLuggage: [] };
     if (!Array.isArray(state.packingCheck.openLuggage)) state.packingCheck.openLuggage = [];
   } catch {
-    state.packingPurchases = [];
+    state.packingPurchases = (Array.isArray(state.data.preTrip?.purchaseItems) ? state.data.preTrip.purchaseItems : []).map((item, index) => ({
+      id: String(item.id || `purchase-initial-${index + 1}`),
+      text: String(item.text || item.title || "").trim(),
+      detail: String(item.detail || "").trim(),
+      property: packingPropertyFor(item),
+      usesTotal: Number(item.usesTotal || 0)
+    })).filter((item) => item.text);
+    state.removedPurchaseIds = new Set();
     state.packingCheck = { active: false, index: 0, completed: false, openLuggage: [] };
   }
   const optionMarkup = (kind) => Object.entries(kind === "notice" ? PREP_LABELS.notice : PREP_LABELS.packing).map(([key, label]) => ({ key, label }))
@@ -1214,6 +1233,7 @@ function renderTravelPrep() {
       state.todos.push(todo);
       saveSharedChange("todos", todo).catch(console.error);
     }
+    state.removedPurchaseIds.add(id);
     state.packingPurchases = state.packingPurchases.filter((item) => item.id !== id);
     savePackingWorkspace();
     renderAll();

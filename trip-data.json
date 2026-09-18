@@ -980,6 +980,32 @@
       { "todoId": "toilet-gatuo-temple", "x": 210, "y": 322 },
       { "todoId": "toilet-bluesong-lake", "x": 240, "y": 362 }
     ],
+    "purchaseItems": [
+      {
+        "id": "purchase-r50-cage",
+        "text": "颜左 佳能R50相机兔笼",
+        "detail": "黑色；阳极氧化工艺；6061铝材质；重量约140g。",
+        "property": "common"
+      },
+      {
+        "id": "purchase-camera-insert-bag",
+        "text": "阿尔飞斯 相机内胆包",
+        "detail": "小号；加厚隔层；可放微单/单反；尺寸约34×20×13cm；可一机四镜。",
+        "property": "common"
+      },
+      {
+        "id": "purchase-travel-pillow",
+        "text": "食贫道×蓝盒子 旅行枕",
+        "detail": "原创记忆棉3D晶格U型颈枕；便携可拆洗。",
+        "property": "common"
+      },
+      {
+        "id": "purchase-glasslock-cup",
+        "text": "Glasslock 纯钛·焖茶保温杯套装",
+        "detail": "银色；内外99.6%纯钛；轻量便携；含纯钛茶隔/磁吸茶仓；6H保温保冷。",
+        "property": "common"
+      }
+    ],
     "preparationsExplicitlyMentioned": [
       "取还车检查与加油提醒"
     ],
