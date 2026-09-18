@@ -81,3 +81,11 @@ test("toilet category has a map with one marker for every toilet note", () => {
   assert.match(html, /id="toilet-map"/);
   assert.match(app, /function renderToiletMap/);
 });
+
+test("notices are information cards, while the toilet map supports day filters and highlighted map targets", () => {
+  assert.match(html, /placeholder="添加一条信息"/);
+  assert.match(app, /toilet-map-day/);
+  assert.match(app, /is-highlighted/);
+  assert.match(app, /notice-item/);
+  assert.doesNotMatch(app, /\$\("#notice-list"\)\.onchange = updateTodo/);
+});

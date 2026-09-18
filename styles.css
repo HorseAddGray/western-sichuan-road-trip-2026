@@ -398,6 +398,8 @@ main { overflow: hidden; }
 .todo-detail { color: var(--muted); font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
 .todo-item.is-complete .todo-check { border-color: var(--forest); color: white; background: var(--forest); }
 .todo-item.is-complete .todo-text { color: #87928f; text-decoration: line-through; }
+.notice-item { min-height: 54px; padding: 14px 0; border-bottom: 1px solid var(--line); transition: background .25s ease, box-shadow .25s ease; }
+.notice-item.is-highlighted { margin-inline: -10px; padding-inline: 10px; border-radius: 12px; background: #fff2d6; box-shadow: 0 0 0 2px #e1aa3d; }
 .prep-group--trusted h3 { color: #43654a; }
 .prep-group--warning h3 { color: #a13f34; }
 .toilet-map { margin: 0 0 18px; }
@@ -407,6 +409,9 @@ main { overflow: hidden; }
 .toilet-map__key { display: inline-block; width: 8px; height: 8px; margin-right: 3px; border-radius: 50%; }
 .toilet-map__key--trusted { background: #43654a; }
 .toilet-map__key--warning { background: #a13f34; }
+.toilet-map__days { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
+.toilet-map__days button { min-height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--muted); font: inherit; font-size: 11px; cursor: pointer; }
+.toilet-map__days button[aria-pressed="true"] { border-color: var(--lake); background: var(--lake-soft); color: var(--ink); font-weight: 750; }
 .toilet-map-pin { position: absolute; transform: translate(-50%, -50%); z-index: 2; width: 25px; height: 25px; padding: 0; border: 2px solid #fffdf6; border-radius: 50%; color: white; font: 800 13px/1 sans-serif; cursor: pointer; box-shadow: 0 0 0 1px #13262f55, 0 2px 6px #13262f55; }
 .toilet-map-pin--trusted { background: #43654a; }
 .toilet-map-pin--warning { background: #a13f34; }

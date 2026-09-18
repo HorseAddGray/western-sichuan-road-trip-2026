@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260918-1">
+  <link rel="stylesheet" href="styles.css?v=20260918-2">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js" defer></script>
-  <script src="app.js?v=20260918-2" defer></script>
+  <script src="app.js?v=20260918-3" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260918-2" defer></script>
@@ -116,12 +116,12 @@
           <p class="section-kicker">TRIP NOTES</p>
           <h2 id="notices-title">注意事项</h2>
         </div>
-        <span class="soft-label" id="notice-progress">0 / 0</span>
+        <span class="soft-label" id="notice-count">0 条信息</span>
       </div>
       <div class="toilet-map" id="toilet-map" hidden></div>
       <div class="prep-tabs" id="notice-category-tabs" role="tablist" aria-label="注意事项分类"></div>
       <form class="todo-form" id="notice-form">
-        <input id="notice-input" type="text" maxlength="80" placeholder="添加一条注意事项" aria-label="注意事项">
+        <input id="notice-input" type="text" maxlength="80" placeholder="添加一条信息" aria-label="信息">
         <select id="notice-subcategory" aria-label="注意事项类别"></select>
         <button type="submit">添加</button>
       </form>

@@ -7,7 +7,8 @@ const state = {
   purchasedTickets: new Set(),
   todos: [],
   activeNoticeSubcategory: "health",
-  selectedPackingSubcategories: new Set()
+  selectedPackingSubcategories: new Set(),
+  activeToiletMapDay: 0
 };
 
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
@@ -794,13 +795,22 @@ function renderToiletMap() {
   if (!visible) return;
   const source = travelMapSource(state.data.routeMap, state.data.routeMap?.defaultRegionId);
   const canvas = source.canvas || { width: 1448, height: 1086 };
+  const routes = mapRouteDefinitions(source);
+  const selectedRoute = routes.find((route) => route.day === state.activeToiletMapDay);
+  const artwork = travelOverviewArtwork(state.data.days, source, { includeAllPlaces: true, useDetailedRoutes: true }).replace(/(<svg[^>]*>)/, `$1${selectedRoute ? `<style>[id^="overview-route-"]{display:none}#overview-route-${selectedRoute.day}{display:inline}</style>` : ""}`);
   const toilets = state.todos.filter((todo) => window.TravelPrep.normalizeTodoCategory(todo) === "notice" && window.TravelPrep.normalizeTodoSubcategory(todo) === "toilet");
   const pins = (state.data.preTrip?.toiletMapPins || []).map((pin) => ({ ...pin, todo: toilets.find((todo) => todo.id === pin.todoId) })).filter((pin) => pin.todo);
-  root.innerHTML = `<div class="toilet-map__heading"><strong>厕所位置分布</strong><span><i class="toilet-map__key toilet-map__key--trusted"></i>殿堂级　<i class="toilet-map__key toilet-map__key--warning"></i>雷区警示</span></div><div class="travel-map-block is-overview"><div class="travel-map-scroll"><div class="travel-map-canvas">${travelOverviewArtwork(state.data.days, source, { includeAllPlaces: true, useDetailedRoutes: true })}${pins.map((pin) => `<button class="toilet-map-pin toilet-map-pin--${pin.todo.group === "殿堂级" ? "trusted" : "warning"}" type="button" style="left:${pin.x / canvas.width * 100}%;top:${pin.y / canvas.height * 100}%" data-toilet-map-pin="${escapeHtml(pin.todoId)}" aria-label="${escapeHtml(pin.todo.group)}：${escapeHtml(pin.todo.text)}">${pin.todo.group === "殿堂级" ? "★" : "!"}</button>`).join("")}</div></div><p class="toilet-map__note">点击标记查看对应地点说明。位置为路线示意，请以当天导航和现场情况为准。</p></div>`;
+  root.innerHTML = `<div class="toilet-map__heading"><strong>厕所位置分布</strong><span><i class="toilet-map__key toilet-map__key--trusted"></i>殿堂级　<i class="toilet-map__key toilet-map__key--warning"></i>雷区警示</span></div><div class="toilet-map__days" aria-label="厕所地图路线日期"><button type="button" data-toilet-map-day="0" aria-pressed="${state.activeToiletMapDay === 0}">全部</button>${routes.map((route) => { const day = state.data.days.find((item) => item.day === route.day); return day ? `<button type="button" data-toilet-map-day="${route.day}" aria-pressed="${state.activeToiletMapDay === route.day}">Day ${route.day}</button>` : ""; }).join("")}</div><div class="travel-map-block is-overview"><div class="travel-map-scroll"><div class="travel-map-canvas">${artwork}${pins.map((pin) => `<button class="toilet-map-pin toilet-map-pin--${pin.todo.group === "殿堂级" ? "trusted" : "warning"}" type="button" style="left:${pin.x / canvas.width * 100}%;top:${pin.y / canvas.height * 100}%" data-toilet-map-pin="${escapeHtml(pin.todoId)}" aria-label="${escapeHtml(pin.todo.group)}：${escapeHtml(pin.todo.text)}">${pin.todo.group === "殿堂级" ? "★" : "!"}</button>`).join("")}</div></div><p class="toilet-map__note">点击标记查看对应地点说明。位置为路线示意，请以当天导航和现场情况为准。</p></div>`;
   root.onclick = (event) => {
+    const day = event.target.closest("[data-toilet-map-day]");
+    if (day) { state.activeToiletMapDay = Number(day.dataset.toiletMapDay); renderToiletMap(); return; }
     const pin = event.target.closest("[data-toilet-map-pin]");
     if (!pin) return;
-    document.querySelector(`[data-todo-id="${pin.dataset.toiletMapPin}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const info = document.querySelector(`[data-todo-id="${pin.dataset.toiletMapPin}"]`);
+    if (!info) return;
+    info.scrollIntoView({ behavior: "smooth", block: "center" });
+    info.classList.add("is-highlighted");
+    setTimeout(() => info.classList.remove("is-highlighted"), 2200);
   };
 }
 
@@ -811,8 +821,12 @@ function renderTodoList(kind) {
     ? categoryTodos.filter((todo) => state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo)))
     : kind === "notice" ? categoryTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory) : categoryTodos;
   const completed = activeTodos.filter((todo) => todo.completed).length;
-  $(`#${kind === "packing" ? "packing" : "notice"}-progress`).textContent = `${completed} / ${activeTodos.length}`;
-  const itemMarkup = (todo) => `
+  if (kind === "packing") $("#packing-progress").textContent = `${completed} / ${activeTodos.length}`;
+  else $("#notice-count").textContent = `${activeTodos.length} 条信息`;
+  const itemMarkup = (todo) => kind === "notice" ? `
+    <article class="notice-item" data-todo-id="${escapeHtml(todo.id)}">
+      <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
+    </article>` : `
     <div class="todo-item${todo.completed ? " is-complete" : ""}" data-todo-id="${escapeHtml(todo.id)}">
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
@@ -829,12 +843,11 @@ function renderTodoList(kind) {
       return ["殿堂级", "雷区警示"].map((group) => {
         const groupedItems = items.filter((todo) => todo.group === group);
         if (!groupedItems.length) return "";
-        const groupedDone = groupedItems.filter((todo) => todo.completed).length;
-        return `<section class="prep-group prep-group--${group === "殿堂级" ? "trusted" : "warning"}"><h3>${group}<span>${groupedDone} / ${groupedItems.length}</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
+        return `<section class="prep-group prep-group--${group === "殿堂级" ? "trusted" : "warning"}"><h3>${group}<span>${groupedItems.length} 条</span></h3><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></section>`;
       }).join("");
     }
-    return `<section class="prep-group"><h3>${label}<span>${done} / ${items.length}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
-  }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
+    return `<section class="prep-group"><h3>${label}<span>${kind === "notice" ? `${items.length} 条` : `${done} / ${items.length}`}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
+  }).join("") : `<p class="todo-empty">${kind === "notice" ? "还没有信息，添加第一条吧。" : "还没有准备事项，添加第一项吧。"}</p>`;
 }
 
 function renderTravelPrep() {
@@ -909,7 +922,8 @@ function renderTravelPrep() {
     saveSharedChange("todos", { id: todo.id }, "delete").catch(console.error);
     renderAll();
   };
-  ["packing", "notice"].forEach((kind) => { $(`#${kind}-list`).onchange = updateTodo; $(`#${kind}-list`).onclick = manageTodo; });
+  $("#packing-list").onchange = updateTodo;
+  $("#packing-list").onclick = manageTodo;
 }
 
 function safeExternalUrl(value) {
