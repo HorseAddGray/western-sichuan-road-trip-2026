@@ -61,6 +61,15 @@ test("packing uses short bag names, a single owner filter, and selected-bag chec
   assert.match(app, /data-packing-check-reset/);
 });
 
+test("packing additions collect an owner and a property with conditional consumable uses", () => {
+  assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" \}/);
+  assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品" \}/);
+  assert.match(html, /id="packing-owner"/);
+  assert.match(html, /id="packing-property"/);
+  assert.match(html, /data-packing-uses-row/);
+  assert.match(app, /property === "consumable"/);
+});
+
 test("packing data keeps every supplied item on its own row and assigns luggage", () => {
   const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
   assert.equal(packing.length, 99);
