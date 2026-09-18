@@ -17,7 +17,7 @@
   <script src="app.js?v=20260910-4" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
-  <script src="site-navigation.js?v=20260910-2" defer></script>
+  <script src="site-navigation.js?v=20260918-1" defer></script>
 </head>
 <body>
   <a class="skip-link" id="skip-link" href="#main">跳到主要内容</a>
@@ -46,18 +46,6 @@
       <p class="hero__date" id="trip-date"></p>
     </section>
 
-    <section class="section flights-section" id="flights" aria-labelledby="flights-title" data-module="flights" data-travel-panel="info" hidden>
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">BOARDING</p>
-          <h2 id="flights-title">航班行程</h2>
-        </div>
-        <p class="section-index" id="flight-index" aria-live="polite">1 / 3</p>
-      </div>
-      <div class="flight-carousel" id="flight-carousel" aria-label="航班卡片，可左右滑动"></div>
-      <div class="carousel-dots" id="flight-dots" aria-hidden="true"></div>
-    </section>
-
     <section class="section route-section" id="route" aria-labelledby="route-title" data-module="overview" data-travel-panel="info" hidden>
       <div class="section-heading">
         <div>
@@ -68,6 +56,18 @@
       </div>
       <div id="route-explorer"></div>
       <p class="route-caption">路线为行程示意，实际驾驶和步行请使用当天的 Google Maps 导航。</p>
+    </section>
+
+    <section class="section flights-section" id="flights" aria-labelledby="flights-title" data-module="flights" data-travel-panel="info" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">BOARDING</p>
+          <h2 id="flights-title">航班行程</h2>
+        </div>
+        <p class="section-index" id="flight-index" aria-live="polite">1 / 3</p>
+      </div>
+      <div class="flight-carousel" id="flight-carousel" aria-label="航班卡片，可左右滑动"></div>
+      <div class="carousel-dots" id="flight-dots" aria-hidden="true"></div>
     </section>
 
     <section class="section itinerary-section" id="itinerary" aria-labelledby="itinerary-title" data-module="itinerary" data-travel-panel="info" hidden>

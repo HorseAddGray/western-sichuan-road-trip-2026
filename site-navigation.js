@@ -17,13 +17,15 @@
       ledgerView: document.querySelector('[data-site-view="ledger"]'),
       travelMenu: document.querySelector("#travel-navigation"),
       travelTrigger: document.querySelector("#travel-navigation-trigger"),
+      packingLink: document.querySelector('a[href="#packing"]'),
+      noticesLink: document.querySelector('a[href="#notices"]'),
       ledgerLink: document.querySelector("#ledger-navigation-link"),
       skipLink: document.querySelector("#skip-link")
     };
   }
 
   function setVisibleView(nextView, options = {}) {
-    const { travelView, ledgerView, travelTrigger, ledgerLink, skipLink } = elements();
+    const { travelView, ledgerView, travelTrigger, packingLink, noticesLink, ledgerLink, skipLink } = elements();
     if (!travelView || !ledgerView) return;
 
     const viewChanged = activeView !== nextView;
@@ -36,18 +38,17 @@
     travelView.toggleAttribute("inert", ledgerActive);
     ledgerView.toggleAttribute("inert", !ledgerActive);
     document.body.dataset.activeView = nextView;
+    const activePanel = !ledgerActive ? panelForHash(location.hash) : "";
     if (!ledgerActive) {
-      const activePanel = panelForHash(location.hash);
       document.body.dataset.activeTravelPanel = activePanel;
       document.querySelectorAll("[data-travel-panel]").forEach((panel) => {
         const moduleEnabled = !panel.dataset.module || !document.querySelector(`[data-module="${panel.dataset.module}"]`)?.hidden;
         panel.hidden = panel.dataset.travelPanel !== activePanel || !moduleEnabled;
       });
     }
-    if (travelTrigger) {
-      if (ledgerActive) travelTrigger.removeAttribute("aria-current");
-      else travelTrigger.setAttribute("aria-current", "page");
-    }
+    if (travelTrigger) travelTrigger.toggleAttribute("aria-current", activePanel === "info");
+    if (packingLink) packingLink.toggleAttribute("aria-current", activePanel === "packing");
+    if (noticesLink) noticesLink.toggleAttribute("aria-current", activePanel === "notices");
     if (ledgerLink) {
       if (ledgerActive) ledgerLink.setAttribute("aria-current", "page");
       else ledgerLink.removeAttribute("aria-current");

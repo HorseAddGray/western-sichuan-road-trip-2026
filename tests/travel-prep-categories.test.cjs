@@ -9,6 +9,7 @@ const context = {};
 vm.runInNewContext(source, context);
 const { normalizeTodoCategory, filterTodosByCategory, normalizeTodoSubcategory } = context.TravelPrep;
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const navigation = fs.readFileSync(path.join(__dirname, "..", "site-navigation.js"), "utf8");
 
 test("uncategorized items belong to notices", () => {
   assert.equal(normalizeTodoCategory({ text: "验车" }), "notice");
@@ -36,4 +37,15 @@ test("three top-level areas are marked as independent display panels", () => {
   assert.match(html, /data-travel-panel="info"/);
   assert.match(html, /data-travel-panel="packing"/);
   assert.match(html, /data-travel-panel="notices"/);
+});
+
+test("travel information orders route before flights and uses a fresh navigation script version", () => {
+  assert.ok(html.indexOf('id="route"') < html.indexOf('id="flights"'));
+  assert.match(html, /site-navigation\.js\?v=20260918-1/);
+});
+
+test("navigation marks the selected top-level panel as current", () => {
+  assert.match(navigation, /packingLink/);
+  assert.match(navigation, /noticesLink/);
+  assert.match(navigation, /activePanel === "packing"/);
 });
