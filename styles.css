@@ -377,6 +377,7 @@ main { overflow: hidden; }
 .prep-tabs { display: flex; gap: 8px; margin: 4px 0 12px; }
 .prep-tabs button { min-height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
 .prep-tabs button[aria-selected="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); color: var(--ink); font-weight: 750; }
+.prep-tabs button[aria-pressed="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); color: var(--ink); font-weight: 750; }
 .packing-luggage-filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 4px 0 10px; }
 .packing-luggage-filter { min-height: 104px; padding: 10px 7px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.62); color: var(--ink); display: grid; align-content: center; justify-items: center; gap: 2px; font: inherit; cursor: pointer; }
 .packing-luggage-filter b { font-size: 34px; line-height: 1; filter: saturate(.72); }
@@ -385,6 +386,17 @@ main { overflow: hidden; }
 .packing-luggage-filter--all { min-height: 52px; align-self: center; background: transparent; }
 .packing-luggage-filter--all span { font-size: 12px; }
 .packing-luggage-filter[aria-pressed="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); box-shadow: inset 0 0 0 1px var(--lake); }
+.packing-container-filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 10px; }
+.packing-container-filters button { min-height: 34px; padding: 0 10px; border: 1px dashed #8ca5a7; border-radius: 9px; background: transparent; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
+.packing-container-filters button[aria-pressed="true"] { border-style: solid; border-color: var(--lake); background: rgba(40,123,144,.1); }
+.packing-item-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.packing-item-meta select, .packing-item-meta button { min-height: 27px; max-width: 160px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--muted); font: inherit; font-size: 11px; }
+.packing-item-meta button { padding: 0 7px; cursor: pointer; }
+.todo-item.is-exhausted .todo-text { color: #87928f; text-decoration: line-through; }
+.todo-item.is-exhausted .packing-item-meta button { color: #87928f; cursor: default; }
+.packing-check-button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 11px; background: var(--ink); color: white; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.packing-check-card, .packing-check-complete { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.72); }
+.packing-check-card span { color: var(--muted); font-size: 12px; }
 .packing-luggage-manager { margin: 0 0 12px; border-bottom: 1px solid var(--line); }
 .packing-luggage-manager summary { min-height: 40px; display: flex; align-items: center; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
 .packing-luggage-manager[open] summary { color: var(--ink); }

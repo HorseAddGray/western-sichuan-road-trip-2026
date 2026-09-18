@@ -43,6 +43,16 @@ test("packing exposes five editable luggage filters", () => {
   assert.match(app, /data-packing-luggage-label/);
 });
 
+test("packing workspace has details, purchase, and one-by-one checking controls", () => {
+  assert.match(html, /id="packing-workspace-tabs"/);
+  assert.match(html, /id="packing-purchase-list"/);
+  assert.match(html, /id="packing-checker"/);
+  assert.match(app, /data-packing-owner/);
+  assert.match(app, /data-packing-container/);
+  assert.match(app, /data-purchase-submit/);
+  assert.match(app, /data-todo-use/);
+});
+
 test("packing data keeps every supplied item on its own row and assigns luggage", () => {
   const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
   assert.equal(packing.length, 99);

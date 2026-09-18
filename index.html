@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260918-7">
+  <link rel="stylesheet" href="styles.css?v=20260918-8">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260918-11" defer></script>
+  <script src="app.js?v=20260918-12" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260918-2" defer></script>
@@ -101,18 +101,37 @@
         </div>
         <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
-      <div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div>
-      <details class="packing-luggage-manager" id="packing-luggage-manager">
-        <summary>编辑行李用途名称</summary>
-        <div id="packing-luggage-settings" aria-label="行李用途名称"></div>
-      </details>
-      <div class="prep-tabs" id="packing-category-filters" aria-label="行囊清单分类，可多选"></div>
-      <form class="todo-form" id="packing-form">
-        <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">
-        <select id="packing-subcategory" aria-label="物品类别"></select>
-        <button type="submit">添加</button>
-      </form>
-      <div class="todo-list" id="packing-list"></div>
+      <div class="prep-tabs" id="packing-workspace-tabs" role="tablist" aria-label="行囊工作区">
+        <button type="button" data-packing-workspace="details" aria-selected="true">行囊明细</button>
+        <button type="button" data-packing-workspace="purchase" aria-selected="false">采购清单</button>
+        <button type="button" data-packing-workspace="check" aria-selected="false">检查行囊</button>
+      </div>
+      <div id="packing-details">
+        <div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div>
+        <div class="packing-container-filters" id="packing-container-filters" aria-label="内置收纳包筛选" hidden></div>
+        <div class="prep-tabs" id="packing-owner-filters" aria-label="物品归属筛选，可多选"></div>
+        <details class="packing-luggage-manager" id="packing-luggage-manager">
+          <summary>编辑行李用途名称</summary>
+          <div id="packing-luggage-settings" aria-label="行李用途名称"></div>
+        </details>
+        <div class="prep-tabs" id="packing-category-filters" aria-label="行囊清单分类，可多选"></div>
+        <form class="todo-form" id="packing-form">
+          <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">
+          <select id="packing-subcategory" aria-label="物品类别"></select>
+          <input id="packing-uses" type="number" min="0" max="99" value="0" aria-label="一次性用品可用次数">
+          <button type="submit">添加</button>
+        </form>
+        <div class="todo-list" id="packing-list"></div>
+      </div>
+      <div id="packing-purchases" hidden>
+        <form class="todo-form" id="packing-purchase-form">
+          <input id="packing-purchase-input" type="text" maxlength="80" placeholder="添加一项待采购物品" aria-label="待采购物品">
+          <input id="packing-purchase-uses" type="number" min="0" max="99" value="0" aria-label="一次性用品可用次数">
+          <button type="submit">添加采购项</button>
+        </form>
+        <div class="todo-list" id="packing-purchase-list"></div>
+      </div>
+      <div id="packing-checker" hidden></div>
     </section>
 
     <section class="section prep-section" id="notices" aria-labelledby="notices-title" data-module="todo" data-travel-panel="notices" hidden>
