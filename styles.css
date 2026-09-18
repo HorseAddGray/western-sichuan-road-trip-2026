@@ -67,6 +67,7 @@ img { display: block; max-width: 100%; }
 .wordmark span { color: var(--muted); font-weight: 600; }
 .topbar nav { display: flex; gap: 2px; }
 .topbar nav a {
+  position: relative;
   min-width: 44px;
   min-height: 44px;
   padding: 0 6px;
@@ -79,6 +80,32 @@ img { display: block; max-width: 100%; }
   font-weight: 650;
 }
 .topbar nav a:active { color: var(--lake); }
+.travel-navigation summary {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 650;
+}
+.travel-navigation summary::-webkit-details-marker { display: none; }
+.topbar nav a[aria-current="page"], #travel-navigation-trigger[aria-current="page"] { color: var(--lake); font-weight: 800; }
+.topbar nav a[aria-current="page"]::after, #travel-navigation-trigger[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  bottom: 0;
+  left: 6px;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--lake);
+}
 
 main { overflow: hidden; }
 .hero, .section, .footer { width: min(100%, var(--content)); margin-inline: auto; }

@@ -4,6 +4,11 @@
   const ledgerEnabled = () => !document.querySelector("#ledger-navigation-link")?.hidden;
   const viewForHash = (hash) => isLedgerHash(hash) && ledgerEnabled() ? "ledger" : "travel";
   const panelForHash = (hash) => hash === "#packing" ? "packing" : hash === "#notices" ? "notices" : "info";
+  const setCurrent = (element, active) => {
+    if (!element) return;
+    if (active) element.setAttribute("aria-current", "page");
+    else element.removeAttribute("aria-current");
+  };
 
   let activeView = "travel";
   const scrollPositions = { travel: 0, ledger: 0 };
@@ -46,13 +51,10 @@
         panel.hidden = panel.dataset.travelPanel !== activePanel || !moduleEnabled;
       });
     }
-    if (travelTrigger) travelTrigger.toggleAttribute("aria-current", activePanel === "info");
-    if (packingLink) packingLink.toggleAttribute("aria-current", activePanel === "packing");
-    if (noticesLink) noticesLink.toggleAttribute("aria-current", activePanel === "notices");
-    if (ledgerLink) {
-      if (ledgerActive) ledgerLink.setAttribute("aria-current", "page");
-      else ledgerLink.removeAttribute("aria-current");
-    }
+    setCurrent(travelTrigger, activePanel === "info");
+    setCurrent(packingLink, activePanel === "packing");
+    setCurrent(noticesLink, activePanel === "notices");
+    setCurrent(ledgerLink, ledgerActive);
     if (skipLink) skipLink.href = ledgerActive ? "#ledger-root" : "#main";
 
     if (ledgerActive) {
