@@ -12,3 +12,4 @@ private/
 source-facts.json
 reports/private/
 .worktrees/
+.superpowers/
