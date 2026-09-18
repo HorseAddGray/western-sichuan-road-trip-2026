@@ -377,6 +377,20 @@ main { overflow: hidden; }
 .prep-tabs { display: flex; gap: 8px; margin: 4px 0 12px; }
 .prep-tabs button { min-height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
 .prep-tabs button[aria-selected="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); color: var(--ink); font-weight: 750; }
+.packing-luggage-filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 4px 0 10px; }
+.packing-luggage-filter { min-height: 104px; padding: 10px 7px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.62); color: var(--ink); display: grid; align-content: center; justify-items: center; gap: 2px; font: inherit; cursor: pointer; }
+.packing-luggage-filter b { font-size: 34px; line-height: 1; filter: saturate(.72); }
+.packing-luggage-filter span { font-size: 11px; line-height: 1.35; font-weight: 750; text-align: center; overflow-wrap: anywhere; }
+.packing-luggage-filter small { color: var(--muted); font-size: 10px; }
+.packing-luggage-filter--all { min-height: 52px; align-self: center; background: transparent; }
+.packing-luggage-filter--all span { font-size: 12px; }
+.packing-luggage-filter[aria-pressed="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); box-shadow: inset 0 0 0 1px var(--lake); }
+.packing-luggage-manager { margin: 0 0 12px; border-bottom: 1px solid var(--line); }
+.packing-luggage-manager summary { min-height: 40px; display: flex; align-items: center; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
+.packing-luggage-manager[open] summary { color: var(--ink); }
+#packing-luggage-settings { padding: 0 0 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+#packing-luggage-settings label { min-width: 0; display: grid; grid-template-columns: 22px 1fr; gap: 7px; align-items: center; }
+#packing-luggage-settings input { min-width: 0; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.82); color: var(--ink); font: inherit; font-size: 12px; }
 .notice-category-manager { margin: 4px 0 12px; border-bottom: 1px solid var(--line); }
 .notice-category-manager summary { min-height: 40px; display: flex; align-items: center; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
 .notice-category-manager[open] summary { color: var(--ink); }

@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260918-6">
+  <link rel="stylesheet" href="styles.css?v=20260918-7">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260918-10" defer></script>
+  <script src="app.js?v=20260918-11" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260918-2" defer></script>
@@ -101,6 +101,11 @@
         </div>
         <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
+      <div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div>
+      <details class="packing-luggage-manager" id="packing-luggage-manager">
+        <summary>编辑行李用途名称</summary>
+        <div id="packing-luggage-settings" aria-label="行李用途名称"></div>
+      </details>
       <div class="prep-tabs" id="packing-category-filters" aria-label="行囊清单分类，可多选"></div>
       <form class="todo-form" id="packing-form">
         <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">

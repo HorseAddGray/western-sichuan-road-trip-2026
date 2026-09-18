@@ -36,6 +36,27 @@ test("packing and notices have independent navigation and controls", () => {
   assert.match(html, /id="notice-list"/);
 });
 
+test("packing exposes five editable luggage filters", () => {
+  assert.match(html, /id="packing-luggage-filters"/);
+  assert.match(app, /const PACKING_LUGGAGE = \[/);
+  assert.match(app, /data-packing-luggage/);
+  assert.match(app, /data-packing-luggage-label/);
+});
+
+test("packing data keeps every supplied item on its own row and assigns luggage", () => {
+  const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
+  assert.equal(packing.length, 99);
+  assert.ok(packing.some((item) => item.text === "身份证" && item.luggage === "daily-bag"));
+  assert.ok(packing.some((item) => item.text === "三合一冲锋衣（抓绒一件，外壳两件）" && item.luggage === "clothes-case"));
+  assert.ok(packing.some((item) => item.text === "一次性马桶垫（2个）" && item.luggage === "daily-bag"));
+});
+
+test("packing migration removes only the seven replaced generic system items", () => {
+  assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
+  assert.match(app, /packing-documents/);
+  assert.match(app, /applyChange\("todos", \{ id: todo\.id \}, "delete"\)/);
+});
+
 test("three top-level areas are marked as independent display panels", () => {
   assert.match(html, /data-travel-panel="info"/);
   assert.match(html, /data-travel-panel="packing"/);

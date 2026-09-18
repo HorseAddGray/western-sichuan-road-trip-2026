@@ -12,11 +12,17 @@ const state = {
   collapsedNoticeGroups: new Set(),
   draggedNoticeGroup: "",
   selectedPackingSubcategories: new Set(),
+  selectedPackingLuggage: "",
+  packingLuggageLabels: {},
   activeToiletMapDay: 0
 };
 
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
 const SHARED_COLLECTIONS = Object.freeze(["todos", "tickets", "ledger"]);
+const OBSOLETE_PACKING_ITEM_IDS = new Set([
+  "packing-documents", "packing-clothes", "packing-medicines", "packing-hygiene",
+  "packing-weather", "packing-electronics", "packing-supplies"
+]);
 
 function normalizeTripConfig(raw = {}) {
   if (!raw || typeof raw !== "object" || raw.schemaVersion !== "1.0.0") throw new Error("trip-data.json config.schemaVersion must be 1.0.0");
@@ -763,12 +769,18 @@ async function loadSharedState() {
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
   const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
   if (todoAdapter?.mode === "local" && authoredTodos.length) {
+    const obsoleteTodos = state.todos.filter((todo) => OBSOLETE_PACKING_ITEM_IDS.has(todo.id));
+    if (obsoleteTodos.length) {
+      state.todos = state.todos.filter((todo) => !OBSOLETE_PACKING_ITEM_IDS.has(todo.id));
+      await Promise.all(obsoleteTodos.map((todo) => todoAdapter.applyChange("todos", { id: todo.id }, "delete")));
+    }
     const existingIds = new Set(state.todos.map((item) => String(item.id)));
     const missingTodos = authoredTodos.map((item, index) => ({
       id: String(item.id || `todo-initial-${index + 1}`),
       text: String(item.text || item.title || "").trim(),
       category: window.TravelPrep.normalizeTodoCategory(item),
       subcategory: window.TravelPrep.normalizeTodoSubcategory(item),
+      luggage: String(item.luggage || "").trim(),
       detail: String(item.detail || "").trim(),
       group: String(item.group || "").trim(),
       completed: Boolean(item.completed)
@@ -800,8 +812,37 @@ function saveTodoState() { return Promise.all(state.todos.map((todo) => saveShar
 
 const PREP_LABELS = {
   notice: { health: "健康", toilet: "厕所" },
-  packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
+  packing: { documents: "证件与钱财", clothing: "衣物与穿搭", care: "洗护与防晒", medicine: "药品与急救", electronics: "电子与拍摄设备", other: "户外装备与生活杂物" }
 };
+
+const PACKING_LUGGAGE = [
+  { key: "clothes-case", icon: "🧳", label: "衣物与穿搭行李箱", kind: "case" },
+  { key: "care-case", icon: "🧳", label: "洗护与防晒行李箱", kind: "case" },
+  { key: "medicine-pack", icon: "🎒", label: "药品与急救背包", kind: "pack" },
+  { key: "camera-pack", icon: "🎒", label: "电子与拍摄设备背包", kind: "pack" },
+  { key: "daily-bag", icon: "👜", label: "证件与生活杂物挎包", kind: "bag" }
+];
+
+const PACKING_LUGGAGE_BY_SUBCATEGORY = {
+  documents: "daily-bag",
+  clothing: "clothes-case",
+  care: "care-case",
+  medicine: "medicine-pack",
+  electronics: "camera-pack",
+  other: "daily-bag"
+};
+
+function packingLuggageSettingsKey() {
+  return `travel-plan:${state.data.metadata.tripId}:packing-luggage-labels`;
+}
+
+function packingLuggageFor(todo) {
+  return todo.luggage || PACKING_LUGGAGE_BY_SUBCATEGORY[window.TravelPrep.normalizeTodoSubcategory(todo)] || "daily-bag";
+}
+
+function packingLuggageLabel(luggage) {
+  return state.packingLuggageLabels[luggage.key] || luggage.label;
+}
 
 function noticeGroupSettingsKey() {
   return `travel-plan:${state.data.metadata.tripId}:notice-group-settings-v2`;
@@ -880,9 +921,11 @@ function renderTodoList(kind) {
     return;
   }
 
-  const activeTodos = state.selectedPackingSubcategories.size
-    ? categoryTodos.filter((todo) => state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo)))
-    : categoryTodos;
+  const activeTodos = categoryTodos.filter((todo) => {
+    const matchesCategory = !state.selectedPackingSubcategories.size || state.selectedPackingSubcategories.has(window.TravelPrep.normalizeTodoSubcategory(todo));
+    const matchesLuggage = !state.selectedPackingLuggage || packingLuggageFor(todo) === state.selectedPackingLuggage;
+    return matchesCategory && matchesLuggage;
+  });
   const completed = activeTodos.filter((todo) => todo.completed).length;
   $("#packing-progress").textContent = `${completed} / ${activeTodos.length}`;
   const itemMarkup = (todo) => `
@@ -926,12 +969,24 @@ function renderTravelPrep() {
   state.noticeGroupOrder = storedSettings?.order && typeof storedSettings.order === "object" ? storedSettings.order : {};
   state.noticeGroupLabels = storedSettings?.labels && typeof storedSettings.labels === "object" ? storedSettings.labels : {};
   state.collapsedNoticeGroups = new Set(Array.isArray(storedSettings?.collapsed) ? storedSettings.collapsed : []);
+  try {
+    const luggageLabels = JSON.parse(localStorage.getItem(packingLuggageSettingsKey()) || "{}");
+    state.packingLuggageLabels = luggageLabels && typeof luggageLabels === "object" ? luggageLabels : {};
+  } catch {
+    state.packingLuggageLabels = {};
+  }
   const optionMarkup = (kind) => Object.entries(kind === "notice" ? PREP_LABELS.notice : PREP_LABELS.packing).map(([key, label]) => ({ key, label }))
     .map(({ key, label }) => `<option value="${key}">${escapeHtml(label)}</option>`).join("");
   $("#packing-subcategory").innerHTML = optionMarkup("packing");
   $("#notice-subcategory").innerHTML = optionMarkup("notice");
   $("#notice-subcategory").value = state.activeNoticeSubcategory;
   const renderControls = () => {
+    const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
+    $("#packing-luggage-filters").innerHTML = `<button type="button" class="packing-luggage-filter packing-luggage-filter--all" data-packing-luggage="" aria-pressed="${!state.selectedPackingLuggage}"><span>全部</span><small>${packingTodos.length} 件</small></button>${PACKING_LUGGAGE.map((luggage) => {
+      const count = packingTodos.filter((todo) => packingLuggageFor(todo) === luggage.key).length;
+      return `<button type="button" class="packing-luggage-filter packing-luggage-filter--${luggage.kind}" data-packing-luggage="${luggage.key}" aria-pressed="${state.selectedPackingLuggage === luggage.key}"><b aria-hidden="true">${luggage.icon}</b><span>${escapeHtml(packingLuggageLabel(luggage))}</span><small>${count} 件</small></button>`;
+    }).join("")}`;
+    $("#packing-luggage-settings").innerHTML = PACKING_LUGGAGE.map((luggage) => `<label><span>${luggage.icon}</span><input type="text" maxlength="24" value="${escapeHtml(packingLuggageLabel(luggage))}" data-packing-luggage-label="${luggage.key}" aria-label="${escapeHtml(luggage.label)}名称"></label>`).join("");
     $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
     const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
@@ -944,6 +999,24 @@ function renderTravelPrep() {
     if (!button) return;
     const key = button.dataset.packingSubcategory;
     state.selectedPackingSubcategories.has(key) ? state.selectedPackingSubcategories.delete(key) : state.selectedPackingSubcategories.add(key);
+    renderAll();
+  };
+  $("#packing-luggage-filters").onclick = (event) => {
+    const button = event.target.closest("[data-packing-luggage]");
+    if (!button) return;
+    const key = button.dataset.packingLuggage;
+    state.selectedPackingLuggage = state.selectedPackingLuggage === key ? "" : key;
+    renderAll();
+  };
+  $("#packing-luggage-settings").onchange = (event) => {
+    const input = event.target.closest("[data-packing-luggage-label]");
+    if (!input) return;
+    const luggage = PACKING_LUGGAGE.find((item) => item.key === input.dataset.packingLuggageLabel);
+    if (!luggage) return;
+    const label = input.value.trim();
+    if (label && label !== luggage.label) state.packingLuggageLabels[luggage.key] = label;
+    else delete state.packingLuggageLabels[luggage.key];
+    localStorage.setItem(packingLuggageSettingsKey(), JSON.stringify(state.packingLuggageLabels));
     renderAll();
   };
   $("#notice-category-tabs").onclick = (event) => {
@@ -1009,7 +1082,8 @@ function renderTravelPrep() {
     const input = $(`#${kind}-input`);
     const text = input.value.trim();
     if (!text) return;
-    const todo = { id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: kind, subcategory: $(`#${kind}-subcategory`).value, completed: false };
+    const subcategory = $(`#${kind}-subcategory`).value;
+    const todo = { id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: kind, subcategory, ...(kind === "packing" ? { luggage: packingLuggageFor({ category: kind, subcategory }) } : {}), completed: false };
     state.todos.push(todo);
     input.value = "";
     saveSharedChange("todos", todo).catch(console.error);
