@@ -347,12 +347,18 @@ main { overflow: hidden; }
 .drive-note-panel li + li { border-top: 1px solid var(--line); }
 .drive-note-panel li::before { content: ""; position: absolute; left: 0; top: 20px; width: 4px; height: 4px; border-radius: 50%; background: #8ca5a7; }
 
-.todo-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.prep-tabs { display: flex; gap: 8px; margin: 4px 0 12px; }
+.prep-tabs button { min-height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
+.prep-tabs button[aria-selected="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); color: var(--ink); font-weight: 750; }
+.todo-form { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
 .todo-form input { min-width: 0; min-height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); font: inherit; font-size: 13px; outline: none; }
 .todo-form input:focus { border-color: var(--lake); box-shadow: 0 0 0 3px rgba(40,123,144,.1); }
 .todo-form button { min-width: 64px; min-height: 48px; border: 0; border-radius: 13px; color: white; background: var(--ink); cursor: pointer; font-size: 12px; font-weight: 750; }
+.todo-form select { min-height: 48px; max-width: 100px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); color: var(--ink); font: inherit; font-size: 12px; }
 .todo-list { margin-top: 13px; }
 .todo-item { min-height: 54px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+.todo-actions { display: flex; gap: 6px; }
+.todo-edit, .todo-delete { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
 .todo-item label { min-width: 0; min-height: 54px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .todo-item input { position: absolute; opacity: 0; pointer-events: none; }
 .todo-check { width: 22px; height: 22px; flex: 0 0 22px; border: 1.5px solid #93a5a2; border-radius: 7px; color: transparent; display: grid; place-items: center; font-size: 12px; }

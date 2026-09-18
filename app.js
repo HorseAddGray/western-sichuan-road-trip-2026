@@ -5,7 +5,8 @@ const state = {
   expandedDay: null,
   countdownTimer: null,
   purchasedTickets: new Set(),
-  todos: []
+  todos: [],
+  activeTodoCategory: "notice"
 };
 
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
@@ -779,27 +780,43 @@ async function saveSharedChange(collection, value, op = "upsert") {
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
 function renderTodoList() {
-  const completed = state.todos.filter((todo) => todo.completed).length;
-  $("#todo-progress").textContent = `${completed} / ${state.todos.length}`;
-  $("#todo-list").innerHTML = state.todos.length ? state.todos.map((todo) => `
+  const activeTodos = window.TravelPrep.filterTodosByCategory(state.todos, state.activeTodoCategory);
+  const completed = activeTodos.filter((todo) => todo.completed).length;
+  $("#todo-progress").textContent = `${completed} / ${activeTodos.length}`;
+  $("#todo-list").innerHTML = activeTodos.length ? activeTodos.map((todo) => `
     <div class="todo-item${todo.completed ? " is-complete" : ""}" data-todo-id="${escapeHtml(todo.id)}">
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
         <span class="todo-check" aria-hidden="true">✓</span>
         <span class="todo-text">${escapeHtml(todo.text)}</span>
       </label>
-      <button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button>
+      <div class="todo-actions"><button type="button" class="todo-edit" aria-label="编辑：${escapeHtml(todo.text)}">编辑</button><button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button></div>
     </div>`).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
 }
 
 function renderTravelPrep() {
+  const categorySelect = $("#todo-category");
+  categorySelect.value = state.activeTodoCategory;
+  $(".prep-tabs").onclick = (event) => {
+    const button = event.target.closest("[data-prep-category]");
+    if (!button) return;
+    state.activeTodoCategory = button.dataset.prepCategory;
+    categorySelect.value = state.activeTodoCategory;
+    $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item === button)));
+    renderTodoList();
+  };
+  categorySelect.onchange = () => {
+    state.activeTodoCategory = categorySelect.value;
+    $$('[data-prep-category]').forEach((item) => item.setAttribute("aria-selected", String(item.dataset.prepCategory === state.activeTodoCategory)));
+    renderTodoList();
+  };
   renderTodoList();
   $("#todo-form").onsubmit = (event) => {
     event.preventDefault();
     const input = $("#todo-input");
     const text = input.value.trim();
     if (!text) return;
-    state.todos.push({ id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, completed: false });
+    state.todos.push({ id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: categorySelect.value, completed: false });
     input.value = "";
     saveSharedChange("todos", state.todos.at(-1)).catch(console.error);
     renderTodoList();
@@ -813,6 +830,17 @@ function renderTravelPrep() {
     renderTodoList();
   };
   $("#todo-list").onclick = (event) => {
+    const editButton = event.target.closest(".todo-edit");
+    if (editButton) {
+      const item = editButton.closest("[data-todo-id]");
+      const todo = state.todos.find((entry) => entry.id === item.dataset.todoId);
+      const text = window.prompt("编辑项目", todo.text)?.trim();
+      if (!text) return;
+      todo.text = text;
+      saveSharedChange("todos", todo).catch(console.error);
+      renderTodoList();
+      return;
+    }
     const button = event.target.closest(".todo-delete");
     if (!button) return;
     const item = button.closest("[data-todo-id]");

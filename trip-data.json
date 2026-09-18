@@ -333,16 +333,19 @@
       {
         "id": "fuel",
         "text": "还车前按订单要求补足油量并保留加油凭证",
+        "category": "notice",
         "completed": false
       },
       {
         "id": "inspect",
         "text": "还车时与门店共同验车，确认交接",
+        "category": "notice",
         "completed": false
       },
       {
         "id": "licence",
         "text": "取车时携带驾驶员身份证与驾驶证",
+        "category": "notice",
         "completed": false
       }
     ],
