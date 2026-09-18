@@ -184,3 +184,10 @@ test("notices provide a single-category selector and drag-managed collapsible su
   assert.match(app, /data-notice-group-label/);
   assert.doesNotMatch(app, /data-notice-category-move/);
 });
+
+test("notices keep only health and toilet categories and reset subcategories to expanded by default", () => {
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所" \}/);
+  assert.doesNotMatch(app, /rental: "租车与验车"/);
+  assert.match(app, /notice-group-settings-v2/);
+  assert.match(app, /collapsed: \[\]/);
+});

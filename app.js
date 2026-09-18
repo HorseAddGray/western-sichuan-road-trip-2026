@@ -799,12 +799,12 @@ async function saveSharedChange(collection, value, op = "upsert") {
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
 const PREP_LABELS = {
-  notice: { health: "高反与健康", rental: "租车与验车", road: "路况、补给与设施", toilet: "厕所", trip: "行程与住宿", other: "其他" },
+  notice: { health: "健康", toilet: "厕所" },
   packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
 };
 
 function noticeGroupSettingsKey() {
-  return `travel-plan:${state.data.metadata.tripId}:notice-group-settings`;
+  return `travel-plan:${state.data.metadata.tripId}:notice-group-settings-v2`;
 }
 
 function noticeGroupId(category, group) {
@@ -907,7 +907,22 @@ function renderTravelPrep() {
   const saved = localStorage.getItem(preferenceKey);
   if (PREP_LABELS.notice[saved]) state.activeNoticeSubcategory = saved;
   let storedSettings = null;
-  try { storedSettings = JSON.parse(localStorage.getItem(noticeGroupSettingsKey()) || "null"); } catch { storedSettings = null; }
+  try {
+    const latestSettings = localStorage.getItem(noticeGroupSettingsKey());
+    if (latestSettings) {
+      storedSettings = JSON.parse(latestSettings);
+    } else {
+      const legacySettings = JSON.parse(
+        localStorage.getItem(`travel-plan:${state.data.metadata.tripId}:notice-group-settings`) || "null"
+      );
+      if (legacySettings) {
+        storedSettings = { ...legacySettings, collapsed: [] };
+        localStorage.setItem(noticeGroupSettingsKey(), JSON.stringify(storedSettings));
+      }
+    }
+  } catch {
+    storedSettings = null;
+  }
   state.noticeGroupOrder = storedSettings?.order && typeof storedSettings.order === "object" ? storedSettings.order : {};
   state.noticeGroupLabels = storedSettings?.labels && typeof storedSettings.labels === "object" ? storedSettings.labels : {};
   state.collapsedNoticeGroups = new Set(Array.isArray(storedSettings?.collapsed) ? storedSettings.collapsed : []);
