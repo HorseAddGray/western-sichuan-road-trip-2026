@@ -3,6 +3,7 @@
   const isLedgerHash = (hash) => hash === "#ledger" || hash.startsWith("#ledger-");
   const ledgerEnabled = () => !document.querySelector("#ledger-navigation-link")?.hidden;
   const viewForHash = (hash) => isLedgerHash(hash) && ledgerEnabled() ? "ledger" : "travel";
+  const panelForHash = (hash) => hash === "#packing" ? "packing" : hash === "#notices" ? "notices" : "info";
 
   let activeView = "travel";
   const scrollPositions = { travel: 0, ledger: 0 };
@@ -35,6 +36,14 @@
     travelView.toggleAttribute("inert", ledgerActive);
     ledgerView.toggleAttribute("inert", !ledgerActive);
     document.body.dataset.activeView = nextView;
+    if (!ledgerActive) {
+      const activePanel = panelForHash(location.hash);
+      document.body.dataset.activeTravelPanel = activePanel;
+      document.querySelectorAll("[data-travel-panel]").forEach((panel) => {
+        const moduleEnabled = !panel.dataset.module || !document.querySelector(`[data-module="${panel.dataset.module}"]`)?.hidden;
+        panel.hidden = panel.dataset.travelPanel !== activePanel || !moduleEnabled;
+      });
+    }
     if (travelTrigger) {
       if (ledgerActive) travelTrigger.removeAttribute("aria-current");
       else travelTrigger.setAttribute("aria-current", "page");

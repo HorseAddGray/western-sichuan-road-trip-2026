@@ -31,3 +31,9 @@ test("packing and notices have independent navigation and controls", () => {
   assert.match(html, /id="packing-list"/);
   assert.match(html, /id="notice-list"/);
 });
+
+test("three top-level areas are marked as independent display panels", () => {
+  assert.match(html, /data-travel-panel="info"/);
+  assert.match(html, /data-travel-panel="packing"/);
+  assert.match(html, /data-travel-panel="notices"/);
+});

@@ -40,13 +40,13 @@
   </header>
 
   <main id="main" data-site-view="travel">
-    <section class="hero" id="top" aria-labelledby="trip-title">
+    <section class="hero" id="top" aria-labelledby="trip-title" data-travel-panel="info">
       <div class="hero__eyebrow" id="trip-eyebrow"></div>
       <h1 id="trip-title">正在载入旅程</h1>
       <p class="hero__date" id="trip-date"></p>
     </section>
 
-    <section class="section flights-section" id="flights" aria-labelledby="flights-title" data-module="flights" hidden>
+    <section class="section flights-section" id="flights" aria-labelledby="flights-title" data-module="flights" data-travel-panel="info" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">BOARDING</p>
@@ -58,7 +58,7 @@
       <div class="carousel-dots" id="flight-dots" aria-hidden="true"></div>
     </section>
 
-    <section class="section route-section" id="route" aria-labelledby="route-title" data-module="overview" hidden>
+    <section class="section route-section" id="route" aria-labelledby="route-title" data-module="overview" data-travel-panel="info" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">THE WHOLE JOURNEY</p>
@@ -70,7 +70,7 @@
       <p class="route-caption">路线为行程示意，实际驾驶和步行请使用当天的 Google Maps 导航。</p>
     </section>
 
-    <section class="section itinerary-section" id="itinerary" aria-labelledby="itinerary-title" data-module="itinerary" hidden>
+    <section class="section itinerary-section" id="itinerary" aria-labelledby="itinerary-title" data-module="itinerary" data-travel-panel="info" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">DAY BY DAY</p>
@@ -81,7 +81,7 @@
       <div class="timeline" id="timeline"></div>
     </section>
 
-    <section class="section drive-section" id="drive" aria-labelledby="drive-title" data-module="driving" hidden>
+    <section class="section drive-section" id="drive" aria-labelledby="drive-title" data-module="driving" data-travel-panel="info" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">ON THE ROAD</p>
@@ -93,7 +93,7 @@
       <div class="accordion-stack" id="drive-notes"></div>
     </section>
 
-    <section class="section prep-section" id="packing" aria-labelledby="packing-title" data-module="todo" hidden>
+    <section class="section prep-section" id="packing" aria-labelledby="packing-title" data-module="todo" data-travel-panel="packing" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">BEFORE WE GO</p>
@@ -110,7 +110,7 @@
       <div class="todo-list" id="packing-list"></div>
     </section>
 
-    <section class="section prep-section" id="notices" aria-labelledby="notices-title" data-module="todo" hidden>
+    <section class="section prep-section" id="notices" aria-labelledby="notices-title" data-module="todo" data-travel-panel="notices" hidden>
       <div class="section-heading">
         <div>
           <p class="section-kicker">TRIP NOTES</p>
