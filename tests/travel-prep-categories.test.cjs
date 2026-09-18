@@ -44,6 +44,7 @@ test("three top-level areas are marked as independent display panels", () => {
 
 test("travel information orders route before flights and uses a fresh navigation script version", () => {
   assert.ok(html.indexOf('id="route"') < html.indexOf('id="flights"'));
+  assert.ok(html.indexOf('href="#route"') < html.indexOf('href="#flights"'));
   assert.match(html, /site-navigation\.js\?v=20260918-2/);
 });
 
@@ -70,4 +71,13 @@ test("toilet category renders supplied detail under its trusted and warning grou
   assert.match(app, /toilet: "厕所"/);
   assert.match(app, /todo\.group/);
   assert.match(app, /todo\.detail/);
+});
+
+test("toilet category has a map with one marker for every toilet note", () => {
+  const toilets = tripData.preTrip.packingItems.filter((item) => item.subcategory === "toilet");
+  const pins = tripData.preTrip.toiletMapPins || [];
+  assert.equal(pins.length, toilets.length);
+  assert.deepEqual(new Set(pins.map((pin) => pin.todoId)).size, toilets.length);
+  assert.match(html, /id="toilet-map"/);
+  assert.match(app, /function renderToiletMap/);
 });

@@ -400,6 +400,18 @@ main { overflow: hidden; }
 .todo-item.is-complete .todo-text { color: #87928f; text-decoration: line-through; }
 .prep-group--trusted h3 { color: #43654a; }
 .prep-group--warning h3 { color: #a13f34; }
+.toilet-map { margin: 0 0 18px; }
+.toilet-map__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; font-size: 12px; }
+.toilet-map__heading strong { color: var(--ink); font-size: 14px; }
+.toilet-map__heading span { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.toilet-map__key { display: inline-block; width: 8px; height: 8px; margin-right: 3px; border-radius: 50%; }
+.toilet-map__key--trusted { background: #43654a; }
+.toilet-map__key--warning { background: #a13f34; }
+.toilet-map-pin { position: absolute; transform: translate(-50%, -50%); z-index: 2; width: 25px; height: 25px; padding: 0; border: 2px solid #fffdf6; border-radius: 50%; color: white; font: 800 13px/1 sans-serif; cursor: pointer; box-shadow: 0 0 0 1px #13262f55, 0 2px 6px #13262f55; }
+.toilet-map-pin--trusted { background: #43654a; }
+.toilet-map-pin--warning { background: #a13f34; }
+.toilet-map-pin:hover, .toilet-map-pin:focus-visible { transform: translate(-50%, -50%) scale(1.18); }
+.toilet-map__note { margin: 8px 2px 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .todo-delete { min-width: 44px; min-height: 44px; padding: 0; border: 0; color: #9a7062; background: transparent; cursor: pointer; font-size: 10px; }
 .todo-empty { margin: 0; padding: 22px 0 8px; color: var(--muted); text-align: center; font-size: 11px; }
 

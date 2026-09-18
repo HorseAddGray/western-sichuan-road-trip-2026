@@ -559,6 +559,22 @@
         "completed": false
       }
     ],
+    "toiletMapPins": [
+      { "todoId": "toilet-shuangqiaogou", "x": 948, "y": 372 },
+      { "todoId": "toilet-yading-center", "x": 334, "y": 900 },
+      { "todoId": "toilet-dagu-glacier", "x": 1012, "y": 270 },
+      { "todoId": "toilet-kangding-square", "x": 754, "y": 801 },
+      { "todoId": "toilet-xinduqiao-corridor", "x": 655, "y": 804 },
+      { "todoId": "toilet-balangshengdu", "x": 918, "y": 472 },
+      { "todoId": "toilet-gas-station", "x": 708, "y": 766 },
+      { "todoId": "toilet-yuzixi", "x": 619, "y": 749 },
+      { "todoId": "toilet-luorong-milk-lake", "x": 367, "y": 876 },
+      { "todoId": "toilet-seda", "x": 278, "y": 300 },
+      { "todoId": "toilet-tagong", "x": 641, "y": 661 },
+      { "todoId": "toilet-zheduo", "x": 721, "y": 765 },
+      { "todoId": "toilet-dry-toilet-warning", "x": 524, "y": 787 },
+      { "todoId": "toilet-moshi-park", "x": 575, "y": 701 }
+    ],
     "preparationsExplicitlyMentioned": [
       "取还车检查与加油提醒"
     ],

@@ -786,6 +786,24 @@ const PREP_LABELS = {
   packing: { documents: "证件与订单", clothing: "衣物与户外装备", medicine: "药品与卫生用品", electronics: "电子设备", food: "食物与饮水", other: "其他" }
 };
 
+function renderToiletMap() {
+  const root = $("#toilet-map");
+  if (!root) return;
+  const visible = state.activeNoticeSubcategory === "toilet";
+  root.hidden = !visible;
+  if (!visible) return;
+  const source = travelMapSource(state.data.routeMap, state.data.routeMap?.defaultRegionId);
+  const canvas = source.canvas || { width: 1448, height: 1086 };
+  const toilets = state.todos.filter((todo) => window.TravelPrep.normalizeTodoCategory(todo) === "notice" && window.TravelPrep.normalizeTodoSubcategory(todo) === "toilet");
+  const pins = (state.data.preTrip?.toiletMapPins || []).map((pin) => ({ ...pin, todo: toilets.find((todo) => todo.id === pin.todoId) })).filter((pin) => pin.todo);
+  root.innerHTML = `<div class="toilet-map__heading"><strong>厕所位置分布</strong><span><i class="toilet-map__key toilet-map__key--trusted"></i>殿堂级　<i class="toilet-map__key toilet-map__key--warning"></i>雷区警示</span></div><div class="travel-map-block is-overview"><div class="travel-map-scroll"><div class="travel-map-canvas">${travelOverviewArtwork(state.data.days, source, { includeAllPlaces: true, useDetailedRoutes: true })}${pins.map((pin) => `<button class="toilet-map-pin toilet-map-pin--${pin.todo.group === "殿堂级" ? "trusted" : "warning"}" type="button" style="left:${pin.x / canvas.width * 100}%;top:${pin.y / canvas.height * 100}%" data-toilet-map-pin="${escapeHtml(pin.todoId)}" aria-label="${escapeHtml(pin.todo.group)}：${escapeHtml(pin.todo.text)}">${pin.todo.group === "殿堂级" ? "★" : "!"}</button>`).join("")}</div></div><p class="toilet-map__note">点击标记查看对应地点说明。位置为路线示意，请以当天导航和现场情况为准。</p></div>`;
+  root.onclick = (event) => {
+    const pin = event.target.closest("[data-toilet-map-pin]");
+    if (!pin) return;
+    document.querySelector(`[data-todo-id="${pin.dataset.toiletMapPin}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+}
+
 function renderTodoList(kind) {
   const labels = PREP_LABELS[kind];
   const categoryTodos = window.TravelPrep.filterTodosByCategory(state.todos, kind);
@@ -831,7 +849,7 @@ function renderTravelPrep() {
     $("#packing-category-filters").innerHTML = Object.entries(PREP_LABELS.packing).map(([key, label]) => `<button type="button" data-packing-subcategory="${key}" aria-pressed="${state.selectedPackingSubcategories.has(key)}">${label}</button>`).join("");
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
   };
-  const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); };
+  const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); };
   renderAll();
   $("#packing-category-filters").onclick = (event) => {
     const button = event.target.closest("[data-packing-subcategory]");
