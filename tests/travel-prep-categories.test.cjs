@@ -114,6 +114,12 @@ test("packing actions share one style, highlight reset for active filters, and c
   assert.match(app, /packing-category-toggle/);
 });
 
+test("packing names sort inside each category and search and add forms are mutually exclusive", () => {
+  assert.match(app, /localeCompare\(b\.text, "zh-CN"/);
+  assert.match(app, /packing-search-panel"\)\.hidden = true/);
+  assert.match(app, /packing-form-panel"\)\.hidden = true/);
+});
+
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
   assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" \}/);
   assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品" \}/);

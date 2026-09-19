@@ -991,7 +991,9 @@ function renderTodoList(kind) {
     </div>`;
   };
   $("#packing-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
-    const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
+    const items = activeTodos
+      .filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key)
+      .sort((a, b) => a.text.localeCompare(b.text, "zh-CN"));
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
     const collapsed = state.collapsedPackingCategories.has(key);
@@ -1325,6 +1327,7 @@ function renderTravelPrep() {
   $("#packing-form").onsubmit = submitForm("packing");
   $("#notice-form").onsubmit = submitForm("notice");
   $("[data-packing-form-open]").onclick = () => {
+    $("#packing-search-panel").hidden = true;
     $("#packing-form-panel").hidden = false;
     $("#packing-input").focus();
   };
@@ -1332,6 +1335,7 @@ function renderTravelPrep() {
     $("#packing-form-panel").hidden = true;
   };
   $("[data-packing-search-open]").onclick = () => {
+    $("#packing-form-panel").hidden = true;
     $("#packing-search-panel").hidden = false;
     $("#packing-search-input").focus();
   };
