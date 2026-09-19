@@ -101,6 +101,19 @@ test("packing forms keep selectors together, names below, and synchronize worksp
   assert.match(app, /!event\.target\.closest\("#packing-luggage-manager"\)/);
 });
 
+test("packing actions share one style, highlight reset for active filters, and collapse categories by choice", () => {
+  assert.match(html, /class="packing-action-trigger"[^>]*data-packing-form-open/);
+  assert.match(html, /class="packing-action-trigger"[^>]*data-packing-search-open/);
+  assert.match(html, /class="packing-action-trigger"[^>]*data-packing-filter-reset/);
+  assert.match(styles, /\.packing-action-trigger/);
+  assert.match(styles, /\.packing-action-trigger\.is-active/);
+  assert.match(app, /function hasActivePackingFilters/);
+  assert.match(app, /classList\.toggle\("is-active", hasActivePackingFilters/);
+  assert.match(app, /collapsedPackingCategories/);
+  assert.match(app, /data-packing-category-toggle/);
+  assert.match(app, /packing-category-toggle/);
+});
+
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
   assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" \}/);
   assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品" \}/);

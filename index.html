@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260919-13">
+  <link rel="stylesheet" href="styles.css?v=20260919-14">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260919-19" defer></script>
+  <script src="app.js?v=20260919-20" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260919-3" defer></script>
@@ -109,7 +109,7 @@
         <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
       <div id="packing-details">
-        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看</small></span><span class="packing-filter-actions"><details class="packing-luggage-manager" id="packing-luggage-manager"><summary>编辑</summary><div id="packing-luggage-settings" aria-label="行李用途名称"></div></details><button type="button" class="packing-add-trigger" data-packing-form-open>新增</button><button type="button" class="packing-add-trigger packing-search-trigger" data-packing-search-open>搜索</button><button type="button" class="packing-reset-trigger" data-packing-filter-reset>重置</button></span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
+        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看</small></span><span class="packing-filter-actions"><details class="packing-luggage-manager" id="packing-luggage-manager"><summary class="packing-action-trigger">编辑</summary><div id="packing-luggage-settings" aria-label="行李用途名称"></div></details><button type="button" class="packing-action-trigger" data-packing-form-open>新增</button><button type="button" class="packing-action-trigger" data-packing-search-open>搜索</button><button type="button" class="packing-action-trigger" data-packing-filter-reset>重置</button></span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
         <section class="packing-filter-section" id="packing-container-filter-group" hidden><div class="packing-filter-heading"><strong>收纳位置</strong><span>查看选定行囊中的内置收纳包</span></div><div class="packing-container-filters" id="packing-container-filters" aria-label="内置收纳包筛选"></div></section>
         <form class="packing-search-form" id="packing-search-panel" aria-label="搜索物品" hidden>
           <div class="packing-form-heading"><strong>搜索物品</strong><button type="button" data-packing-search-close aria-label="关闭搜索">×</button></div>

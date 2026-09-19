@@ -17,6 +17,7 @@ const state = {
   selectedPackingOwner: "",
   selectedPackingProperty: "",
   packingSearchText: "",
+  collapsedPackingCategories: new Set(),
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
   packingPurchases: [],
@@ -993,8 +994,16 @@ function renderTodoList(kind) {
     const items = activeTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === key);
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
-    return `<section class="prep-group"><h3>${label}<span>${done} / ${items.length}</span></h3><div class="todo-list">${items.map(itemMarkup).join("")}</div></section>`;
+    const collapsed = state.collapsedPackingCategories.has(key);
+    return `<section class="prep-group prep-group--packing" data-packing-category="${key}"><button type="button" class="packing-category-toggle" data-packing-category-toggle="${key}" aria-expanded="${!collapsed}"><span>${label}</span><small>${done} / ${items.length}</small><i aria-hidden="true">⌄</i></button><div class="todo-list" ${collapsed ? "hidden" : ""}>${items.map(itemMarkup).join("")}</div></section>`;
   }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
+}
+
+function hasActivePackingFilters() {
+  return Boolean(
+    state.selectedPackingLuggage || state.selectedPackingContainer || state.selectedPackingOwner ||
+    state.selectedPackingProperty || state.packingSearchText.trim() || state.selectedPackingSubcategories.size
+  );
 }
 
 function renderPackingWorkspace() {
@@ -1106,6 +1115,7 @@ function renderTravelPrep() {
     $("#packing-search-input").value = state.packingSearchText;
     const selectedCategory = [...state.selectedPackingSubcategories][0] || "";
     $("#packing-category-filter-select").innerHTML = `<option value="">全部类别</option>${Object.entries(PREP_LABELS.packing).map(([key, label]) => `<option value="${key}" ${selectedCategory === key ? "selected" : ""}>${label}</option>`).join("")}`;
+    $("[data-packing-filter-reset]").classList.toggle("is-active", hasActivePackingFilters());
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
     const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
@@ -1370,6 +1380,13 @@ function renderTravelPrep() {
   };
   $("#packing-list").onchange = updateTodo;
   $("#packing-list").onclick = (event) => {
+    const categoryToggle = event.target.closest("[data-packing-category-toggle]");
+    if (categoryToggle) {
+      const key = categoryToggle.dataset.packingCategoryToggle;
+      state.collapsedPackingCategories.has(key) ? state.collapsedPackingCategories.delete(key) : state.collapsedPackingCategories.add(key);
+      renderTodoList("packing");
+      return;
+    }
     const find = event.target.closest("[data-packing-find]");
     if (find) {
       const todo = state.todos.find((entry) => entry.id === find.dataset.packingFind);
