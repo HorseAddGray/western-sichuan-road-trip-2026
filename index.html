@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260919-12">
+  <link rel="stylesheet" href="styles.css?v=20260919-13">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260919-18" defer></script>
+  <script src="app.js?v=20260919-19" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260919-3" defer></script>
@@ -36,9 +36,9 @@
       <details class="travel-navigation" id="packing-navigation" data-module="todo" hidden>
         <summary id="packing-navigation-trigger">行囊清单</summary>
         <div class="travel-navigation-menu" role="menu" aria-label="行囊清单栏目">
-          <a href="#packing-details" role="menuitem" data-module="todo" hidden>行囊明细</a>
-          <a href="#packing-purchase" role="menuitem" data-module="todo" hidden>采购清单</a>
-          <a href="#packing-check" role="menuitem" data-module="todo" hidden>检查行囊</a>
+          <a href="#packing-details" role="menuitem" data-module="todo" hidden>行囊</a>
+          <a href="#packing-purchase" role="menuitem" data-module="todo" hidden>采购</a>
+          <a href="#packing-check" role="menuitem" data-module="todo" hidden>检查</a>
         </div>
       </details>
       <a class="primary-navigation__ledger" href="#notices" data-module="todo" hidden>注意事项</a>
@@ -109,19 +109,19 @@
         <span class="soft-label" id="packing-progress">0 / 0</span>
       </div>
       <div id="packing-details">
-        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看</small></span><span class="packing-filter-actions"><details class="packing-luggage-manager" id="packing-luggage-manager"><summary>编辑</summary><div id="packing-luggage-settings" aria-label="行李用途名称"></div></details><button type="button" class="packing-add-trigger" data-packing-form-open>新增</button></span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
+        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看</small></span><span class="packing-filter-actions"><details class="packing-luggage-manager" id="packing-luggage-manager"><summary>编辑</summary><div id="packing-luggage-settings" aria-label="行李用途名称"></div></details><button type="button" class="packing-add-trigger" data-packing-form-open>新增</button><button type="button" class="packing-add-trigger packing-search-trigger" data-packing-search-open>搜索</button><button type="button" class="packing-reset-trigger" data-packing-filter-reset>重置</button></span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
         <section class="packing-filter-section" id="packing-container-filter-group" hidden><div class="packing-filter-heading"><strong>收纳位置</strong><span>查看选定行囊中的内置收纳包</span></div><div class="packing-container-filters" id="packing-container-filters" aria-label="内置收纳包筛选"></div></section>
-        <section class="packing-filter-toolbar" aria-label="物品筛选"><label><span>物品类别</span><select id="packing-category-filter-select" aria-label="按物品类别筛选"></select></label><button type="button" data-packing-filter-reset>重置筛选</button></section>
-        <section class="packing-search" aria-label="查找物品"><label class="packing-search__name"><span>查找物品</span><input id="packing-search-input" type="search" placeholder="输入物品名称" aria-label="按名称查找物品"></label><label><span>物品属性</span><select id="packing-property-filter-select" aria-label="按物品属性筛选"></select></label><label><span>人物归属</span><select id="packing-owner-filter-select" aria-label="按人物归属筛选"></select></label></section>
+        <form class="packing-search-form" id="packing-search-panel" aria-label="搜索物品" hidden>
+          <div class="packing-form-heading"><strong>搜索物品</strong><button type="button" data-packing-search-close aria-label="关闭搜索">×</button></div>
+          <div class="packing-form-selectors"><label><span>物品类别</span><select id="packing-category-filter-select" aria-label="按物品类别筛选"></select></label><label><span>物品属性</span><select id="packing-property-filter-select" aria-label="按物品属性筛选"></select></label><label><span>人物归属</span><select id="packing-owner-filter-select" aria-label="按人物归属筛选"></select></label></div>
+          <label class="packing-form-name"><span>物品名称</span><input id="packing-search-input" type="search" placeholder="输入物品名称" aria-label="按名称查找物品"></label>
+        </form>
         <section class="packing-add-form" id="packing-form-panel" hidden>
-          <div class="packing-add-form__heading"><strong>新增物品</strong><button type="button" data-packing-form-close>关闭</button></div>
-          <form class="todo-form" id="packing-form">
-            <input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品">
-            <select id="packing-subcategory" aria-label="物品类别"></select>
-            <select id="packing-owner" aria-label="人物归属"></select>
-            <select id="packing-property" data-packing-property aria-label="物品属性"></select>
-            <label class="packing-uses-field" data-packing-uses-row hidden><span>可用次数</span><input id="packing-uses" type="number" min="1" max="99" value="1" aria-label="消耗品可用次数"></label>
-            <button type="submit">添加</button>
+          <div class="packing-form-heading"><strong>新增物品</strong><button type="button" data-packing-form-close aria-label="关闭新增物品">×</button></div>
+          <form class="todo-form packing-add-todo-form" id="packing-form">
+            <div class="packing-form-selectors"><label><span>物品类别</span><select id="packing-subcategory" aria-label="物品类别"></select></label><label><span>人物归属</span><select id="packing-owner" aria-label="人物归属"></select></label><label><span>物品属性</span><select id="packing-property" data-packing-property aria-label="物品属性"></select></label></div>
+            <label class="packing-form-name"><span>物品名称</span><input id="packing-input" type="text" maxlength="80" placeholder="添加一项待准备物品" aria-label="待准备物品"></label>
+            <div class="packing-add-todo-form__actions"><label class="packing-uses-field" data-packing-uses-row hidden><span>可用次数</span><input id="packing-uses" type="number" min="1" max="99" value="1" aria-label="消耗品可用次数"></label><button type="submit">添加</button></div>
           </form>
         </section>
         <div class="todo-list" id="packing-list"></div>

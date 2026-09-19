@@ -87,6 +87,10 @@ function applyModuleConfig() {
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+document.addEventListener("click", (event) => {
+  const manager = document.querySelector("#packing-luggage-manager");
+  if (manager?.open && !event.target.closest("#packing-luggage-manager")) manager.open = false;
+});
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;",
   "<": "&lt;",
@@ -828,6 +832,7 @@ const PREP_LABELS = {
   notice: { health: "健康", toilet: "厕所" },
   packing: { documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" }
 };
+const PACKING_WORKSPACE_TITLES = { details: "行囊明细", purchase: "采购清单", check: "检查行囊" };
 
 const PACKING_LUGGAGE = [
   { key: "clothes-case", icon: "🧳", label: "衣箱", kind: "case" },
@@ -997,6 +1002,7 @@ function renderPackingWorkspace() {
   const purchases = $("#packing-purchases");
   const checker = $("#packing-checker");
   if (!details || !purchases || !checker) return;
+  $("#packing-title").textContent = PACKING_WORKSPACE_TITLES[state.activePackingWorkspace] || PACKING_WORKSPACE_TITLES.details;
   details.hidden = state.activePackingWorkspace !== "details";
   purchases.hidden = state.activePackingWorkspace !== "purchase";
   checker.hidden = state.activePackingWorkspace !== "check";
@@ -1133,6 +1139,7 @@ function renderTravelPrep() {
     state.packingSearchText = event.target.value;
     renderAll();
   };
+  $("#packing-search-panel").onsubmit = (event) => event.preventDefault();
   $("#packing-category-filter-select").onchange = (event) => {
     state.selectedPackingSubcategories = event.target.value ? new Set([event.target.value]) : new Set();
     renderAll();
@@ -1313,6 +1320,13 @@ function renderTravelPrep() {
   };
   $("[data-packing-form-close]").onclick = () => {
     $("#packing-form-panel").hidden = true;
+  };
+  $("[data-packing-search-open]").onclick = () => {
+    $("#packing-search-panel").hidden = false;
+    $("#packing-search-input").focus();
+  };
+  $("[data-packing-search-close]").onclick = () => {
+    $("#packing-search-panel").hidden = true;
   };
   const updateUsesVisibility = (propertySelect, usesRow) => {
     const isConsumable = propertySelect.value === "consumable";

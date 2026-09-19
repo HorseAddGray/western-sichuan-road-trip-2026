@@ -43,11 +43,11 @@ test("packing exposes five editable luggage filters", () => {
   assert.match(app, /data-packing-luggage-label/);
 });
 
-test("packing workspace has navigation children for details, purchases, and checks", () => {
+test("packing workspace uses concise navigation children for luggage, purchases, and checks", () => {
   assert.match(html, /id="packing-navigation"/);
-  assert.match(html, /href="#packing-details"[^>]*>行囊明细</);
-  assert.match(html, /href="#packing-purchase"[^>]*>采购清单</);
-  assert.match(html, /href="#packing-check"[^>]*>检查行囊</);
+  assert.match(html, /href="#packing-details"[^>]*>行囊</);
+  assert.match(html, /href="#packing-purchase"[^>]*>采购</);
+  assert.match(html, /href="#packing-check"[^>]*>检查</);
   assert.match(html, /id="packing-purchase-list"/);
   assert.match(html, /id="packing-checker"/);
   assert.match(app, /data-packing-owner/);
@@ -78,6 +78,9 @@ test("packing keeps additions in a closable form and moves item actions into a f
   assert.match(html, /data-packing-form-open/);
   assert.match(html, /id="packing-form-panel" hidden/);
   assert.match(html, /data-packing-form-close/);
+  assert.match(html, /data-packing-search-open/);
+  assert.match(html, /id="packing-search-panel"[^>]*hidden/);
+  assert.match(html, /data-packing-search-close/);
   assert.match(html, /id="packing-search-input"/);
   assert.match(html, /id="packing-property-filter-select"/);
   assert.match(app, /packingSearchText/);
@@ -86,6 +89,16 @@ test("packing keeps additions in a closable form and moves item actions into a f
   assert.match(app, /todo-more__menu/);
   assert.doesNotMatch(app, /packing-property">\$\{PACKING_PROPERTY_LABELS\[property\]\}<\//);
   assert.doesNotMatch(app, /data-packing-container="\$\{escapeHtml\(todo\.id\)\}"/);
+});
+
+test("packing forms keep selectors together, names below, and synchronize workspace titles", () => {
+  assert.match(html, /class="packing-form-selectors"/);
+  assert.match(html, /data-packing-filter-reset>重置</);
+  assert.match(html, /data-packing-form-close[^>]*>×</);
+  assert.match(html, /data-packing-search-close[^>]*>×</);
+  assert.match(app, /const PACKING_WORKSPACE_TITLES/);
+  assert.match(app, /packing-title"\)\.textContent/);
+  assert.match(app, /!event\.target\.closest\("#packing-luggage-manager"\)/);
 });
 
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
