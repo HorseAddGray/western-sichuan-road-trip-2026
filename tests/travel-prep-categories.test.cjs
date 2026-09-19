@@ -353,3 +353,9 @@ test("deleted authored packing items stay deleted instead of being seeded again 
   assert.match(app, /removedAuthoredTodoIds\.has\(item\.id\)/);
   assert.match(app, /rememberRemovedAuthoredPackingTodo\(todo\)/);
 });
+
+test("consumable uses stay inline with the packing item name before the overflow menu", () => {
+  assert.match(app, /packing-item-meta packing-item-meta--inline/);
+  assert.match(app, /packing-item-meta packing-item-meta--inline.*data-todo-use/);
+  assert.match(styles, /\.packing-item-meta--inline \{[^}]*margin-top: 0/);
+});
