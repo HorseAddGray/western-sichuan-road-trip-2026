@@ -74,6 +74,20 @@ test("packing filters use list selectors with a reset action and compact luggage
   assert.match(app, /packing-item-title/);
 });
 
+test("packing keeps additions in a closable form and moves item actions into a findable overflow menu", () => {
+  assert.match(html, /data-packing-form-open/);
+  assert.match(html, /id="packing-form-panel" hidden/);
+  assert.match(html, /data-packing-form-close/);
+  assert.match(html, /id="packing-search-input"/);
+  assert.match(html, /id="packing-property-filter-select"/);
+  assert.match(app, /packingSearchText/);
+  assert.match(app, /selectedPackingProperty/);
+  assert.match(app, /data-packing-find/);
+  assert.match(app, /todo-more__menu/);
+  assert.doesNotMatch(app, /packing-property">\$\{PACKING_PROPERTY_LABELS\[property\]\}<\//);
+  assert.doesNotMatch(app, /data-packing-container="\$\{escapeHtml\(todo\.id\)\}"/);
+});
+
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
   assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" \}/);
   assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品" \}/);
