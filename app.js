@@ -856,11 +856,11 @@ const PACKING_LUGGAGE_BY_SUBCATEGORY = {
 };
 
 const PACKING_OWNER_LABELS = { shared: "共同", "ma-jia": "马甲", "zai-zai": "仔仔", unassigned: "待分配" };
-const PACKING_PROPERTY_LABELS = { common: "常用", appliance: "电器", consumable: "消耗品", coat: "外套", trousers: "长裤", sweater: "毛衣", base: "打底", sleepwear: "睡衣", other: "其他" };
+const PACKING_PROPERTY_LABELS = { none: "无", appliance: "电器", consumable: "消耗品", coat: "外套", trousers: "长裤", sweater: "毛衣", base: "打底", sleepwear: "睡衣", other: "其他" };
 const PACKING_TAGS_BY_CATEGORY = {
-  clothing: ["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other"],
-  electronics: ["appliance"],
-  daily: ["common", "consumable"]
+  clothing: ["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other", "none"],
+  electronics: ["appliance", "none"],
+  daily: ["none", "consumable"]
 };
 const PACKING_CONTAINERS = [
   { key: "skincare-pouch", parent: "care-case", label: "护包", icon: "🧴" },
@@ -879,10 +879,13 @@ function packingCategoryEntries() {
   return [...Object.entries(PREP_LABELS.packing), ...Object.entries(state.packingCustomCategories || {})];
 }
 function packingTagsForCategory(category) {
-  return PACKING_TAGS_BY_CATEGORY[category] || ["common"];
+  return PACKING_TAGS_BY_CATEGORY[category] || ["none"];
 }
 function packingQuantityFor(todo) {
   return Math.min(5, Math.max(1, Number(todo.quantity) || 1));
+}
+function packingCategoryLabel(key) {
+  return Object.fromEntries(packingCategoryEntries())[key] || "其他";
 }
 function syncPackingTagOptions() {
   const category = $("#packing-subcategory")?.value || "";
@@ -906,8 +909,9 @@ function packingLuggageLabel(luggage) {
 
 function packingOwnerFor(todo) { return PACKING_OWNER_LABELS[todo.owner] ? todo.owner : "unassigned"; }
 function packingPropertyFor(todo) {
+  if (todo.property === "common") return "none";
   if (PACKING_PROPERTY_LABELS[todo.property]) return todo.property;
-  return Number(todo.usesTotal || 0) > 0 ? "consumable" : "common";
+  return Number(todo.usesTotal || 0) > 0 ? "consumable" : "none";
 }
 function packingContainerFor(todo) { return todo.container || packingLuggageFor(todo); }
 function packingWorkspaceFromHash(hash = location.hash) {
@@ -1044,7 +1048,10 @@ function packingOverviewTagTotals(owner) {
     .filter((todo) => packingOwnerFor(todo) === owner)
     .reduce((totals, todo) => {
       const tag = packingPropertyFor(todo);
-      totals[tag] = (totals[tag] || 0) + packingQuantityFor(todo);
+      const category = window.TravelPrep.normalizeTodoSubcategory(todo);
+      const key = tag === "none" ? `category:${category}` : `tag:${tag}`;
+      const label = tag === "none" ? packingCategoryLabel(category) : PACKING_PROPERTY_LABELS[tag];
+      totals[key] = { label, quantity: (totals[key]?.quantity || 0) + packingQuantityFor(todo) };
       return totals;
     }, {});
 }
@@ -1056,10 +1063,10 @@ function renderPackingOverview() {
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
   const cardMarkup = (owner) => {
     const totals = packingOverviewTagTotals(owner);
-    const tags = Object.keys(totals).sort((first, second) => Object.keys(PACKING_PROPERTY_LABELS).indexOf(first) - Object.keys(PACKING_PROPERTY_LABELS).indexOf(second));
+    const tags = Object.values(totals).sort((first, second) => first.label.localeCompare(second.label, "zh-CN"));
     return `<article class="packing-overview-card">
       <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>实际物品标签数量</small></div>
-      <div class="packing-overview-card__items">${tags.length ? tags.map((tag) => `<div class="packing-overview-item"><strong class="packing-overview-tag">${escapeHtml(PACKING_PROPERTY_LABELS[tag] || "常用")}</strong><strong class="packing-overview-value">${totals[tag]}<i>件</i></strong></div>`).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
+      <div class="packing-overview-card__items">${tags.length ? tags.map((tag) => `<div class="packing-overview-item"><strong class="packing-overview-tag">${escapeHtml(tag.label)}</strong><strong class="packing-overview-value">${tag.quantity}<i>件</i></strong></div>`).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
     </article>`;
   };
   overview.innerHTML = `<section class="packing-overview">
@@ -1318,7 +1325,7 @@ function renderTravelPrep() {
     const usesTotal = property === "consumable" ? Number($("#packing-purchase-uses").value) || 0 : 0;
     state.packingPurchases.push({ id: `purchase-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, property, usesTotal });
     input.value = "";
-    $("#packing-purchase-property").value = "common";
+    $("#packing-purchase-property").value = "none";
     $("#packing-purchase-uses").value = "0";
     $("[data-packing-purchase-uses-row]").hidden = true;
     savePackingWorkspace();

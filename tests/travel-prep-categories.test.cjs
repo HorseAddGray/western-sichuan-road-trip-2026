@@ -127,16 +127,16 @@ test("packing additions support reusable custom categories, quantity, and catego
   assert.match(app, /daily: "日用品"/);
   assert.match(app, /misc: "其他"/);
   assert.match(app, /PACKING_TAGS_BY_CATEGORY/);
-  assert.match(app, /clothing: \["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other"\]/);
-  assert.match(app, /electronics: \["appliance"\]/);
-  assert.match(app, /daily: \["common", "consumable"\]/);
+  assert.match(app, /clothing: \["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other", "none"\]/);
+  assert.match(app, /electronics: \["appliance", "none"\]/);
+  assert.match(app, /daily: \["none", "consumable"\]/);
   assert.match(app, /quantity: Number\(\$\("#packing-quantity"\)\.value\) \|\| 1/);
   assert.match(app, /packing-custom-categories/);
 });
 
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
   assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", daily: "日用品", other: "户外", misc: "其他" \}/);
-  assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品", coat: "外套"/);
+  assert.match(app, /const PACKING_PROPERTY_LABELS = \{ none: "无", appliance: "电器", consumable: "消耗品", coat: "外套"/);
   assert.match(html, /id="packing-owner"/);
   assert.match(html, /id="packing-property"/);
   assert.match(html, /data-packing-uses-row/);
@@ -334,4 +334,11 @@ test("packing overview shows each person's actual tag quantities without expecte
   assert.doesNotMatch(app, /data-essential-edit/);
   assert.doesNotMatch(app, /预期数量/);
   assert.match(styles, /\.packing-overview-value/);
+});
+
+test("packing supports an untagged option, migrates common to it, and labels untagged totals by category", () => {
+  assert.match(app, /none: "无"/);
+  assert.match(app, /todo\.property === "common"\) return "none"/);
+  assert.match(app, /tag === "none" \? packingCategoryLabel/);
+  assert.doesNotMatch(app, /common: "常用"/);
 });
