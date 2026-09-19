@@ -399,6 +399,7 @@ main { overflow: hidden; }
 .packing-container-filters button[aria-pressed="true"] { border-style: solid; border-color: var(--lake); background: rgba(40,123,144,.1); }
 .packing-item-title { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .packing-item-title select { min-height: 26px; max-width: 110px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--muted); font: inherit; font-size: 11px; }
+.packing-item-quantity { color: var(--muted); font-size: 11px; font-weight: 650; }
 .packing-item-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
 .packing-item-meta select, .packing-item-meta button, .packing-property { min-height: 27px; max-width: 160px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--muted); font: inherit; font-size: 11px; }
 .packing-property { display: inline-flex; align-items: center; padding: 0 7px; color: #285d68; background: rgba(40,123,144,.08); }
@@ -431,7 +432,12 @@ main { overflow: hidden; }
 .packing-form-heading button { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: 500 22px/1 sans-serif; cursor: pointer; }
 .packing-form-heading button:hover { color: var(--ink); background: rgba(40,123,144,.1); }
 .packing-form-selectors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.packing-form-selectors--add { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .packing-form-selectors label, .packing-form-name { min-width: 0; display: grid; gap: 4px; }
+.packing-custom-category-field { margin-top: 8px; display: grid; gap: 4px; }
+.packing-custom-category-field[hidden] { display: none; }
+.packing-custom-category-field > span { color: var(--muted); font-size: 11px; }
+.packing-custom-category-field input { min-width: 0; height: 38px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font: inherit; font-size: 12px; outline: none; }
 .packing-form-selectors span, .packing-form-name > span { color: var(--muted); font-size: 11px; }
 .packing-form-selectors select, .packing-form-name input { min-width: 0; height: 38px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font: inherit; font-size: 12px; outline: none; }
 .packing-form-name { margin-top: 8px; }
@@ -457,7 +463,7 @@ main { overflow: hidden; }
 .packing-uses-field { display: grid; grid-template-columns: auto 58px; align-items: center; min-height: 48px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); color: var(--muted); font-size: 11px; }
 .packing-uses-field[hidden] { display: none; }
 .packing-uses-field input { min-height: 34px; padding: 0 5px; border: 0; border-radius: 0; background: transparent; text-align: center; }
-@media (max-width: 699px) { .todo-form { grid-template-columns: minmax(0, 1fr) 1fr; } .todo-form input:first-child { grid-column: 1 / -1; } .todo-form select { max-width: none; width: 100%; } .packing-uses-field { grid-column: 1; } .todo-form button { grid-column: 2; } .packing-form-selectors { grid-template-columns: 1fr 1fr; } .packing-form-selectors label:last-child { grid-column: 1 / -1; } .packing-add-todo-form { grid-template-columns: 1fr; } .packing-add-todo-form .packing-form-selectors { grid-column: auto; } .packing-add-todo-form .packing-form-name { grid-column: auto; } .packing-add-todo-form__actions { grid-column: auto; } .packing-add-todo-form__actions button { grid-column: auto; } }
+@media (max-width: 699px) { .todo-form { grid-template-columns: minmax(0, 1fr) 1fr; } .todo-form input:first-child { grid-column: 1 / -1; } .todo-form select { max-width: none; width: 100%; } .packing-uses-field { grid-column: 1; } .todo-form button { grid-column: 2; } .packing-form-selectors, .packing-form-selectors--add { grid-template-columns: 1fr 1fr; } .packing-form-selectors label:last-child { grid-column: 1 / -1; } .packing-add-todo-form { grid-template-columns: 1fr; } .packing-add-todo-form .packing-form-selectors { grid-column: auto; } .packing-add-todo-form .packing-form-name { grid-column: auto; } .packing-add-todo-form__actions { grid-column: auto; } .packing-add-todo-form__actions button { grid-column: auto; } }
 .prep-group { border-bottom: 1px solid var(--line); }
 .prep-group h3 { min-height: 48px; margin: 0; display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: 13px; font-weight: 750; }
 .prep-group h3 span { color: var(--muted); font-size: 11px; font-weight: 600; }

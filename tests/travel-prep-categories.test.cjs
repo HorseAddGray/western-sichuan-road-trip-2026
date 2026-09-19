@@ -120,9 +120,23 @@ test("packing names sort inside each category and search and add forms are mutua
   assert.match(app, /packing-form-panel"\)\.hidden = true/);
 });
 
+test("packing additions support reusable custom categories, quantity, and category-bound tags", () => {
+  assert.match(html, /id="packing-custom-category"/);
+  assert.match(html, /id="packing-quantity"/);
+  assert.match(html, /物品标签/);
+  assert.match(app, /daily: "日用品"/);
+  assert.match(app, /misc: "其他"/);
+  assert.match(app, /PACKING_TAGS_BY_CATEGORY/);
+  assert.match(app, /clothing: \["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other"\]/);
+  assert.match(app, /electronics: \["appliance"\]/);
+  assert.match(app, /daily: \["common", "consumable"\]/);
+  assert.match(app, /quantity: Number\(\$\("#packing-quantity"\)\.value\) \|\| 1/);
+  assert.match(app, /packing-custom-categories/);
+});
+
 test("packing additions collect an owner and a property with conditional consumable uses", () => {
-  assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", other: "户外" \}/);
-  assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品" \}/);
+  assert.match(app, /packing: \{ documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", daily: "日用品", other: "户外", misc: "其他" \}/);
+  assert.match(app, /const PACKING_PROPERTY_LABELS = \{ common: "常用", appliance: "电器", consumable: "消耗品", coat: "外套"/);
   assert.match(html, /id="packing-owner"/);
   assert.match(html, /id="packing-property"/);
   assert.match(html, /data-packing-uses-row/);
