@@ -747,6 +747,29 @@ function updateRentalCountdown() {
 
 function loadTodoState() { state.todos = []; }
 
+function removedAuthoredPackingTodoIdsKey() {
+  return `travel-plan:${state.data.metadata.tripId}:removed-authored-packing-todos`;
+}
+
+function readRemovedAuthoredPackingTodoIds() {
+  try {
+    const value = JSON.parse(localStorage.getItem(removedAuthoredPackingTodoIdsKey()) || "[]");
+    return new Set(Array.isArray(value) ? value.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function rememberRemovedAuthoredPackingTodo(todo) {
+  const authoredPackingIds = new Set((state.data.preTrip?.packingItems || [])
+    .filter((item) => window.TravelPrep.normalizeTodoCategory(item) === "packing")
+    .map((item) => String(item.id)));
+  if (!authoredPackingIds.has(String(todo.id))) return;
+  const removed = readRemovedAuthoredPackingTodoIds();
+  removed.add(String(todo.id));
+  localStorage.setItem(removedAuthoredPackingTodoIdsKey(), JSON.stringify([...removed]));
+}
+
 function createRuntimeAdapters() {
   const storage = window.TravelRuntimeStorage;
   if (!storage?.createAdapter) throw new Error("runtime-storage.js is required");
@@ -784,6 +807,7 @@ async function loadSharedState() {
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
   const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
   if (todoAdapter?.mode === "local" && authoredTodos.length) {
+    const removedAuthoredTodoIds = readRemovedAuthoredPackingTodoIds();
     const obsoleteTodos = state.todos.filter((todo) => OBSOLETE_PACKING_ITEM_IDS.has(todo.id));
     if (obsoleteTodos.length) {
       state.todos = state.todos.filter((todo) => !OBSOLETE_PACKING_ITEM_IDS.has(todo.id));
@@ -805,7 +829,7 @@ async function loadSharedState() {
       detail: String(item.detail || "").trim(),
       group: String(item.group || "").trim(),
       completed: Boolean(item.completed)
-    })).filter((item) => item.text && !existingIds.has(item.id));
+    })).filter((item) => item.text && !existingIds.has(item.id) && !removedAuthoredTodoIds.has(item.id));
     state.todos.push(...missingTodos);
     await Promise.all(missingTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
     const legacyOxygenReminder = state.todos.find((todo) => todo.id === "oxygen-reminder");
@@ -1484,6 +1508,7 @@ function renderTravelPrep() {
       return;
     }
     if (!event.target.closest(".todo-delete")) return;
+    if (window.TravelPrep.normalizeTodoCategory(todo) === "packing") rememberRemovedAuthoredPackingTodo(todo);
     state.todos = state.todos.filter((entry) => entry.id !== todo.id);
     saveSharedChange("todos", { id: todo.id }, "delete").catch(console.error);
     renderAll();

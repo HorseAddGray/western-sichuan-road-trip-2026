@@ -347,3 +347,9 @@ test("packing overview gives each person a stronger visual hierarchy than item c
   assert.match(styles, /\.packing-overview-card__heading \{[^}]*font-size: 22px/);
   assert.match(styles, /\.packing-overview-tag \{[^}]*font-size: 17px/);
 });
+
+test("deleted authored packing items stay deleted instead of being seeded again on the next visit", () => {
+  assert.match(app, /function removedAuthoredPackingTodoIdsKey/);
+  assert.match(app, /removedAuthoredTodoIds\.has\(item\.id\)/);
+  assert.match(app, /rememberRemovedAuthoredPackingTodo\(todo\)/);
+});
