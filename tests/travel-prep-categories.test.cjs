@@ -322,3 +322,16 @@ test("notices keep only health and toilet categories and reset subcategories to 
   assert.match(app, /notice-group-settings-v2/);
   assert.match(app, /collapsed: \[\]/);
 });
+
+test("packing overview compares each person's expected essentials against synced packing quantities", () => {
+  assert.match(html, /href="#packing-overview"[^>]*>总览</);
+  assert.match(html, /id="packing-overview"/);
+  assert.match(app, /overview: "行囊总览"/);
+  assert.match(app, /packingEssentials/);
+  assert.match(app, /function essentialActualQuantity/);
+  assert.match(app, /packingQuantityFor\(todo\)/);
+  assert.match(app, /data-packing-overview-owner/);
+  assert.match(app, /data-essential-form-open/);
+  assert.match(app, /data-essential-edit/);
+  assert.match(styles, /\.packing-overview-value/);
+});
