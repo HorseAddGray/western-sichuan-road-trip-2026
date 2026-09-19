@@ -425,7 +425,7 @@ main { overflow: hidden; }
 .packing-overview-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .packing-overview-cards.is-single { grid-template-columns: minmax(0, 1fr); max-width: 540px; }
 .packing-overview-card { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.78); }
-.packing-overview-card__heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px; color: var(--ink); background: rgba(40,123,144,.08); font-size: 14px; font-weight: 800; }
+.packing-overview-card__heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 13px 14px; color: var(--ink); background: rgba(40,123,144,.08); font-size: 22px; font-weight: 900; letter-spacing: .04em; }
 .packing-overview-card__heading small { color: var(--muted); font-size: 10px; font-weight: 600; }
 .packing-overview-card__items { display: grid; }
 .packing-overview-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border-top: 1px solid var(--line); }

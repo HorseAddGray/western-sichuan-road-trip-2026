@@ -342,3 +342,8 @@ test("packing supports an untagged option, migrates common to it, and labels unt
   assert.match(app, /tag === "none" \? packingCategoryLabel/);
   assert.doesNotMatch(app, /common: "常用"/);
 });
+
+test("packing overview gives each person a stronger visual hierarchy than item categories and tags", () => {
+  assert.match(styles, /\.packing-overview-card__heading \{[^}]*font-size: 22px/);
+  assert.match(styles, /\.packing-overview-tag \{[^}]*font-size: 17px/);
+});
