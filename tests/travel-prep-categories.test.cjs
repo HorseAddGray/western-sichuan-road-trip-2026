@@ -323,15 +323,15 @@ test("notices keep only health and toilet categories and reset subcategories to 
   assert.match(app, /collapsed: \[\]/);
 });
 
-test("packing overview compares each person's expected essentials against synced packing quantities", () => {
+test("packing overview shows each person's actual tag quantities without expected-goal management", () => {
   assert.match(html, /href="#packing-overview"[^>]*>总览</);
   assert.match(html, /id="packing-overview"/);
   assert.match(app, /overview: "行囊总览"/);
-  assert.match(app, /packingEssentials/);
-  assert.match(app, /function essentialActualQuantity/);
+  assert.match(app, /function packingOverviewTagTotals/);
   assert.match(app, /packingQuantityFor\(todo\)/);
   assert.match(app, /data-packing-overview-owner/);
-  assert.match(app, /data-essential-form-open/);
-  assert.match(app, /data-essential-edit/);
+  assert.doesNotMatch(app, /data-essential-form-open/);
+  assert.doesNotMatch(app, /data-essential-edit/);
+  assert.doesNotMatch(app, /预期数量/);
   assert.match(styles, /\.packing-overview-value/);
 });

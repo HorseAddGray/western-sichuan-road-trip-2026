@@ -22,7 +22,6 @@ const state = {
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
   packingPurchases: [],
-  packingEssentials: [],
   packingOverviewOwner: "all",
   removedPurchaseIds: new Set(),
   packingCheck: { active: false, index: 0, completed: false, openLuggage: [] },
@@ -885,9 +884,6 @@ function packingTagsForCategory(category) {
 function packingQuantityFor(todo) {
   return Math.min(5, Math.max(1, Number(todo.quantity) || 1));
 }
-function packingCategoryLabel(key) {
-  return Object.fromEntries(packingCategoryEntries())[key] || "其他";
-}
 function syncPackingTagOptions() {
   const category = $("#packing-subcategory")?.value || "";
   const tags = packingTagsForCategory(category);
@@ -919,7 +915,7 @@ function packingWorkspaceFromHash(hash = location.hash) {
 }
 function packingWorkspaceKey() { return `travel-plan:${state.data.metadata.tripId}:packing-workspace`; }
 function savePackingWorkspace() {
-  localStorage.setItem(packingWorkspaceKey(), JSON.stringify({ purchases: state.packingPurchases, essentials: state.packingEssentials, removedPurchaseIds: [...state.removedPurchaseIds], check: state.packingCheck }));
+  localStorage.setItem(packingWorkspaceKey(), JSON.stringify({ purchases: state.packingPurchases, removedPurchaseIds: [...state.removedPurchaseIds], check: state.packingCheck }));
 }
 
 function noticeGroupSettingsKey() {
@@ -1043,12 +1039,14 @@ function hasActivePackingFilters() {
   );
 }
 
-function essentialActualQuantity(essential) {
+function packingOverviewTagTotals(owner) {
   return window.TravelPrep.filterTodosByCategory(state.todos, "packing")
-    .filter((todo) => packingOwnerFor(todo) === essential.owner &&
-      window.TravelPrep.normalizeTodoSubcategory(todo) === essential.category &&
-      packingPropertyFor(todo) === essential.tag)
-    .reduce((total, todo) => total + packingQuantityFor(todo), 0);
+    .filter((todo) => packingOwnerFor(todo) === owner)
+    .reduce((totals, todo) => {
+      const tag = packingPropertyFor(todo);
+      totals[tag] = (totals[tag] || 0) + packingQuantityFor(todo);
+      return totals;
+    }, {});
 }
 
 function renderPackingOverview() {
@@ -1056,21 +1054,17 @@ function renderPackingOverview() {
   if (!overview) return;
   const owners = ["ma-jia", "zai-zai"];
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
-  const categoryOptions = packingCategoryEntries().map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("");
-  const selectedCategory = $("#packing-essential-category")?.value || packingCategoryEntries()[0]?.[0] || "other";
-  const tagOptions = packingTagsForCategory(selectedCategory).map((key) => `<option value="${key}">${PACKING_PROPERTY_LABELS[key]}</option>`).join("");
   const cardMarkup = (owner) => {
-    const essentials = state.packingEssentials.filter((item) => item.owner === owner);
+    const totals = packingOverviewTagTotals(owner);
+    const tags = Object.keys(totals).sort((first, second) => Object.keys(PACKING_PROPERTY_LABELS).indexOf(first) - Object.keys(PACKING_PROPERTY_LABELS).indexOf(second));
     return `<article class="packing-overview-card">
-      <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>${essentials.length} 项必需品</small></div>
-      <div class="packing-overview-card__items">${essentials.length ? essentials.map((item) => `<div class="packing-overview-item"><span>${escapeHtml(packingCategoryLabel(item.category))} · ${escapeHtml(PACKING_PROPERTY_LABELS[item.tag] || "常用")}</span><strong class="packing-overview-value">${essentialActualQuantity(item)} <i>/</i> ${item.target}</strong><span class="packing-overview-item__actions"><button type="button" data-essential-edit="${escapeHtml(item.id)}">编辑</button><button type="button" data-essential-delete="${escapeHtml(item.id)}">删除</button></span></div>`).join("") : `<p class="todo-empty">还没有设置必需品。</p>`}</div>
+      <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>实际物品标签数量</small></div>
+      <div class="packing-overview-card__items">${tags.length ? tags.map((tag) => `<div class="packing-overview-item"><strong class="packing-overview-tag">${escapeHtml(PACKING_PROPERTY_LABELS[tag] || "常用")}</strong><strong class="packing-overview-value">${totals[tag]}<i>件</i></strong></div>`).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
     </article>`;
   };
   overview.innerHTML = `<section class="packing-overview">
-    <div class="packing-overview-toolbar"><div><p class="section-kicker">PACKING STATUS</p><strong>必需品进度</strong><small>实际数量自动汇总行囊明细中相同人物、类别和标签的物品。</small></div><div class="packing-overview-owner-tabs" aria-label="按人物查看"><button type="button" data-packing-overview-owner="all" aria-pressed="${state.packingOverviewOwner === "all"}">两人</button>${owners.map((owner) => `<button type="button" data-packing-overview-owner="${owner}" aria-pressed="${state.packingOverviewOwner === owner}">${PACKING_OWNER_LABELS[owner]}</button>`).join("")}</div></div>
+    <div class="packing-overview-toolbar"><div><p class="section-kicker">PACKING ACTUALS</p><strong>行囊实际数量</strong><small>直接汇总行囊明细；修改物品数量、标签或人物归属后会即时更新。</small></div><div class="packing-overview-owner-tabs" aria-label="按人物查看"><button type="button" data-packing-overview-owner="all" aria-pressed="${state.packingOverviewOwner === "all"}">两人</button>${owners.map((owner) => `<button type="button" data-packing-overview-owner="${owner}" aria-pressed="${state.packingOverviewOwner === owner}">${PACKING_OWNER_LABELS[owner]}</button>`).join("")}</div></div>
     <div class="packing-overview-cards${visibleOwners.length === 1 ? " is-single" : ""}">${visibleOwners.map(cardMarkup).join("")}</div>
-    <section class="packing-essential-manager"><div><strong>必需品目标</strong><small>添加后会与行囊明细保持同步。</small></div><button type="button" class="packing-action-trigger" data-essential-form-open>新增必需品</button></section>
-    <form id="packing-essential-form" class="packing-essential-form" hidden><div class="packing-form-heading"><strong>新增必需品</strong><button type="button" data-essential-form-close aria-label="关闭新增必需品">×</button></div><div class="packing-form-selectors"><label><span>人物归属</span><select id="packing-essential-owner"><option value="ma-jia">马甲</option><option value="zai-zai">仔仔</option></select></label><label><span>物品类别</span><select id="packing-essential-category">${categoryOptions}</select></label><label><span>物品标签</span><select id="packing-essential-tag">${tagOptions}</select></label><label><span>预期数量</span><input id="packing-essential-target" type="number" min="1" max="99" value="1"></label></div><button type="submit">添加目标</button></form>
   </section>`;
 }
 
@@ -1157,9 +1151,6 @@ function renderTravelPrep() {
     const storedPurchases = Array.isArray(workspace.purchases) ? workspace.purchases : [];
     state.packingPurchases = [...new Map([...authoredPurchases, ...storedPurchases].map((item) => [String(item.id), item])).values()]
       .filter((item) => !state.removedPurchaseIds.has(String(item.id)));
-    state.packingEssentials = Array.isArray(workspace.essentials) ? workspace.essentials
-      .filter((item) => item && ["ma-jia", "zai-zai"].includes(item.owner) && item.category && item.tag)
-      .map((item) => ({ ...item, id: String(item.id), target: Math.min(99, Math.max(1, Number(item.target) || 1)) })) : [];
     state.packingCheck = workspace.check && typeof workspace.check === "object" ? workspace.check : { active: false, index: 0, completed: false, openLuggage: [] };
     if (!Array.isArray(state.packingCheck.openLuggage)) state.packingCheck.openLuggage = [];
   } catch {
@@ -1171,7 +1162,6 @@ function renderTravelPrep() {
       usesTotal: Number(item.usesTotal || 0)
     })).filter((item) => item.text);
     state.removedPurchaseIds = new Set();
-    state.packingEssentials = [];
     state.packingCheck = { active: false, index: 0, completed: false, openLuggage: [] };
   }
   const optionMarkup = (kind) => (kind === "notice" ? Object.entries(PREP_LABELS.notice) : packingCategoryEntries()).map(([key, label]) => ({ key, label }))
@@ -1205,51 +1195,9 @@ function renderTravelPrep() {
   renderAll();
   $("#packing-overview").onclick = (event) => {
     const owner = event.target.closest("[data-packing-overview-owner]");
-    if (owner) {
-      state.packingOverviewOwner = owner.dataset.packingOverviewOwner;
-      renderPackingWorkspace();
-      return;
-    }
-    if (event.target.closest("[data-essential-form-open]")) {
-      $("#packing-essential-form").hidden = false;
-      return;
-    }
-    if (event.target.closest("[data-essential-form-close]")) {
-      $("#packing-essential-form").hidden = true;
-      return;
-    }
-    const edit = event.target.closest("[data-essential-edit]");
-    if (edit) {
-      const item = state.packingEssentials.find((essential) => essential.id === edit.dataset.essentialEdit);
-      if (!item) return;
-      const target = Number(window.prompt("预期数量", String(item.target)));
-      if (!Number.isFinite(target) || target < 1) return;
-      item.target = Math.min(99, Math.round(target));
-      savePackingWorkspace();
-      renderAll();
-      return;
-    }
-    const remove = event.target.closest("[data-essential-delete]");
-    if (!remove) return;
-    state.packingEssentials = state.packingEssentials.filter((item) => item.id !== remove.dataset.essentialDelete);
-    savePackingWorkspace();
-    renderAll();
-  };
-  $("#packing-overview").onchange = (event) => {
-    if (event.target.id !== "packing-essential-category") return;
-    const tag = $("#packing-essential-tag");
-    tag.innerHTML = packingTagsForCategory(event.target.value).map((key) => `<option value="${key}">${PACKING_PROPERTY_LABELS[key]}</option>`).join("");
-  };
-  $("#packing-overview").onsubmit = (event) => {
-    if (event.target.id !== "packing-essential-form") return;
-    event.preventDefault();
-    const owner = $("#packing-essential-owner").value;
-    const category = $("#packing-essential-category").value;
-    const tag = $("#packing-essential-tag").value;
-    const target = Math.min(99, Math.max(1, Math.round(Number($("#packing-essential-target").value) || 1)));
-    state.packingEssentials.push({ id: `essential-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, owner, category, tag, target });
-    savePackingWorkspace();
-    renderAll();
+    if (!owner) return;
+    state.packingOverviewOwner = owner.dataset.packingOverviewOwner;
+    renderPackingWorkspace();
   };
   $("#packing-luggage-filters").onclick = (event) => {
     const button = event.target.closest("[data-packing-luggage]");
