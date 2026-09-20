@@ -111,7 +111,7 @@ npm run validate
 
 预期：两个测试文件均无失败，生成校验输出 `validate-lite: PASS`。
 
-- [ ] **Step 3: 发布并检查公开页资源**
+- [x] **Step 3: 发布并检查公开页资源**
 
 运行：
 
@@ -122,7 +122,7 @@ Invoke-WebRequest -Uri https://western-sichuan-road-trip-2026.pages.dev/ -UseBas
 
 预期：部署成功，公开 HTML 含有新的 `styles.css` 与 `app.js` 版本号。
 
-- [ ] **Step 4: 提交缓存版本并推送**
+- [x] **Step 4: 提交缓存版本并推送**
 
 ```powershell
 git add index.html docs/superpowers/plans/2026-09-20-packing-row-alignment.md
