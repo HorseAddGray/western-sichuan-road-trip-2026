@@ -176,7 +176,7 @@ test("three top-level areas are marked as independent display panels", () => {
 test("travel information orders route before flights and uses a fresh navigation script version", () => {
   assert.ok(html.indexOf('id="route"') < html.indexOf('id="flights"'));
   assert.ok(html.indexOf('href="#route"') < html.indexOf('href="#flights"'));
-  assert.match(html, /site-navigation\.js\?v=20260919-3/);
+  assert.match(html, /site-navigation\.js\?v=20260920-4/);
 });
 
 test("navigation marks the selected top-level panel as current", () => {
@@ -446,9 +446,10 @@ test("packing add and edit forms provide matching custom category and tag fields
   assert.match(app, /function packingPropertyLabel/);
 });
 
-test("saved custom packing tags are reusable in item tag menus and filters", () => {
+test("saved custom packing tags are reusable through their assigned item categories", () => {
   assert.match(app, /function packingCustomPropertyValues\(\)/);
-  assert.match(app, /const customProperties = \[\.\.\.new Set\(\[\.\.\.packingCustomPropertyValues\(\), selected\]/);
+  assert.match(app, /function packingTagAssociationsKey\(\)/);
+  assert.match(app, /function packingTagsForCategory\(category\)/);
   assert.match(app, /const packingPropertyFilterOptions = \[/);
 });
 
@@ -458,4 +459,13 @@ test("packing overview groups tag totals in collapsible categories sorted by qua
   assert.match(app, /packing-overview-category-toggle/);
   assert.match(app, /data-packing-overview-category/);
   assert.match(app, /sort\(\(first, second\) => second\.quantity - first\.quantity\)/);
+});
+
+test("packing dictionary exposes category-to-tag associations and manages them", () => {
+  assert.match(html, /href="#packing-dictionary"[^>]*>字典</);
+  assert.match(html, /id="packing-dictionary"/);
+  assert.match(app, /dictionary: "字典设置"/);
+  assert.match(app, /data-packing-dictionary-tag/);
+  assert.match(app, /data-packing-dictionary-add/);
+  assert.match(app, /attachPackingTagToCategory/);
 });
