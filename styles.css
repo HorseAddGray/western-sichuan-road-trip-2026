@@ -462,14 +462,22 @@ main { overflow: hidden; }
 .packing-dictionary__add label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; }
 .packing-dictionary__add input, .packing-dictionary__add select { min-height: 42px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); font: inherit; font-size: 13px; }
 .packing-dictionary__add button { min-height: 42px; padding: 0 15px; border: 0; border-radius: 10px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
-.packing-dictionary__categories { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.packing-dictionary-card { display: grid; gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.78); }
-.packing-dictionary-card > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.packing-dictionary-card strong { color: var(--ink); font-size: 15px; font-weight: 900; }
-.packing-dictionary-card small { color: var(--muted); font-size: 10px; }
-.packing-dictionary-tags { display: flex; flex-wrap: wrap; gap: 7px; }
-.packing-dictionary-tags label { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font-size: 12px; cursor: pointer; }
-.packing-dictionary-tags input { accent-color: var(--lake); }
+.packing-dictionary-tree { display: grid; gap: 7px; }
+.packing-dictionary-root { margin: 0; padding: 0 0 7px 12px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 900; }
+.packing-dictionary-branch { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.78); }
+.packing-dictionary-branch summary { min-height: 42px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; cursor: pointer; }
+.packing-dictionary-branch summary::-webkit-details-marker { display: none; }
+.packing-dictionary-branch summary span { display: flex; align-items: baseline; gap: 8px; }
+.packing-dictionary-branch summary strong { color: var(--ink); font-size: 14px; font-weight: 900; }
+.packing-dictionary-branch summary small { color: var(--muted); font-size: 11px; }
+.packing-dictionary-branch summary i { color: var(--lake); font-style: normal; transition: transform .18s ease; }
+.packing-dictionary-branch:not([open]) summary i { transform: rotate(-90deg); }
+.packing-dictionary-tags { min-height: 46px; padding: 9px 12px 12px 24px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); background: rgba(248,250,247,.7); }
+.packing-dictionary-tags p { margin: 0; color: var(--muted); font-size: 12px; }
+.packing-dictionary-tag { min-height: 29px; padding: 0 4px 0 9px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font-size: 12px; cursor: grab; }
+.packing-dictionary-tag:active { cursor: grabbing; }
+.packing-dictionary-tag button { width: 20px; height: 20px; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: inherit; cursor: pointer; }
+.packing-dictionary-tag button:hover { color: white; background: var(--ink); }
 .packing-luggage-manager { position: relative; margin: 0; }
 .packing-luggage-manager summary { list-style: none; }
 .packing-luggage-manager summary::-webkit-details-marker { display: none; }
@@ -525,7 +533,7 @@ main { overflow: hidden; }
 .packing-uses-field { display: grid; grid-template-columns: auto 58px; align-items: center; min-height: 48px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); color: var(--muted); font-size: 11px; }
 .packing-uses-field[hidden] { display: none; }
 .packing-uses-field input { min-height: 34px; padding: 0 5px; border: 0; border-radius: 0; background: transparent; text-align: center; }
-@media (max-width: 699px) { .todo-form { grid-template-columns: minmax(0, 1fr) 1fr; } .todo-form input:first-child { grid-column: 1 / -1; } .todo-form select { max-width: none; width: 100%; } .packing-uses-field { grid-column: 1; } .todo-form button { grid-column: 2; } .packing-form-selectors, .packing-form-selectors--add { grid-template-columns: 1fr 1fr; } .packing-form-selectors label:last-child { grid-column: 1 / -1; } .packing-form-selectors--add .packing-add-todo-form__actions { grid-column: 1 / -1; } .packing-add-todo-form { grid-template-columns: 1fr; } .packing-add-todo-form .packing-form-selectors { grid-column: auto; } .packing-add-todo-form .packing-form-name { grid-column: auto; } .packing-add-todo-form__actions { grid-column: auto; } .packing-add-todo-form__actions button { grid-column: auto; } .packing-overview-toolbar { align-items: start; flex-direction: column; } .packing-overview-cards, .packing-dictionary__categories { grid-template-columns: 1fr; } .packing-dictionary__add { grid-template-columns: 1fr; } }
+@media (max-width: 699px) { .todo-form { grid-template-columns: minmax(0, 1fr) 1fr; } .todo-form input:first-child { grid-column: 1 / -1; } .todo-form select { max-width: none; width: 100%; } .packing-uses-field { grid-column: 1; } .todo-form button { grid-column: 2; } .packing-form-selectors, .packing-form-selectors--add { grid-template-columns: 1fr 1fr; } .packing-form-selectors label:last-child { grid-column: 1 / -1; } .packing-form-selectors--add .packing-add-todo-form__actions { grid-column: 1 / -1; } .packing-add-todo-form { grid-template-columns: 1fr; } .packing-add-todo-form .packing-form-selectors { grid-column: auto; } .packing-add-todo-form .packing-form-name { grid-column: auto; } .packing-add-todo-form__actions { grid-column: auto; } .packing-add-todo-form__actions button { grid-column: auto; } .packing-overview-toolbar { align-items: start; flex-direction: column; } .packing-overview-cards { grid-template-columns: 1fr; } .packing-dictionary__add { grid-template-columns: 1fr; } }
 .prep-group { border-bottom: 1px solid var(--line); }
 .prep-group h3 { min-height: 48px; margin: 0; display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: 13px; font-weight: 750; }
 .prep-group h3 span { color: var(--muted); font-size: 11px; font-weight: 600; }

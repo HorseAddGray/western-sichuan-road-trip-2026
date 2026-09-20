@@ -23,6 +23,7 @@ const state = {
   collapsedPackingOverviewCategories: new Set(),
   packingCustomCategories: {},
   packingTagAssociations: {},
+  packingAddDefaults: { subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" },
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
   packingPurchases: [],
@@ -1239,7 +1240,7 @@ function packingOverviewCategoryTotals(owner) {
       const categoryTotals = categories[category] || { key: category, label: packingCategoryLabel(category), quantity: 0, tags: {} };
       categoryTotals.quantity += packingQuantityFor(todo);
       categoryTotals.tags[tag] = {
-        label: tag === "none" ? "未标记" : packingPropertyLabel(tag),
+        label: tag === "none" ? packingCategoryLabel(category) : packingPropertyLabel(tag),
         quantity: (categoryTotals.tags[tag]?.quantity || 0) + packingQuantityFor(todo)
       };
       categories[category] = categoryTotals;
@@ -1275,11 +1276,13 @@ function renderPackingDictionary() {
   const dictionary = $("#packing-dictionary");
   if (!dictionary) return;
   const categories = packingCategoryEntries();
-  const tags = packingKnownTagValues();
   dictionary.innerHTML = `<section class="packing-dictionary">
-    <div class="packing-dictionary__heading"><div><p class="section-kicker">PACKING DICTIONARY</p><strong>类别与标签</strong><small>勾选标签可出现在哪些物品类别中；新增物品时只展示对应类别的标签。</small></div></div>
+    <div class="packing-dictionary__heading"><div><p class="section-kicker">PACKING DICTIONARY</p><strong>类别与标签</strong><small>展开类别查看标签；把标签拖到另一个类别，即可新增关联。新增物品时只展示对应类别的标签。</small></div></div>
     <form class="packing-dictionary__add" data-packing-dictionary-add><label><span>新增物品标签</span><input name="tag" type="text" maxlength="24" placeholder="例如：摄影"></label><label><span>先关联到</span><select name="category">${categories.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</select></label><button type="submit">新增</button></form>
-    <div class="packing-dictionary__categories">${categories.map(([category, label]) => `<article class="packing-dictionary-card"><div><strong>${escapeHtml(label)}</strong><small>可用物品标签</small></div><div class="packing-dictionary-tags">${tags.map((tag) => `<label><input type="checkbox" data-packing-dictionary-tag="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" ${packingTagsForCategory(category).includes(tag) ? "checked" : ""}><span>${escapeHtml(packingPropertyLabel(tag))}</span></label>`).join("")}</div></article>`).join("")}</div>
+    <div class="packing-dictionary-tree" role="tree"><p class="packing-dictionary-root">物品类别</p>${categories.map(([category, label]) => {
+      const tags = packingTagsForCategory(category);
+      return `<details class="packing-dictionary-branch" data-packing-dictionary-category="${escapeHtml(category)}"><summary data-packing-dictionary-drop="${escapeHtml(category)}"><span><strong>${escapeHtml(label)}</strong><small>${tags.length} 个标签</small></span><i aria-hidden="true">⌄</i></summary><div class="packing-dictionary-tags">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" title="拖到其他类别以新增关联"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div></details>`;
+    }).join("")}</div>
   </section>`;
 }
 
@@ -1405,9 +1408,19 @@ function renderTravelPrep() {
     .map(({ key, label }) => `<option value="${key}">${escapeHtml(label)}</option>`).join("");
   const packingOwnerOptions = () => Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}">${label}</option>`).join("");
   const packingPropertyOptions = () => Object.entries(PACKING_PROPERTY_LABELS).map(([key, label]) => `<option value="${key}">${label}</option>`).join("");
+  const packingAddDefaults = state.packingAddDefaults;
+  const packingCategories = packingCategoryEntries().map(([key]) => key);
+  if (!packingCategories.includes(packingAddDefaults.subcategory)) packingAddDefaults.subcategory = "documents";
   $("#packing-subcategory").innerHTML = `${optionMarkup("packing")}<option value="__custom__">新增类别…</option>`;
+  $("#packing-subcategory").value = packingAddDefaults.subcategory;
   $("#packing-owner").innerHTML = packingOwnerOptions();
+  $("#packing-owner").value = packingAddDefaults.owner;
+  $("#packing-quantity").value = packingAddDefaults.quantity;
   syncPackingTagOptions();
+  const availablePackingTags = packingTagsForCategory(packingAddDefaults.subcategory);
+  $("#packing-property").value = availablePackingTags.includes(packingAddDefaults.property) ? packingAddDefaults.property : availablePackingTags[0];
+  $("#packing-uses").value = packingAddDefaults.usesTotal;
+  $("[data-packing-uses-row]").hidden = $("#packing-property").value !== "consumable";
   $("#packing-purchase-property").innerHTML = packingPropertyOptions();
   $("#notice-subcategory").innerHTML = optionMarkup("notice");
   $("#notice-subcategory").value = state.activeNoticeSubcategory;
@@ -1459,16 +1472,35 @@ function renderTravelPrep() {
     attachPackingTagToCategory(tag, category);
     renderAll();
   };
-  $("#packing-dictionary").onchange = (event) => {
-    const input = event.target.closest("[data-packing-dictionary-tag]");
-    if (!input) return;
-    const category = input.dataset.packingDictionaryCategory;
-    const tag = input.dataset.packingDictionaryTag;
+  $("#packing-dictionary").onclick = (event) => {
+    const unlink = event.target.closest("[data-packing-dictionary-unlink]");
+    if (!unlink) return;
+    const category = unlink.dataset.packingDictionaryCategory;
+    const tag = unlink.dataset.packingDictionaryUnlink;
     const tags = new Set(packingTagsForCategory(category));
-    if (input.checked) tags.add(tag);
-    else tags.delete(tag);
+    tags.delete(tag);
     state.packingTagAssociations[category] = [...tags];
     savePackingTagAssociations();
+    renderAll();
+  };
+  $("#packing-dictionary").ondragstart = (event) => {
+    const tag = event.target.closest("[data-packing-dictionary-tag]");
+    if (!tag || !event.dataTransfer) return;
+    event.dataTransfer.setData("text/plain", tag.dataset.packingDictionaryTag);
+    event.dataTransfer.effectAllowed = "copy";
+  };
+  $("#packing-dictionary").ondragover = (event) => {
+    if (!event.target.closest("[data-packing-dictionary-drop]")) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+  };
+  $("#packing-dictionary").ondrop = (event) => {
+    const target = event.target.closest("[data-packing-dictionary-drop]");
+    if (!target || !event.dataTransfer) return;
+    event.preventDefault();
+    const tag = event.dataTransfer.getData("text/plain");
+    if (!tag) return;
+    attachPackingTagToCategory(tag, target.dataset.packingDictionaryDrop);
     renderAll();
   };
   $("#packing-luggage-filters").onclick = (event) => {
@@ -1688,16 +1720,11 @@ function renderTravelPrep() {
     state.todos.push(todo);
     input.value = "";
     if (kind === "packing") {
-      $("#packing-owner").value = "shared";
-      $("#packing-subcategory").value = "documents";
-      $("#packing-quantity").value = "1";
+      state.packingAddDefaults = { subcategory, owner, property, quantity: $("#packing-quantity").value, usesTotal: $("#packing-uses").value };
       $("#packing-custom-category").value = "";
       $("[data-packing-custom-category-row]").hidden = true;
       $("#packing-custom-property").value = "";
       $("[data-packing-custom-property-row]").hidden = true;
-      syncPackingTagOptions();
-      $("#packing-uses").value = "0";
-      $("[data-packing-uses-row]").hidden = true;
     }
     saveSharedChange("todos", todo).catch(console.error);
     renderAll();
@@ -1726,6 +1753,8 @@ function renderTravelPrep() {
     const isCustom = $("#packing-subcategory").value === "__custom__";
     $("[data-packing-custom-category-row]").hidden = !isCustom;
     syncPackingTagOptions();
+    state.packingAddDefaults.subcategory = $("#packing-subcategory").value;
+    state.packingAddDefaults.property = $("#packing-property").value;
     if (isCustom) $("#packing-custom-category").focus();
   };
   const updateUsesVisibility = (propertySelect, usesRow) => {
@@ -1741,7 +1770,11 @@ function renderTravelPrep() {
   $("#packing-property").onchange = () => {
     updateUsesVisibility($("#packing-property"), $("[data-packing-uses-row]"));
     updateCustomPropertyVisibility($("#packing-property"), $("[data-packing-custom-property-row]"), $("#packing-custom-property"));
+    state.packingAddDefaults.property = $("#packing-property").value;
   };
+  $("#packing-owner").onchange = () => { state.packingAddDefaults.owner = $("#packing-owner").value; };
+  $("#packing-quantity").onchange = () => { state.packingAddDefaults.quantity = $("#packing-quantity").value; };
+  $("#packing-uses").oninput = () => { state.packingAddDefaults.usesTotal = $("#packing-uses").value; };
   $("#packing-purchase-property").onchange = () => updateUsesVisibility($("#packing-purchase-property"), $("[data-packing-purchase-uses-row]"));
   const syncPackingEditFields = (form) => {
     const category = $("[data-packing-edit-category]", form).value;

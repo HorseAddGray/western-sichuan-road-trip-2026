@@ -336,10 +336,10 @@ test("packing overview shows each person's actual category and tag quantities wi
   assert.match(styles, /\.packing-overview-value/);
 });
 
-test("packing supports an untagged option, migrates common to it, and keeps untagged totals distinct", () => {
+test("packing supports an untagged option, migrates common to it, and shows its item category in the overview", () => {
   assert.match(app, /none: "无"/);
   assert.match(app, /todo\.property === "common"\) return "none"/);
-  assert.match(app, /label: tag === "none" \? "未标记"/);
+  assert.match(app, /label: tag === "none" \? packingCategoryLabel\(category\)/);
   assert.doesNotMatch(app, /common: "常用"/);
 });
 
@@ -468,4 +468,21 @@ test("packing dictionary exposes category-to-tag associations and manages them",
   assert.match(app, /data-packing-dictionary-tag/);
   assert.match(app, /data-packing-dictionary-add/);
   assert.match(app, /attachPackingTagToCategory/);
+});
+
+test("packing dictionary uses a collapsible tree and supports dragging tags between categories", () => {
+  assert.match(app, /<details class="packing-dictionary-branch"/);
+  assert.match(app, /draggable="true" data-packing-dictionary-tag/);
+  assert.match(app, /ondragstart/);
+  assert.match(app, /event\.dataTransfer\.getData\("text\/plain"\)/);
+  assert.match(app, /ondrop/);
+  assert.match(app, /data-packing-dictionary-unlink/);
+});
+
+test("packing additions keep the last category, owner, tag, and quantity for repeated entry", () => {
+  assert.match(app, /packingAddDefaults: \{ subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" \}/);
+  assert.match(app, /state\.packingAddDefaults = \{ subcategory, owner, property/);
+  assert.match(app, /\$\("#packing-subcategory"\)\.value = packingAddDefaults\.subcategory/);
+  assert.doesNotMatch(app, /\$\("#packing-owner"\)\.value = "shared"/);
+  assert.doesNotMatch(app, /\$\("#packing-quantity"\)\.value = "1"/);
 });
