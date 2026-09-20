@@ -1200,7 +1200,7 @@ function packingOverviewTagTotals(owner) {
 function renderPackingOverview() {
   const overview = $("#packing-overview");
   if (!overview) return;
-  const owners = ["ma-jia", "zai-zai"];
+  const owners = ["shared", "ma-jia", "zai-zai"];
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
   const cardMarkup = (owner) => {
     const totals = packingOverviewTagTotals(owner);

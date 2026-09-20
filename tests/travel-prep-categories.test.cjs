@@ -430,3 +430,9 @@ test("custom packing category names use a dedicated row below the add-item field
   assert.match(html, /data-packing-custom-category-row[^>]*hidden/);
   assert.match(styles, /\.todo-form\.packing-add-todo-form \{[^}]*grid-template-columns: 1fr/);
 });
+
+test("packing overview includes shared items before each person's cards", () => {
+  assert.match(app, /const owners = \["shared", "ma-jia", "zai-zai"\]/);
+  assert.match(app, /data-packing-overview-owner="\$\{owner\}"/);
+  assert.match(app, /PACKING_OWNER_LABELS\[owner\]/);
+});
