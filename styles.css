@@ -472,7 +472,7 @@ main { overflow: hidden; }
 .packing-dictionary-branch summary small { color: var(--muted); font-size: 11px; }
 .packing-dictionary-branch summary i { color: var(--lake); font-style: normal; transition: transform .18s ease; }
 .packing-dictionary-branch:not([open]) summary i { transform: rotate(-90deg); }
-.packing-dictionary-branch__actions { position: absolute; z-index: 7; top: 8px; right: 9px; }
+.packing-dictionary-branch__actions { position: absolute; z-index: 7; top: 8px; right: 18px; }
 .packing-dictionary-branch__actions .todo-more__menu { top: 29px; }
 .packing-dictionary-branch input { width: min(210px, 48vw); min-height: 27px; padding: 0 6px; border: 1px solid var(--lake); border-radius: 6px; color: var(--ink); background: white; font: 800 13px/1 inherit; }
 .packing-dictionary-tags { min-height: 46px; padding: 9px 12px 12px 24px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); background: rgba(248,250,247,.7); }

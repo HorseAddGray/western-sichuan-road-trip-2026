@@ -489,6 +489,14 @@ test("packing dictionary reorders tags, keeps open branches open after removal, 
   assert.match(app, /todo-more__menu/);
 });
 
+test("packing dictionary hides tag counts, dismisses category editing on outside clicks, and confirms only nonempty category deletion", () => {
+  assert.doesNotMatch(app, /<small>\$\{tags\.length\} 个标签<\/small>/);
+  assert.match(app, /packingDictionaryOutsideHandler/);
+  assert.match(app, /data-packing-dictionary-category-edit/);
+  assert.match(app, /if \(tags\.length && !window\.confirm/);
+  assert.match(styles, /packing-dictionary-branch__actions \{[^}]*right: 18px/);
+});
+
 test("packing additions keep the last category, owner, tag, and quantity for repeated entry", () => {
   assert.match(app, /packingAddDefaults: \{ subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" \}/);
   assert.match(app, /state\.packingAddDefaults = \{ subcategory, owner, property/);

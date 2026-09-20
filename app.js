@@ -27,6 +27,7 @@ const state = {
   packingTagAssociations: {},
   expandedPackingDictionaryCategories: new Set(),
   editingPackingDictionaryCategory: "",
+  packingDictionaryOutsideHandler: null,
   draggedPackingDictionaryTag: null,
   packingAddDefaults: { subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" },
   packingLuggageLabels: {},
@@ -1340,7 +1341,7 @@ function renderPackingDictionary() {
     <div class="packing-dictionary-tree" role="tree"><p class="packing-dictionary-root">物品类别</p>${categories.map(([category, label]) => {
       const tags = packingTagsForCategory(category);
       const editing = state.editingPackingDictionaryCategory === category;
-      return `<details class="packing-dictionary-branch" data-packing-dictionary-category="${escapeHtml(category)}" ${state.expandedPackingDictionaryCategories.has(category) ? "open" : ""}><summary data-packing-dictionary-drop="${escapeHtml(category)}"><span>${editing ? `<input data-packing-dictionary-category-label="${escapeHtml(category)}" value="${escapeHtml(label)}" maxlength="24" aria-label="${escapeHtml(label)}类别名称">` : `<strong>${escapeHtml(label)}</strong>`}<i aria-hidden="true">⌄</i></span><small>${tags.length} 个标签</small></summary><div class="packing-dictionary-branch__actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(label)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-dictionary-category-edit="${escapeHtml(category)}">编辑</button><button type="button" class="todo-delete" data-packing-dictionary-category-delete="${escapeHtml(category)}">删除</button></div></details></div><div class="packing-dictionary-tags" data-packing-dictionary-drop="${escapeHtml(category)}">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" data-packing-dictionary-tag-drop="${escapeHtml(tag)}" title="拖动标签调整位置"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div></details>`;
+      return `<details class="packing-dictionary-branch" data-packing-dictionary-category="${escapeHtml(category)}" ${state.expandedPackingDictionaryCategories.has(category) ? "open" : ""}><summary data-packing-dictionary-drop="${escapeHtml(category)}"><span>${editing ? `<input data-packing-dictionary-category-label="${escapeHtml(category)}" value="${escapeHtml(label)}" maxlength="24" aria-label="${escapeHtml(label)}类别名称">` : `<strong>${escapeHtml(label)}</strong>`}<i aria-hidden="true">⌄</i></span></summary><div class="packing-dictionary-branch__actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(label)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-dictionary-category-edit="${escapeHtml(category)}">编辑</button><button type="button" class="todo-delete" data-packing-dictionary-category-delete="${escapeHtml(category)}">删除</button></div></details></div><div class="packing-dictionary-tags" data-packing-dictionary-drop="${escapeHtml(category)}">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" data-packing-dictionary-tag-drop="${escapeHtml(tag)}" title="拖动标签调整位置"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div></details>`;
     }).join("")}</div>
   </section>`;
 }
@@ -1514,6 +1515,14 @@ function renderTravelPrep() {
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
   renderAll();
+  state.packingDictionaryOutsideHandler?.();
+  const packingDictionaryOutsideHandler = (event) => {
+    if (!state.editingPackingDictionaryCategory || event.target.closest("[data-packing-dictionary-category-label], [data-packing-dictionary-category-edit]")) return;
+    state.editingPackingDictionaryCategory = "";
+    renderAll();
+  };
+  state.packingDictionaryOutsideHandler = () => document.removeEventListener("click", packingDictionaryOutsideHandler);
+  document.addEventListener("click", packingDictionaryOutsideHandler);
   $("#packing-overview").onclick = (event) => {
     const category = event.target.closest("[data-packing-overview-category]");
     if (category) {
@@ -1568,7 +1577,8 @@ function renderTravelPrep() {
     if (deleteCategory) {
       const category = deleteCategory.dataset.packingDictionaryCategoryDelete;
       const label = packingCategoryLabel(category);
-      if (!window.confirm(`删除“${label}”类别？其中物品会转入其他现有类别。`)) return;
+      const tags = packingTagsForCategory(category);
+      if (tags.length && !window.confirm(`“${label}”类别内仍有 ${tags.length} 个标签，确认删除类别及这些关联标签吗？`)) return;
       rememberOpenPackingDictionaryBranches();
       deletePackingDictionaryCategory(category);
       renderAll();
