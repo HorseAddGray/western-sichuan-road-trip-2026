@@ -466,8 +466,15 @@ test("packing dictionary exposes category-to-tag associations and manages them",
   assert.match(html, /id="packing-dictionary"/);
   assert.match(app, /dictionary: "字典设置"/);
   assert.match(app, /data-packing-dictionary-tag/);
-  assert.match(app, /data-packing-dictionary-add/);
+  assert.match(app, /data-packing-dictionary-tag-add/);
   assert.match(app, /attachPackingTagToCategory/);
+});
+
+test("packing dictionary creates a tag from each category overflow menu instead of a top-level form", () => {
+  assert.doesNotMatch(app, /packing-dictionary__add/);
+  assert.match(app, /data-packing-dictionary-tag-create/);
+  assert.match(app, /data-packing-dictionary-tag-add/);
+  assert.match(app, /data-packing-dictionary-category-delete/);
 });
 
 test("packing dictionary uses a collapsible tree and supports dragging tags between categories", () => {
