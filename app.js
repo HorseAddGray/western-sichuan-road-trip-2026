@@ -27,6 +27,7 @@ const state = {
   packingOverviewOwner: "all",
   removedPurchaseIds: new Set(),
   packingCheck: { active: false, index: 0, completed: false, openLuggage: [] },
+  editingPackingTodoId: "",
   activeToiletMapDay: 0
 };
 
@@ -95,6 +96,9 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 document.addEventListener("click", (event) => {
   const manager = document.querySelector("#packing-luggage-manager");
   if (manager?.open && !event.target.closest("#packing-luggage-manager")) manager.open = false;
+  if (!event.target.closest(".todo-more")) {
+    document.querySelectorAll(".todo-more[open]").forEach((menu) => { menu.open = false; });
+  }
 });
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;",
@@ -1033,6 +1037,24 @@ function packingPropertyFor(todo) {
   return Number(todo.usesTotal || 0) > 0 ? "consumable" : "none";
 }
 function packingContainerFor(todo) { return todo.container || packingLuggageFor(todo); }
+function packingEditFormMarkup(todo) {
+  const category = window.TravelPrep.normalizeTodoSubcategory(todo);
+  const property = packingPropertyFor(todo);
+  const tags = packingTagsForCategory(category);
+  const usesTotal = Number(todo.usesTotal || 0);
+  return `<form class="packing-edit-form" data-packing-edit-form data-todo-id="${escapeHtml(todo.id)}">
+    <div class="packing-form-heading"><strong>编辑物品</strong><button type="button" data-packing-edit-cancel aria-label="取消编辑：${escapeHtml(todo.text)}">×</button></div>
+    <div class="packing-form-selectors packing-form-selectors--add">
+      <label><span>物品类别</span><select data-packing-edit-category aria-label="物品类别">${packingCategoryEntries().map(([key, label]) => `<option value="${key}" ${category === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}<option value="__custom__">新增类别…</option></select></label>
+      <label><span>人物归属</span><select data-packing-edit-owner aria-label="人物归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></label>
+      <label><span>物品标签</span><select data-packing-edit-property aria-label="物品标签">${tags.map((key) => `<option value="${key}" ${property === key ? "selected" : ""}>${PACKING_PROPERTY_LABELS[key]}</option>`).join("")}</select></label>
+      <label><span>数量</span><select data-packing-edit-quantity aria-label="物品数量">${[1, 2, 3, 4, 5].map((quantity) => `<option value="${quantity}" ${packingQuantityFor(todo) === quantity ? "selected" : ""}>${quantity}</option>`).join("")}</select></label>
+      <label class="packing-form-name"><span>物品名称</span><input data-packing-edit-name type="text" maxlength="80" value="${escapeHtml(todo.text)}" aria-label="物品名称"></label>
+      <div class="packing-add-todo-form__actions"><label class="packing-uses-field" data-packing-edit-uses-row ${property === "consumable" ? "" : "hidden"}><span>可用次数</span><input data-packing-edit-uses type="number" min="1" max="99" value="${usesTotal || 1}" aria-label="消耗品可用次数"></label><button type="submit">保存</button></div>
+    </div>
+    <label class="packing-custom-category" data-packing-edit-custom-category-row hidden><span>新类别名称</span><input data-packing-edit-custom-category type="text" maxlength="12" placeholder="例如：摄影"></label>
+  </form>`;
+}
 function packingWorkspaceFromHash(hash = location.hash) {
   return { "#packing": "details", "#packing-overview": "overview", "#packing-details": "details", "#packing-purchase": "purchase", "#packing-check": "check" }[hash] || null;
 }
@@ -1142,7 +1164,7 @@ function renderTodoList(kind) {
         <span class="todo-copy"><span class="packing-item-title"><strong class="todo-text">${escapeHtml(todo.text)}${packingQuantityFor(todo) > 1 ? ` <small class="packing-item-quantity">×${packingQuantityFor(todo)}</small>` : ""}</strong><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select>${property === "consumable" && usesTotal > 0 ? `<span class="packing-item-meta packing-item-meta--inline"><button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button></span>` : ""}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </label>
       <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
-    </div>`;
+    </div>${state.editingPackingTodoId === todo.id ? packingEditFormMarkup(todo) : ""}`;
   };
   $("#packing-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
     const items = activeTodos
@@ -1543,7 +1565,9 @@ function renderTravelPrep() {
     saveSharedChange("todos", todo).catch(console.error);
     renderAll();
   };
-  $("#packing-form").onsubmit = submitForm("packing");
+  const submitPackingForm = submitForm("packing");
+  $("#packing-form").onsubmit = submitPackingForm;
+  $("[data-packing-add-submit]").onclick = () => submitPackingForm({ preventDefault() {} });
   $("#notice-form").onsubmit = submitForm("notice");
   $("[data-packing-form-open]").onclick = () => {
     $("#packing-search-panel").hidden = true;
@@ -1574,6 +1598,51 @@ function renderTravelPrep() {
   };
   $("#packing-property").onchange = () => updateUsesVisibility($("#packing-property"), $("[data-packing-uses-row]"));
   $("#packing-purchase-property").onchange = () => updateUsesVisibility($("#packing-purchase-property"), $("[data-packing-purchase-uses-row]"));
+  const syncPackingEditFields = (form) => {
+    const category = $("[data-packing-edit-category]", form).value;
+    const isCustom = category === "__custom__";
+    $("[data-packing-edit-custom-category-row]", form).hidden = !isCustom;
+    const property = $("[data-packing-edit-property]", form);
+    const tags = packingTagsForCategory(category);
+    const selected = tags.includes(property.value) ? property.value : tags[0];
+    property.innerHTML = tags.map((key) => `<option value="${key}">${PACKING_PROPERTY_LABELS[key]}</option>`).join("");
+    property.value = selected;
+    updateUsesVisibility(property, $("[data-packing-edit-uses-row]", form));
+    if (isCustom) $("[data-packing-edit-custom-category]", form).focus();
+  };
+  const submitPackingEdit = (event) => {
+    const form = event.target.closest("[data-packing-edit-form]");
+    if (!form) return;
+    event.preventDefault();
+    const todo = state.todos.find((entry) => entry.id === form.dataset.todoId);
+    const text = $("[data-packing-edit-name]", form).value.trim();
+    if (!todo || !text) return;
+    let subcategory = $("[data-packing-edit-category]", form).value;
+    if (subcategory === "__custom__") {
+      const label = $("[data-packing-edit-custom-category]", form).value.trim();
+      if (!label) { $("[data-packing-edit-custom-category]", form).focus(); return; }
+      const existing = packingCategoryEntries().find(([, value]) => value === label);
+      subcategory = existing ? existing[0] : `custom-${Date.now().toString(36)}`;
+      if (!existing) {
+        state.packingCustomCategories[subcategory] = label;
+        localStorage.setItem(packingCustomCategoriesKey(), JSON.stringify(state.packingCustomCategories));
+      }
+    }
+    const property = $("[data-packing-edit-property]", form).value;
+    const usesTotal = property === "consumable" ? Number($("[data-packing-edit-uses]", form).value) || 1 : 0;
+    Object.assign(todo, {
+      text,
+      subcategory,
+      owner: $("[data-packing-edit-owner]", form).value,
+      property,
+      quantity: Number($("[data-packing-edit-quantity]", form).value) || 1,
+      usesTotal,
+      usesRemaining: usesTotal
+    });
+    state.editingPackingTodoId = "";
+    saveSharedChange("todos", todo).catch(console.error);
+    renderAll();
+  };
   const updateTodo = (event) => {
     const item = event.target.closest("[data-todo-id]");
     if (!item) return;
@@ -1595,11 +1664,8 @@ function renderTravelPrep() {
     const todo = item && state.todos.find((entry) => entry.id === item.dataset.todoId);
     if (!todo) return;
     if (event.target.closest(".todo-edit")) {
-      const text = window.prompt("编辑项目", todo.text)?.trim();
-      if (!text) return;
-      todo.text = text;
-      saveSharedChange("todos", todo).catch(console.error);
-      renderAll();
+      state.editingPackingTodoId = todo.id;
+      renderTodoList("packing");
       return;
     }
     if (event.target.closest("[data-todo-copy]")) {
@@ -1618,8 +1684,22 @@ function renderTravelPrep() {
     saveSharedChange("todos", { id: todo.id }, "delete").catch(console.error);
     renderAll();
   };
-  $("#packing-list").onchange = updateTodo;
+  $("#packing-list").onsubmit = submitPackingEdit;
+  $("#packing-list").onchange = (event) => {
+    const form = event.target.closest("[data-packing-edit-form]");
+    if (form && event.target.matches("[data-packing-edit-category], [data-packing-edit-property]")) {
+      syncPackingEditFields(form);
+      return;
+    }
+    updateTodo(event);
+  };
   $("#packing-list").onclick = (event) => {
+    const editCancel = event.target.closest("[data-packing-edit-cancel]");
+    if (editCancel) {
+      state.editingPackingTodoId = "";
+      renderTodoList("packing");
+      return;
+    }
     const categoryToggle = event.target.closest("[data-packing-category-toggle]");
     if (categoryToggle) {
       const key = categoryToggle.dataset.packingCategoryToggle;

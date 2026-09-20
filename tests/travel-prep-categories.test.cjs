@@ -406,3 +406,16 @@ test("packing overflow menu can duplicate an item above delete without changing 
   assert.doesNotMatch(app, /text: `\$\{todo\.text\}（副本）`/);
   assert.match(app, /state\.todos\.push\(duplicate\)/);
 });
+
+test("packing items support a full-field edit form and dismiss overflow menus outside the row", () => {
+  assert.match(app, /editingPackingTodoId/);
+  assert.match(app, /data-packing-edit-form/);
+  assert.match(app, /data-packing-edit-cancel/);
+  assert.match(app, /data-packing-edit-category/);
+  assert.match(app, /data-packing-edit-owner/);
+  assert.match(app, /data-packing-edit-property/);
+  assert.match(app, /data-packing-edit-quantity/);
+  assert.match(app, /data-packing-edit-uses/);
+  assert.match(app, /event\.target\.closest\("\.todo-more"\)/);
+  assert.match(app, /\$\("#packing-list"\)\.onsubmit/);
+});

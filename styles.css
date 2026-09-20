@@ -477,7 +477,10 @@ main { overflow: hidden; }
 .packing-form-selectors--add .packing-form-name { margin-top: 0; }
 .packing-form-selectors select:focus, .packing-form-name input:focus { border-color: var(--lake); box-shadow: 0 0 0 3px rgba(40,123,144,.1); }
 .packing-add-todo-form { display: grid; grid-template-columns: 1fr; gap: 0; }
+.packing-edit-form { margin: -1px 10px 9px; padding: 9px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.72); }
+.packing-edit-form .packing-form-heading { margin-bottom: 7px; }
 .packing-add-todo-form .packing-form-selectors select, .packing-add-todo-form .packing-form-name input { width: 100%; max-width: none; height: 38px; box-sizing: border-box; }
+.packing-edit-form .packing-form-selectors select, .packing-edit-form .packing-form-name input { width: 100%; max-width: none; height: 38px; box-sizing: border-box; }
 .packing-add-todo-form__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .packing-form-selectors--add .packing-add-todo-form__actions { align-self: end; margin-top: 0; }
 .packing-add-todo-form__actions .packing-uses-field { margin-right: auto; }
