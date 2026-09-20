@@ -502,6 +502,23 @@ main { overflow: hidden; }
 .packing-filter-toolbar button:hover { border-color: var(--lake); color: var(--ink); }
 .packing-search-form, .packing-add-form { margin: 0 0 13px; padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.54); }
 .packing-search-form[hidden], .packing-add-form[hidden] { display: none; }
+.packing-form-description, .packing-form-select { display: grid; gap: 5px; margin-top: 9px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.packing-form-description textarea { width: 100%; min-height: 76px; resize: vertical; padding: 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; font-size: 12px; line-height: 1.5; }
+.packing-form-select select { min-height: 36px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; }
+.packing-purchase-heading { margin-bottom: 12px; }
+.notice-heading-actions { display: inline-flex; align-items: center; gap: 8px; }
+.notice-edit-form { margin: 0 0 9px; padding: 10px 12px; display: grid; gap: 8px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.76); }
+.notice-edit-form label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.notice-edit-form input, .notice-edit-form select, .notice-edit-form textarea { min-height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font: inherit; font-size: 12px; }
+.notice-edit-form textarea { min-height: 70px; padding: 8px; resize: vertical; }
+.notice-edit-form button { width: fit-content; min-height: 32px; padding: 0 11px; border: 0; border-radius: 7px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.packing-check-picker > label { display: grid; width: min(220px, 100%); gap: 4px; margin-bottom: 12px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.packing-check-picker select { min-height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: white; font: inherit; }
+.packing-check-picker section { display: grid; gap: 7px; }
+.packing-check-children { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 14px; }
+.packing-check-children button { border-style: dashed; }
+.packing-check-actions { display: flex; align-items: stretch; gap: 8px; }
+.packing-check-actions > div { display: grid; gap: 6px; }
 .packing-form-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 9px; color: var(--ink); font-size: 12px; }
 .packing-form-heading button { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: 500 22px/1 sans-serif; cursor: pointer; }
 .packing-form-heading button:hover { color: var(--ink); background: rgba(40,123,144,.1); }
@@ -572,7 +589,7 @@ main { overflow: hidden; }
 .todo-detail { color: var(--muted); font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-line; }
 .todo-item.is-complete .todo-check { border-color: var(--forest); color: white; background: var(--forest); }
 .todo-item.is-complete .todo-text { color: #87928f; text-decoration: line-through; }
-.notice-item { min-height: 54px; padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 6px minmax(0, 1fr); column-gap: 8px; transition: background .25s ease, box-shadow .25s ease; }
+.notice-item { min-height: 54px; padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; column-gap: 8px; transition: background .25s ease, box-shadow .25s ease; }
 .notice-item::before { content: ""; width: 4px; height: 4px; margin-top: 8px; border-radius: 50%; background: #13262f; }
 .notice-item.is-highlighted { margin-inline: -10px; padding-inline: 10px; border-radius: 12px; background: #fff2d6; box-shadow: 0 0 0 2px #e1aa3d; }
 .prep-group--trusted h3 { color: #43654a; }

@@ -154,6 +154,21 @@ test("authored purchase items seed the purchase list and retain local removals",
   assert.match(app, /removedPurchaseIds/);
 });
 
+test("purchase, packing checks, and notices expose the requested scoped workflows", () => {
+  assert.match(html, /id="packing-purchase-form-panel"[^>]*hidden/);
+  assert.match(html, /id="packing-purchase-description"/);
+  assert.match(app, /data-purchase-edit/);
+  assert.match(app, /data-purchase-submit/);
+  assert.match(app, /purchase\.subcategory/);
+  assert.match(app, /packingCheckOwner/);
+  assert.match(app, /data-packing-check-child/);
+  assert.match(app, />确认无误</);
+  assert.match(html, /data-notice-form-open/);
+  assert.match(html, /id="notice-title-input"/);
+  assert.match(html, /id="notice-detail-input"/);
+  assert.match(app, /data-notice-edit/);
+});
+
 test("packing data keeps every supplied item on its own row and assigns luggage", () => {
   const packing = tripData.preTrip.packingItems.filter((item) => item.category === "packing");
   assert.equal(packing.length, 99);
