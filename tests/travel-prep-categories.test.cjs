@@ -445,3 +445,9 @@ test("packing add and edit forms provide matching custom category and tag fields
   assert.match(app, /新增标签…/);
   assert.match(app, /function packingPropertyLabel/);
 });
+
+test("saved custom packing tags are reusable in item tag menus and filters", () => {
+  assert.match(app, /function packingCustomPropertyValues\(\)/);
+  assert.match(app, /const customProperties = \[\.\.\.new Set\(\[\.\.\.packingCustomPropertyValues\(\), selected\]/);
+  assert.match(app, /const packingPropertyFilterOptions = \[/);
+});

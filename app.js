@@ -1013,8 +1013,14 @@ function packingPropertyLabel(property) {
   }
   return PACKING_PROPERTY_LABELS[property] || "无";
 }
+function packingCustomPropertyValues() {
+  return [...new Set(window.TravelPrep.filterTodosByCategory(state.todos, "packing")
+    .map(packingPropertyFor)
+    .filter(isCustomPackingProperty))];
+}
 function packingTagOptions(tags, selected) {
-  return `${tags.map((key) => `<option value="${key}" ${selected === key ? "selected" : ""}>${packingPropertyLabel(key)}</option>`).join("")}${isCustomPackingProperty(selected) ? `<option value="${escapeHtml(selected)}" selected>${escapeHtml(packingPropertyLabel(selected))}</option>` : ""}<option value="__custom__">新增标签…</option>`;
+  const customProperties = [...new Set([...packingCustomPropertyValues(), selected].filter(isCustomPackingProperty))];
+  return `${tags.map((key) => `<option value="${key}" ${selected === key ? "selected" : ""}>${packingPropertyLabel(key)}</option>`).join("")}${customProperties.map((key) => `<option value="${escapeHtml(key)}" ${selected === key ? "selected" : ""}>${escapeHtml(packingPropertyLabel(key))}</option>`).join("")}<option value="__custom__">新增标签…</option>`;
 }
 function packingQuantityFor(todo) {
   return Math.min(5, Math.max(1, Number(todo.quantity) || 1));
@@ -1346,7 +1352,11 @@ function renderTravelPrep() {
     $("#packing-container-filters").innerHTML = containers.map((container) => `<button type="button" data-packing-container="${container.key}" aria-pressed="${state.selectedPackingContainer === container.key}">${container.icon} ${container.label}</button>`).join("");
     $("#packing-luggage-settings").innerHTML = PACKING_LUGGAGE.map((luggage) => `<label><span>${luggage.icon}</span><input type="text" maxlength="24" value="${escapeHtml(packingLuggageLabel(luggage))}" data-packing-luggage-label="${luggage.key}" aria-label="${escapeHtml(luggage.label)}名称"></label>`).join("");
     $("#packing-owner-filter-select").innerHTML = `<option value="">全部归属</option>${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${state.selectedPackingOwner === key ? "selected" : ""}>${label}</option>`).join("")}`;
-    $("#packing-property-filter-select").innerHTML = `<option value="">全部属性</option>${Object.entries(PACKING_PROPERTY_LABELS).map(([key, label]) => `<option value="${key}" ${state.selectedPackingProperty === key ? "selected" : ""}>${label}</option>`).join("")}`;
+    const packingPropertyFilterOptions = [
+      ...Object.entries(PACKING_PROPERTY_LABELS),
+      ...packingCustomPropertyValues().map((key) => [key, packingPropertyLabel(key)])
+    ];
+    $("#packing-property-filter-select").innerHTML = `<option value="">全部属性</option>${packingPropertyFilterOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.selectedPackingProperty === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}`;
     $("#packing-search-input").value = state.packingSearchText;
     const selectedCategory = [...state.selectedPackingSubcategories][0] || "";
     $("#packing-category-filter-select").innerHTML = `<option value="">全部类别</option>${packingCategoryEntries().map(([key, label]) => `<option value="${key}" ${selectedCategory === key ? "selected" : ""}>${label}</option>`).join("")}`;
