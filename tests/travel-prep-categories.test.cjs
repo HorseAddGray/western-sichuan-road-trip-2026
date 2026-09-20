@@ -323,11 +323,11 @@ test("notices keep only health and toilet categories and reset subcategories to 
   assert.match(app, /collapsed: \[\]/);
 });
 
-test("packing overview shows each person's actual tag quantities without expected-goal management", () => {
+test("packing overview shows each person's actual category and tag quantities without expected-goal management", () => {
   assert.match(html, /href="#packing-overview"[^>]*>总览</);
   assert.match(html, /id="packing-overview"/);
   assert.match(app, /overview: "行囊总览"/);
-  assert.match(app, /function packingOverviewTagTotals/);
+  assert.match(app, /function packingOverviewCategoryTotals/);
   assert.match(app, /packingQuantityFor\(todo\)/);
   assert.match(app, /data-packing-overview-owner/);
   assert.doesNotMatch(app, /data-essential-form-open/);
@@ -336,10 +336,10 @@ test("packing overview shows each person's actual tag quantities without expecte
   assert.match(styles, /\.packing-overview-value/);
 });
 
-test("packing supports an untagged option, migrates common to it, and labels untagged totals by category", () => {
+test("packing supports an untagged option, migrates common to it, and keeps untagged totals distinct", () => {
   assert.match(app, /none: "无"/);
   assert.match(app, /todo\.property === "common"\) return "none"/);
-  assert.match(app, /tag === "none" \? packingCategoryLabel/);
+  assert.match(app, /label: tag === "none" \? "未标记"/);
   assert.doesNotMatch(app, /common: "常用"/);
 });
 
@@ -450,4 +450,12 @@ test("saved custom packing tags are reusable in item tag menus and filters", () 
   assert.match(app, /function packingCustomPropertyValues\(\)/);
   assert.match(app, /const customProperties = \[\.\.\.new Set\(\[\.\.\.packingCustomPropertyValues\(\), selected\]/);
   assert.match(app, /const packingPropertyFilterOptions = \[/);
+});
+
+test("packing overview groups tag totals in collapsible categories sorted by quantity", () => {
+  assert.match(app, /collapsedPackingOverviewCategories/);
+  assert.match(app, /function packingOverviewCategoryTotals\(owner\)/);
+  assert.match(app, /packing-overview-category-toggle/);
+  assert.match(app, /data-packing-overview-category/);
+  assert.match(app, /sort\(\(first, second\) => second\.quantity - first\.quantity\)/);
 });

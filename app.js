@@ -20,6 +20,7 @@ const state = {
   selectedPackingProperty: "",
   packingSearchText: "",
   collapsedPackingCategories: new Set(),
+  collapsedPackingOverviewCategories: new Set(),
   packingCustomCategories: {},
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
@@ -1206,16 +1207,20 @@ function hasActivePackingFilters() {
   );
 }
 
-function packingOverviewTagTotals(owner) {
+function packingOverviewCategoryTotals(owner) {
   return window.TravelPrep.filterTodosByCategory(state.todos, "packing")
     .filter((todo) => [owner, "shared"].includes(packingOwnerFor(todo)))
-    .reduce((totals, todo) => {
+    .reduce((categories, todo) => {
       const tag = packingPropertyFor(todo);
       const category = window.TravelPrep.normalizeTodoSubcategory(todo);
-      const key = tag === "none" ? `category:${category}` : `tag:${tag}`;
-      const label = tag === "none" ? packingCategoryLabel(category) : packingPropertyLabel(tag);
-      totals[key] = { label, quantity: (totals[key]?.quantity || 0) + packingQuantityFor(todo) };
-      return totals;
+      const categoryTotals = categories[category] || { key: category, label: packingCategoryLabel(category), quantity: 0, tags: {} };
+      categoryTotals.quantity += packingQuantityFor(todo);
+      categoryTotals.tags[tag] = {
+        label: tag === "none" ? "未标记" : packingPropertyLabel(tag),
+        quantity: (categoryTotals.tags[tag]?.quantity || 0) + packingQuantityFor(todo)
+      };
+      categories[category] = categoryTotals;
+      return categories;
     }, {});
 }
 
@@ -1225,11 +1230,16 @@ function renderPackingOverview() {
   const owners = ["ma-jia", "zai-zai"];
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
   const cardMarkup = (owner) => {
-    const totals = packingOverviewTagTotals(owner);
-    const tags = Object.values(totals).sort((first, second) => first.label.localeCompare(second.label, "zh-CN"));
+    const categories = Object.values(packingOverviewCategoryTotals(owner))
+      .map((category) => ({ ...category, tags: Object.values(category.tags).sort((first, second) => second.quantity - first.quantity) }))
+      .sort((first, second) => second.quantity - first.quantity);
     return `<article class="packing-overview-card">
       <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>实际物品标签数量</small></div>
-      <div class="packing-overview-card__items">${tags.length ? tags.map((tag) => `<div class="packing-overview-item"><strong class="packing-overview-tag">${escapeHtml(tag.label)}</strong><strong class="packing-overview-value">${tag.quantity}<i>件</i></strong></div>`).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
+      <div class="packing-overview-card__items">${categories.length ? categories.map((category) => {
+        const categoryId = `${owner}:${category.key}`;
+        const collapsed = state.collapsedPackingOverviewCategories.has(categoryId);
+        return `<section class="packing-overview-category"><button type="button" class="packing-overview-category-toggle" data-packing-overview-category="${escapeHtml(category.key)}" data-packing-overview-owner="${owner}" aria-expanded="${!collapsed}"><span><strong>${escapeHtml(category.label)}</strong><small>${category.quantity}件</small></span><i aria-hidden="true">⌄</i></button><div class="packing-overview-category__items" ${collapsed ? "hidden" : ""}>${category.tags.map((tag) => `<div class="packing-overview-item"><strong class="packing-overview-tag">${escapeHtml(tag.label)}</strong><strong class="packing-overview-value">${tag.quantity}<i>件</i></strong></div>`).join("")}</div></section>`;
+      }).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
     </article>`;
   };
   overview.innerHTML = `<section class="packing-overview">
@@ -1368,6 +1378,14 @@ function renderTravelPrep() {
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
   renderAll();
   $("#packing-overview").onclick = (event) => {
+    const category = event.target.closest("[data-packing-overview-category]");
+    if (category) {
+      const categoryId = `${category.dataset.packingOverviewOwner}:${category.dataset.packingOverviewCategory}`;
+      if (state.collapsedPackingOverviewCategories.has(categoryId)) state.collapsedPackingOverviewCategories.delete(categoryId);
+      else state.collapsedPackingOverviewCategories.add(categoryId);
+      renderPackingWorkspace();
+      return;
+    }
     const owner = event.target.closest("[data-packing-overview-owner]");
     if (!owner) return;
     state.packingOverviewOwner = owner.dataset.packingOverviewOwner;
