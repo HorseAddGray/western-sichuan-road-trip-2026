@@ -513,7 +513,7 @@ main { overflow: hidden; }
 .todo-actions { display: flex; align-items: center; gap: 6px; padding-right: 2px; }
 .todo-edit, .todo-delete { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
 .todo-more { position: relative; }
-.todo-more summary { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: white; cursor: pointer; font: 800 14px/1 sans-serif; letter-spacing: 1px; list-style: none; }
+.todo-more summary { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--muted); background: transparent; cursor: pointer; font: 800 12px/1 sans-serif; letter-spacing: 0; list-style: none; }
 .todo-more summary::-webkit-details-marker { display: none; }
 .todo-more[open] summary { color: var(--ink); border-color: var(--lake); }
 .todo-more__menu { position: absolute; z-index: 6; right: 0; top: 37px; width: 86px; padding: 5px; display: grid; gap: 2px; border: 1px solid var(--line); border-radius: 9px; background: white; box-shadow: 0 12px 24px rgba(19,38,47,.14); }

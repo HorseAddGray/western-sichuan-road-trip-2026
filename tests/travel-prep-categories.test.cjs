@@ -394,3 +394,7 @@ test("packing rows keep the overflow trigger inside the row and add form fields 
   assert.match(html, /packing-form-selectors--add[\s\S]*packing-input[\s\S]*packing-add-todo-form__actions/);
   assert.match(styles, /\.packing-form-selectors--add \{[^}]*grid-template-columns:.*minmax\(180px, 2fr\).*auto/);
 });
+
+test("packing overflow control is compact and does not draw a white square", () => {
+  assert.match(styles, /\.todo-more summary \{[^}]*width: 24px[^}]*height: 24px[^}]*border: 0[^}]*background: transparent/);
+});
