@@ -1113,7 +1113,7 @@ function renderTodoList(kind) {
     $("#notice-list").innerHTML = orderedTodos.length ? noticeGroups(activeCategory, orderedTodos).map(({ group, id, label, collapsed }) => {
       const groupedItems = orderedTodos.filter((todo) => (todo.group || "其他信息") === group);
       const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
-      return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span>${escapeHtml(label)}</span><small>${groupedItems.length} 条</small><i aria-hidden="true">⌄</i></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
+      return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span class="notice-subcategory__title">${escapeHtml(label)}<i aria-hidden="true">⌄</i></span><small>${groupedItems.length} 条</small></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
     }).join("") : `<p class="todo-empty">该类别还没有信息。</p>`;
     return;
   }
@@ -1151,7 +1151,7 @@ function renderTodoList(kind) {
     if (!items.length) return "";
     const done = items.filter((todo) => todo.completed).length;
     const collapsed = state.collapsedPackingCategories.has(key);
-    return `<section class="prep-group prep-group--packing" data-packing-category="${key}"><button type="button" class="packing-category-toggle" data-packing-category-toggle="${key}" aria-expanded="${!collapsed}"><span>${label}</span><small>${done} / ${items.length}</small><i aria-hidden="true">⌄</i></button><div class="todo-list" ${collapsed ? "hidden" : ""}>${items.map(itemMarkup).join("")}</div></section>`;
+    return `<section class="prep-group prep-group--packing" data-packing-category="${key}"><button type="button" class="packing-category-toggle" data-packing-category-toggle="${key}" aria-expanded="${!collapsed}"><span class="packing-category-toggle__title">${label}<i aria-hidden="true">⌄</i></span><small>${done} / ${items.length}</small></button><div class="todo-list" ${collapsed ? "hidden" : ""}>${items.map(itemMarkup).join("")}</div></section>`;
   }).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
 }
 

@@ -18,7 +18,7 @@
 - Modify: `index.html`
 - Modify: `styles.css`
 
-- [ ] **Step 1: 写入失败测试**
+- [x] **Step 1: 写入失败测试**
 
 在 `tests/travel-prep-categories.test.cjs` 追加：
 
@@ -35,7 +35,7 @@ test("packing rows keep the overflow trigger inside the row and add form fields 
 });
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 运行：
 
@@ -45,7 +45,7 @@ node --test tests/travel-prep-categories.test.cjs
 
 预期：新增的类别标题断言失败，因为当前箭头位于完成数之后。
 
-- [ ] **Step 3: 最小实现**
+- [x] **Step 3: 最小实现**
 
 在 `app.js` 的 `packingCategoryMarkup` 和 `noticeItemMarkup` 字符串中，把标题部分替换为：
 
@@ -73,7 +73,7 @@ node --test tests/travel-prep-categories.test.cjs
 
 并在现有 `@media (max-width: 699px)` 中覆盖新增网格为两列，让名称字段占满整行、添加按钮保持可点击。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 运行：
 
@@ -83,7 +83,7 @@ node --test tests/travel-prep-categories.test.cjs
 
 预期：所有断言通过。
 
-- [ ] **Step 5: 提交布局修改**
+- [x] **Step 5: 提交布局修改**
 
 ```powershell
 git add app.js index.html styles.css tests/travel-prep-categories.test.cjs
@@ -95,11 +95,11 @@ git commit -m "style: align packing rows and category toggles"
 **Files:**
 - Modify: `index.html`
 
-- [ ] **Step 1: 更新缓存版本**
+- [x] **Step 1: 更新缓存版本**
 
 把 `index.html` 中 `styles.css` 与 `app.js` 的查询版本递增，确保已打开网页的浏览器重新读取布局资源。
 
-- [ ] **Step 2: 运行完整验证**
+- [x] **Step 2: 运行完整验证**
 
 运行：
 

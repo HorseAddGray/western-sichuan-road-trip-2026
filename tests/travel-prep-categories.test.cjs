@@ -383,3 +383,14 @@ test("shared trip API hashes invite codes and restricts record writes to the req
   assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_records/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_initialization/);
 });
+
+test("packing and notice category headings keep their chevrons beside the category name", () => {
+  assert.match(app, /packing-category-toggle.*packing-category-toggle__title.*<i aria-hidden="true">⌄<\/i>.*<small>/);
+  assert.match(app, /notice-subcategory__toggle.*notice-subcategory__title.*<i aria-hidden="true">⌄<\/i>.*<small>/);
+});
+
+test("packing rows keep the overflow trigger inside the row and add form fields on one desktop row", () => {
+  assert.match(styles, /\.todo-item \{[^}]*padding-inline/);
+  assert.match(html, /packing-form-selectors--add[\s\S]*packing-input[\s\S]*packing-add-todo-form__actions/);
+  assert.match(styles, /\.packing-form-selectors--add \{[^}]*grid-template-columns:.*minmax\(180px, 2fr\).*auto/);
+});
