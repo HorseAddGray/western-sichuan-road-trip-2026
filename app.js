@@ -1605,7 +1605,6 @@ function renderTravelPrep() {
     if (event.target.closest("[data-todo-copy]")) {
       const duplicate = { ...todo,
         id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        text: `${todo.text}（副本）`,
         completed: false
       };
       state.todos.push(duplicate);

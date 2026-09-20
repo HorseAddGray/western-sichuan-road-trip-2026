@@ -403,5 +403,6 @@ test("packing overflow menu can duplicate an item above delete without changing 
   assert.match(app, /data-packing-find[\s\S]*todo-edit[\s\S]*data-todo-copy[\s\S]*todo-delete/);
   assert.match(app, /event\.target\.closest\("\[data-todo-copy\]"\)/);
   assert.match(app, /const duplicate = \{ \.\.\.todo,[\s\S]*completed: false/);
+  assert.doesNotMatch(app, /text: `\$\{todo\.text\}（副本）`/);
   assert.match(app, /state\.todos\.push\(duplicate\)/);
 });
