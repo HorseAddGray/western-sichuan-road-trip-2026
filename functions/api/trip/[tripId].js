@@ -42,10 +42,13 @@ async function authorize(request, env, tripId) {
 }
 
 async function snapshot(env, tripId, collections) {
-  const records = await env.TRIP_DB.prepare(
+  const [records, initialization] = await Promise.all([
+    env.TRIP_DB.prepare(
     "SELECT collection, payload FROM trip_records WHERE trip_id = ?1 AND collection IN (" + collections.map((_, index) => `?${index + 2}`).join(",") + ") ORDER BY updated_at, record_id"
-  ).bind(tripId, ...collections).all();
-  const result = { version: 1, updatedAt: new Date().toISOString() };
+    ).bind(tripId, ...collections).all(),
+    env.TRIP_DB.prepare("SELECT trip_id FROM trip_initialization WHERE trip_id = ?1").bind(tripId).first()
+  ]);
+  const result = { version: 1, initialized: Boolean(initialization), updatedAt: new Date().toISOString() };
   collections.forEach((collection) => { result[collection] = []; });
   (records.results || []).forEach((record) => {
     try { result[record.collection].push(JSON.parse(record.payload)); } catch { /* Invalid stored data is ignored rather than exposed. */ }
@@ -66,12 +69,12 @@ function validateChanges(changes, collections) {
 
 async function applyChanges(env, tripId, changes) {
   const updatedAt = new Date().toISOString();
-  const statements = changes.map((change) => change.op === "delete"
+  const statements = [env.TRIP_DB.prepare("INSERT OR IGNORE INTO trip_initialization (trip_id, initialized_at) VALUES (?1, ?2)").bind(tripId, updatedAt), ...changes.map((change) => change.op === "delete"
     ? env.TRIP_DB.prepare("DELETE FROM trip_records WHERE trip_id = ?1 AND collection = ?2 AND record_id = ?3")
       .bind(tripId, change.collection, String(change.id))
     : env.TRIP_DB.prepare(
       "INSERT INTO trip_records (trip_id, collection, record_id, payload, updated_at) VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT(trip_id, collection, record_id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at"
-    ).bind(tripId, change.collection, String(change.id), JSON.stringify(change.value), updatedAt));
+    ).bind(tripId, change.collection, String(change.id), JSON.stringify(change.value), updatedAt))];
   if (statements.length) await env.TRIP_DB.batch(statements);
 }
 

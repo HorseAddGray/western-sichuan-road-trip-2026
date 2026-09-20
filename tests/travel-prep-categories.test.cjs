@@ -378,6 +378,8 @@ test("shared trip API hashes invite codes and restricts record writes to the req
   assert.match(api, /crypto\.subtle\.digest\("SHA-256"/);
   assert.match(api, /TRIP_DB/);
   assert.match(api, /ALLOWED_COLLECTIONS/);
+  assert.match(api, /trip_initialization/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_access/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_records/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_initialization/);
 });

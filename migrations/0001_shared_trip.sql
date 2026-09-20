@@ -4,6 +4,11 @@ CREATE TABLE IF NOT EXISTS trip_access (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS trip_initialization (
+  trip_id TEXT PRIMARY KEY,
+  initialized_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS trip_records (
   trip_id TEXT NOT NULL,
   collection TEXT NOT NULL,

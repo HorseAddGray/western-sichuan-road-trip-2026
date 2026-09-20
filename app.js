@@ -858,14 +858,35 @@ function createRuntimeAdapters() {
   d1Collections.forEach((collection) => { state.runtimeAdapters[collection] = d1Adapter; });
 }
 
-async function migrateLocalTodosToD1(todoAdapter) {
+function authoredTodosForMigration() {
+  return (state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || []).map((item, index) => ({
+    id: String(item.id || `todo-initial-${index + 1}`),
+    text: String(item.text || item.title || "").trim(),
+    category: window.TravelPrep.normalizeTodoCategory(item),
+    subcategory: window.TravelPrep.normalizeTodoSubcategory(item),
+    luggage: String(item.luggage || "").trim(),
+    owner: String(item.owner || "unassigned").trim(),
+    property: String(item.property || "").trim(),
+    container: String(item.container || "").trim(),
+    usesTotal: Number(item.usesTotal || 0),
+    usesRemaining: Number(item.usesRemaining || 0),
+    checked: Boolean(item.checked),
+    detail: String(item.detail || "").trim(),
+    group: String(item.group || "").trim(),
+    completed: Boolean(item.completed)
+  })).filter((item) => item.text && !OBSOLETE_PACKING_ITEM_IDS.has(item.id));
+}
+
+async function migrateLocalTodosToD1(todoAdapter, remoteInitialized) {
   if (todoAdapter?.mode !== "d1" || !state.localMigrationAdapter) return;
   if (localStorage.getItem(d1LocalMigrationKey()) === "1") return;
   const localSnapshot = await state.localMigrationAdapter.load();
-  const localTodos = Array.isArray(localSnapshot.todos) ? localSnapshot.todos : [];
-  if (!localTodos.length) return;
-  state.todos = localTodos;
-  await Promise.all(localTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
+  const localTodos = Array.isArray(localSnapshot.todos) ? localSnapshot.todos.filter((todo) => !OBSOLETE_PACKING_ITEM_IDS.has(todo.id)) : [];
+  const hasLegacySnapshot = Boolean(state.localMigrationAdapter.storageKey && localStorage.getItem(state.localMigrationAdapter.storageKey));
+  const todosToMigrate = localTodos.length ? localTodos : (!remoteInitialized && !hasLegacySnapshot ? authoredTodosForMigration() : []);
+  if (!todosToMigrate.length) return;
+  state.todos = todosToMigrate;
+  await Promise.all(todosToMigrate.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
   localStorage.setItem(d1LocalMigrationKey(), "1");
 }
 
@@ -877,7 +898,7 @@ async function loadSharedState() {
   const todoSnapshot = snapshotFor("todos");
   const ticketSnapshot = snapshotFor("tickets");
   state.todos = Array.isArray(todoSnapshot.todos) ? todoSnapshot.todos : [];
-  if (state.todos.length === 0) await migrateLocalTodosToD1(todoAdapter);
+  if (state.todos.length === 0) await migrateLocalTodosToD1(todoAdapter, Boolean(todoSnapshot.initialized));
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
   const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
   if (todoAdapter?.mode === "local" && authoredTodos.length) {
