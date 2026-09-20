@@ -458,7 +458,13 @@ main { overflow: hidden; }
 .packing-dictionary__heading > div { display: grid; gap: 4px; }
 .packing-dictionary__heading strong { color: var(--ink); font-size: 16px; }
 .packing-dictionary__heading small { color: var(--muted); font-size: 11px; line-height: 1.55; }
+.packing-dictionary-tabs { display: inline-flex; width: fit-content; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: white; }
+.packing-dictionary-tabs button { min-height: 32px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); color: var(--muted); background: transparent; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.packing-dictionary-tabs button:last-child { border-right: 0; }
+.packing-dictionary-tabs button[aria-selected="true"] { color: white; background: var(--ink); }
 .packing-dictionary-tree { display: grid; gap: 7px; }
+.packing-dictionary-luggage-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.packing-dictionary-luggage-heading .packing-dictionary-root { flex: 1; }
 .packing-dictionary-root { margin: 0; padding: 0 0 7px 12px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 900; }
 .packing-dictionary-branch { position: relative; overflow: visible; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.78); }
 .packing-dictionary-branch > summary { min-height: 42px; padding: 0 48px 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; cursor: pointer; }
@@ -480,13 +486,14 @@ main { overflow: hidden; }
 .packing-dictionary-tag-add { display: flex; gap: 7px; padding: 9px 12px 12px 24px; border-top: 1px solid var(--line); background: rgba(248,250,247,.7); }
 .packing-dictionary-tag-add input { min-width: 0; flex: 1; min-height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; font-size: 12px; }
 .packing-dictionary-tag-add button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 8px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
-.packing-luggage-manager { position: relative; margin: 0; }
-.packing-luggage-manager summary { list-style: none; }
-.packing-luggage-manager summary::-webkit-details-marker { display: none; }
-.packing-luggage-manager[open] summary { border-color: var(--lake); color: var(--ink); }
-#packing-luggage-settings { position: absolute; z-index: 5; top: 34px; right: 0; width: min(270px, calc(100vw - 38px)); padding: 9px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; border: 1px solid var(--line); border-radius: 10px; background: white; box-shadow: 0 12px 24px rgba(19,38,47,.14); }
-#packing-luggage-settings label { min-width: 0; display: grid; grid-template-columns: 22px 1fr; gap: 7px; align-items: center; }
-#packing-luggage-settings input { min-width: 0; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.82); color: var(--ink); font: inherit; font-size: 12px; }
+.packing-luggage-add, .packing-luggage-edit { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 7px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(248,250,247,.7); }
+.packing-luggage-add label, .packing-luggage-edit label { min-width: 0; display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
+.packing-luggage-add select, .packing-luggage-add input, .packing-luggage-edit select { min-width: 0; min-height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font: inherit; font-size: 12px; }
+.packing-luggage-add button, .packing-luggage-edit button { align-self: end; min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.packing-luggage-children { display: grid; gap: 7px; padding: 0 10px 10px 26px; }
+.packing-luggage-children .packing-dictionary-branch { background: rgba(248,250,247,.7); }
+.packing-luggage-branch summary b { font-size: 16px; }
+.packing-luggage-branch summary small { padding-left: 3px; }
 .packing-filter-toolbar { display: grid; grid-template-columns: minmax(0, 190px) auto; gap: 7px; align-items: end; margin: 0 0 9px; }
 .packing-filter-toolbar label { min-width: 0; display: grid; gap: 4px; }
 .packing-filter-toolbar label > span { color: var(--muted); font-size: 11px; }
@@ -681,4 +688,6 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
   .is-daily .transport-pin {width:24px;height:24px;padding:5px;border-radius:7px;}
   .is-daily .transport-pin svg {width:13px;height:13px;}
   #map-dialog-content .daily-fullscreen {width:100%;min-width:0;}
+  .packing-luggage-add, .packing-luggage-edit { grid-template-columns: 1fr 1fr; }
+  .packing-luggage-add label:last-of-type, .packing-luggage-edit label:last-of-type { grid-column: 1 / -1; }
 }

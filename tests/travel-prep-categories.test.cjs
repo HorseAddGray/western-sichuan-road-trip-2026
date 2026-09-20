@@ -98,7 +98,8 @@ test("packing forms keep selectors together, names below, and synchronize worksp
   assert.match(html, /data-packing-search-close[^>]*>×</);
   assert.match(app, /const PACKING_WORKSPACE_TITLES/);
   assert.match(app, /packing-title"\)\.textContent/);
-  assert.match(app, /!event\.target\.closest\("#packing-luggage-manager"\)/);
+  assert.doesNotMatch(html, /id="packing-luggage-manager"/);
+  assert.match(app, /data-packing-dictionary-tab="luggage"/);
 });
 
 test("packing actions share one style, highlight reset for active filters, and collapse categories by choice", () => {
@@ -475,6 +476,23 @@ test("packing dictionary creates a tag from each category overflow menu instead 
   assert.match(app, /data-packing-dictionary-tag-create/);
   assert.match(app, /data-packing-dictionary-tag-add/);
   assert.match(app, /data-packing-dictionary-category-delete/);
+});
+
+test("dictionary has category and luggage-use subcategories with sortable categories", () => {
+  assert.match(app, /activePackingDictionaryTab/);
+  assert.match(app, /data-packing-dictionary-tab="luggage"/);
+  assert.match(app, /data-packing-dictionary-category-drag/);
+  assert.match(app, /function movePackingDictionaryCategory\(/);
+  assert.match(app, /data-packing-luggage-add/);
+  assert.match(app, /data-packing-luggage-parent/);
+  assert.match(app, /data-packing-luggage-icon/);
+  assert.match(app, /packing-overview-owner="all"[^>]*>共同</);
+});
+
+test("new packing categories and labels synchronize into dictionary branches", () => {
+  assert.match(app, /function syncPackingDictionaryCategory\(category, property = ""\)/);
+  assert.match(app, /state\.packingCustomCategories\[subcategory\] = label/);
+  assert.match(app, /syncPackingDictionaryCategory\(subcategory, property\)/);
 });
 
 test("packing dictionary uses a collapsible tree and supports dragging tags between categories", () => {
