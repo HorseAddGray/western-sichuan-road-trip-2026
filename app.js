@@ -1186,7 +1186,7 @@ function hasActivePackingFilters() {
 
 function packingOverviewTagTotals(owner) {
   return window.TravelPrep.filterTodosByCategory(state.todos, "packing")
-    .filter((todo) => packingOwnerFor(todo) === owner)
+    .filter((todo) => [owner, "shared"].includes(packingOwnerFor(todo)))
     .reduce((totals, todo) => {
       const tag = packingPropertyFor(todo);
       const category = window.TravelPrep.normalizeTodoSubcategory(todo);
@@ -1200,7 +1200,7 @@ function packingOverviewTagTotals(owner) {
 function renderPackingOverview() {
   const overview = $("#packing-overview");
   if (!overview) return;
-  const owners = ["shared", "ma-jia", "zai-zai"];
+  const owners = ["ma-jia", "zai-zai"];
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
   const cardMarkup = (owner) => {
     const totals = packingOverviewTagTotals(owner);
