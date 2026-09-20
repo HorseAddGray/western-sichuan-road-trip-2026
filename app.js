@@ -1141,7 +1141,7 @@ function renderTodoList(kind) {
         <span class="todo-check" aria-hidden="true">✓</span>
         <span class="todo-copy"><span class="packing-item-title"><strong class="todo-text">${escapeHtml(todo.text)}${packingQuantityFor(todo) > 1 ? ` <small class="packing-item-quantity">×${packingQuantityFor(todo)}</small>` : ""}</strong><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select>${property === "consumable" && usesTotal > 0 ? `<span class="packing-item-meta packing-item-meta--inline"><button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button></span>` : ""}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </label>
-      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><button type="button" class="todo-edit">编辑</button><button type="button" class="todo-delete">删除</button></div></details></div>
+      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
     </div>`;
   };
   $("#packing-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
@@ -1599,6 +1599,17 @@ function renderTravelPrep() {
       if (!text) return;
       todo.text = text;
       saveSharedChange("todos", todo).catch(console.error);
+      renderAll();
+      return;
+    }
+    if (event.target.closest("[data-todo-copy]")) {
+      const duplicate = { ...todo,
+        id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        text: `${todo.text}（副本）`,
+        completed: false
+      };
+      state.todos.push(duplicate);
+      saveSharedChange("todos", duplicate).catch(console.error);
       renderAll();
       return;
     }

@@ -398,3 +398,10 @@ test("packing rows keep the overflow trigger inside the row and add form fields 
 test("packing overflow control is compact and does not draw a white square", () => {
   assert.match(styles, /\.todo-more summary \{[^}]*width: 24px[^}]*height: 24px[^}]*border: 0[^}]*background: transparent/);
 });
+
+test("packing overflow menu can duplicate an item above delete without changing the original", () => {
+  assert.match(app, /data-packing-find[\s\S]*todo-edit[\s\S]*data-todo-copy[\s\S]*todo-delete/);
+  assert.match(app, /event\.target\.closest\("\[data-todo-copy\]"\)/);
+  assert.match(app, /const duplicate = \{ \.\.\.todo,[\s\S]*completed: false/);
+  assert.match(app, /state\.todos\.push\(duplicate\)/);
+});
