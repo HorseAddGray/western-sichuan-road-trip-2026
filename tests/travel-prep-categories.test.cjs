@@ -420,6 +420,12 @@ test("packing items support a full-field edit form and dismiss overflow menus ou
   assert.match(app, /\$\("#packing-list"\)\.onsubmit/);
 });
 
+test("packing edit save uses an explicit click action for dynamic edit forms", () => {
+  assert.match(app, /data-packing-edit-submit/);
+  assert.match(app, /event\.target\.closest\("\[data-packing-edit-submit\]"\)/);
+  assert.match(app, /submitPackingEdit\(\{ target: editSave\.closest/);
+});
+
 test("custom packing category names use a dedicated row below the add-item fields", () => {
   assert.match(html, /data-packing-custom-category-row[^>]*hidden/);
   assert.match(styles, /\.todo-form\.packing-add-todo-form \{[^}]*grid-template-columns: 1fr/);

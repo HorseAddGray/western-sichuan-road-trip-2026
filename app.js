@@ -1050,7 +1050,7 @@ function packingEditFormMarkup(todo) {
       <label><span>物品标签</span><select data-packing-edit-property aria-label="物品标签">${tags.map((key) => `<option value="${key}" ${property === key ? "selected" : ""}>${PACKING_PROPERTY_LABELS[key]}</option>`).join("")}</select></label>
       <label><span>数量</span><select data-packing-edit-quantity aria-label="物品数量">${[1, 2, 3, 4, 5].map((quantity) => `<option value="${quantity}" ${packingQuantityFor(todo) === quantity ? "selected" : ""}>${quantity}</option>`).join("")}</select></label>
       <label class="packing-form-name"><span>物品名称</span><input data-packing-edit-name type="text" maxlength="80" value="${escapeHtml(todo.text)}" aria-label="物品名称"></label>
-      <div class="packing-add-todo-form__actions"><label class="packing-uses-field" data-packing-edit-uses-row ${property === "consumable" ? "" : "hidden"}><span>可用次数</span><input data-packing-edit-uses type="number" min="1" max="99" value="${usesTotal || 1}" aria-label="消耗品可用次数"></label><button type="submit">保存</button></div>
+      <div class="packing-add-todo-form__actions"><label class="packing-uses-field" data-packing-edit-uses-row ${property === "consumable" ? "" : "hidden"}><span>可用次数</span><input data-packing-edit-uses type="number" min="1" max="99" value="${usesTotal || 1}" aria-label="消耗品可用次数"></label><button type="button" data-packing-edit-submit>保存</button></div>
     </div>
     <label class="packing-custom-category" data-packing-edit-custom-category-row hidden><span>新类别名称</span><input data-packing-edit-custom-category type="text" maxlength="12" placeholder="例如：摄影"></label>
   </form>`;
@@ -1694,6 +1694,11 @@ function renderTravelPrep() {
     updateTodo(event);
   };
   $("#packing-list").onclick = (event) => {
+    const editSave = event.target.closest("[data-packing-edit-submit]");
+    if (editSave) {
+      submitPackingEdit({ target: editSave.closest("[data-packing-edit-form]"), preventDefault() {} });
+      return;
+    }
     const editCancel = event.target.closest("[data-packing-edit-cancel]");
     if (editCancel) {
       state.editingPackingTodoId = "";
