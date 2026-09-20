@@ -125,6 +125,6 @@ Use the local Wrangler configuration to bind `TRIP_DB` to the existing Pages pro
 
 Verify unauthenticated API calls return 401, correct-code reads return 200, an upsert returns the record, and a subsequent read returns the same record.
 
-- [ ] **Step 4: Commit safe source changes**
+- [x] **Step 4: Commit safe source changes**
 
 Commit application code, schema, tests, and the D1 configuration mode. Do not commit a database ID, access code, or local Wrangler configuration.
