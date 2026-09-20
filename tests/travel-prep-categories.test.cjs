@@ -479,6 +479,16 @@ test("packing dictionary uses a collapsible tree and supports dragging tags betw
   assert.match(app, /data-packing-dictionary-unlink/);
 });
 
+test("packing dictionary reorders tags, keeps open branches open after removal, and manages categories from an overflow menu", () => {
+  assert.match(app, /data-packing-dictionary-tag-drop/);
+  assert.match(app, /function movePackingDictionaryTag\(/);
+  assert.match(app, /function rememberOpenPackingDictionaryBranches\(/);
+  assert.match(app, /expandedPackingDictionaryCategories/);
+  assert.match(app, /data-packing-dictionary-category-edit/);
+  assert.match(app, /data-packing-dictionary-category-delete/);
+  assert.match(app, /todo-more__menu/);
+});
+
 test("packing additions keep the last category, owner, tag, and quantity for repeated entry", () => {
   assert.match(app, /packingAddDefaults: \{ subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" \}/);
   assert.match(app, /state\.packingAddDefaults = \{ subcategory, owner, property/);

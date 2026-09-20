@@ -22,7 +22,12 @@ const state = {
   collapsedPackingCategories: new Set(),
   collapsedPackingOverviewCategories: new Set(),
   packingCustomCategories: {},
+  packingCategoryLabels: {},
+  deletedPackingCategories: new Set(),
   packingTagAssociations: {},
+  expandedPackingDictionaryCategories: new Set(),
+  editingPackingDictionaryCategory: "",
+  draggedPackingDictionaryTag: null,
   packingAddDefaults: { subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" },
   packingLuggageLabels: {},
   activePackingWorkspace: "details",
@@ -1001,11 +1006,22 @@ function packingLuggageSettingsKey() {
 function packingCustomCategoriesKey() {
   return `travel-plan:${state.data.metadata.tripId}:packing-custom-categories`;
 }
+function packingCategorySettingsKey() {
+  return `travel-plan:${state.data.metadata.tripId}:packing-category-settings`;
+}
 function packingTagAssociationsKey() {
   return `travel-plan:${state.data.metadata.tripId}:packing-tag-associations`;
 }
 function packingCategoryEntries() {
-  return [...Object.entries(PREP_LABELS.packing), ...Object.entries(state.packingCustomCategories || {})];
+  return [...Object.entries(PREP_LABELS.packing), ...Object.entries(state.packingCustomCategories || {})]
+    .filter(([category]) => !state.deletedPackingCategories.has(category))
+    .map(([category, label]) => [category, state.packingCategoryLabels[category] || label]);
+}
+function savePackingCategorySettings() {
+  localStorage.setItem(packingCategorySettingsKey(), JSON.stringify({
+    labels: state.packingCategoryLabels,
+    deleted: [...state.deletedPackingCategories]
+  }));
 }
 function packingTagsForCategory(category) {
   if (Object.hasOwn(state.packingTagAssociations, category)) return state.packingTagAssociations[category];
@@ -1021,6 +1037,48 @@ function attachPackingTagToCategory(tag, category) {
   const tags = new Set(packingTagsForCategory(category));
   tags.add(tag);
   state.packingTagAssociations[category] = [...tags];
+  savePackingTagAssociations();
+}
+function movePackingDictionaryTag(sourceCategory, tag, targetCategory, beforeTag = "") {
+  const sourceTags = packingTagsForCategory(sourceCategory).filter((item) => item !== tag);
+  const targetTags = sourceCategory === targetCategory
+    ? sourceTags
+    : packingTagsForCategory(targetCategory).filter((item) => item !== tag);
+  const index = beforeTag ? targetTags.indexOf(beforeTag) : -1;
+  targetTags.splice(index >= 0 ? index : targetTags.length, 0, tag);
+  state.packingTagAssociations[sourceCategory] = sourceTags;
+  state.packingTagAssociations[targetCategory] = targetTags;
+  savePackingTagAssociations();
+}
+function rememberOpenPackingDictionaryBranches() {
+  $$(".packing-dictionary-branch", $("#packing-dictionary")).forEach((branch) => {
+    const category = branch.dataset.packingDictionaryCategory;
+    if (branch.open) state.expandedPackingDictionaryCategories.add(category);
+    else state.expandedPackingDictionaryCategories.delete(category);
+  });
+}
+function deletePackingDictionaryCategory(category) {
+  const remaining = packingCategoryEntries().filter(([key]) => key !== category);
+  const fallback = remaining.find(([key]) => key === "other")?.[0] || remaining[0]?.[0];
+  if (!fallback) return;
+  window.TravelPrep.filterTodosByCategory(state.todos, "packing").forEach((todo) => {
+    if (window.TravelPrep.normalizeTodoSubcategory(todo) !== category) return;
+    todo.subcategory = fallback;
+    todo.luggage = packingLuggageFor(todo);
+    todo.container = packingLuggageFor(todo);
+    saveSharedChange("todos", todo).catch(console.error);
+  });
+  if (Object.hasOwn(state.packingCustomCategories, category)) {
+    delete state.packingCustomCategories[category];
+    localStorage.setItem(packingCustomCategoriesKey(), JSON.stringify(state.packingCustomCategories));
+  } else {
+    state.deletedPackingCategories.add(category);
+  }
+  delete state.packingCategoryLabels[category];
+  delete state.packingTagAssociations[category];
+  state.expandedPackingDictionaryCategories.delete(category);
+  state.editingPackingDictionaryCategory = "";
+  savePackingCategorySettings();
   savePackingTagAssociations();
 }
 function isCustomPackingProperty(property) {
@@ -1281,7 +1339,8 @@ function renderPackingDictionary() {
     <form class="packing-dictionary__add" data-packing-dictionary-add><label><span>新增物品标签</span><input name="tag" type="text" maxlength="24" placeholder="例如：摄影"></label><label><span>先关联到</span><select name="category">${categories.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</select></label><button type="submit">新增</button></form>
     <div class="packing-dictionary-tree" role="tree"><p class="packing-dictionary-root">物品类别</p>${categories.map(([category, label]) => {
       const tags = packingTagsForCategory(category);
-      return `<details class="packing-dictionary-branch" data-packing-dictionary-category="${escapeHtml(category)}"><summary data-packing-dictionary-drop="${escapeHtml(category)}"><span><strong>${escapeHtml(label)}</strong><small>${tags.length} 个标签</small></span><i aria-hidden="true">⌄</i></summary><div class="packing-dictionary-tags">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" title="拖到其他类别以新增关联"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div></details>`;
+      const editing = state.editingPackingDictionaryCategory === category;
+      return `<details class="packing-dictionary-branch" data-packing-dictionary-category="${escapeHtml(category)}" ${state.expandedPackingDictionaryCategories.has(category) ? "open" : ""}><summary data-packing-dictionary-drop="${escapeHtml(category)}"><span>${editing ? `<input data-packing-dictionary-category-label="${escapeHtml(category)}" value="${escapeHtml(label)}" maxlength="24" aria-label="${escapeHtml(label)}类别名称">` : `<strong>${escapeHtml(label)}</strong>`}<i aria-hidden="true">⌄</i></span><small>${tags.length} 个标签</small></summary><div class="packing-dictionary-branch__actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(label)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-dictionary-category-edit="${escapeHtml(category)}">编辑</button><button type="button" class="todo-delete" data-packing-dictionary-category-delete="${escapeHtml(category)}">删除</button></div></details></div><div class="packing-dictionary-tags" data-packing-dictionary-drop="${escapeHtml(category)}">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" data-packing-dictionary-tag-drop="${escapeHtml(tag)}" title="拖动标签调整位置"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div></details>`;
     }).join("")}</div>
   </section>`;
 }
@@ -1358,6 +1417,14 @@ function renderTravelPrep() {
     state.packingCustomCategories = customCategories && typeof customCategories === "object" ? customCategories : {};
   } catch {
     state.packingCustomCategories = {};
+  }
+  try {
+    const categorySettings = JSON.parse(localStorage.getItem(packingCategorySettingsKey()) || "{}");
+    state.packingCategoryLabels = categorySettings?.labels && typeof categorySettings.labels === "object" ? categorySettings.labels : {};
+    state.deletedPackingCategories = new Set(Array.isArray(categorySettings?.deleted) ? categorySettings.deleted : []);
+  } catch {
+    state.packingCategoryLabels = {};
+    state.deletedPackingCategories = new Set();
   }
   try {
     const savedAssociations = JSON.parse(localStorage.getItem(packingTagAssociationsKey()) || "null");
@@ -1473,8 +1540,43 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#packing-dictionary").onclick = (event) => {
+    const labelInput = event.target.closest("[data-packing-dictionary-category-label]");
+    if (labelInput) {
+      event.stopPropagation();
+      return;
+    }
+    const summary = event.target.closest(".packing-dictionary-branch > summary");
+    if (summary) {
+      const branch = summary.parentElement;
+      setTimeout(() => {
+        if (branch.open) state.expandedPackingDictionaryCategories.add(branch.dataset.packingDictionaryCategory);
+        else state.expandedPackingDictionaryCategories.delete(branch.dataset.packingDictionaryCategory);
+      });
+      return;
+    }
+    const editCategory = event.target.closest("[data-packing-dictionary-category-edit]");
+    if (editCategory) {
+      rememberOpenPackingDictionaryBranches();
+      const category = editCategory.dataset.packingDictionaryCategoryEdit;
+      state.editingPackingDictionaryCategory = category;
+      state.expandedPackingDictionaryCategories.add(category);
+      renderAll();
+      $("[data-packing-dictionary-category-label]", $("#packing-dictionary"))?.focus();
+      return;
+    }
+    const deleteCategory = event.target.closest("[data-packing-dictionary-category-delete]");
+    if (deleteCategory) {
+      const category = deleteCategory.dataset.packingDictionaryCategoryDelete;
+      const label = packingCategoryLabel(category);
+      if (!window.confirm(`删除“${label}”类别？其中物品会转入其他现有类别。`)) return;
+      rememberOpenPackingDictionaryBranches();
+      deletePackingDictionaryCategory(category);
+      renderAll();
+      return;
+    }
     const unlink = event.target.closest("[data-packing-dictionary-unlink]");
     if (!unlink) return;
+    rememberOpenPackingDictionaryBranches();
     const category = unlink.dataset.packingDictionaryCategory;
     const tag = unlink.dataset.packingDictionaryUnlink;
     const tags = new Set(packingTagsForCategory(category));
@@ -1483,26 +1585,47 @@ function renderTravelPrep() {
     savePackingTagAssociations();
     renderAll();
   };
+  $("#packing-dictionary").onchange = (event) => {
+    const input = event.target.closest("[data-packing-dictionary-category-label]");
+    if (!input) return;
+    const category = input.dataset.packingDictionaryCategoryLabel;
+    const label = input.value.trim();
+    const defaultLabel = PREP_LABELS.packing[category] || state.packingCustomCategories[category];
+    if (label && label !== defaultLabel) state.packingCategoryLabels[category] = label;
+    else delete state.packingCategoryLabels[category];
+    state.editingPackingDictionaryCategory = "";
+    savePackingCategorySettings();
+    renderAll();
+  };
   $("#packing-dictionary").ondragstart = (event) => {
     const tag = event.target.closest("[data-packing-dictionary-tag]");
     if (!tag || !event.dataTransfer) return;
-    event.dataTransfer.setData("text/plain", tag.dataset.packingDictionaryTag);
-    event.dataTransfer.effectAllowed = "copy";
+    state.draggedPackingDictionaryTag = { tag: tag.dataset.packingDictionaryTag, category: tag.dataset.packingDictionaryCategory };
+    event.dataTransfer.setData("text/plain", JSON.stringify(state.draggedPackingDictionaryTag));
+    event.dataTransfer.effectAllowed = "move";
   };
   $("#packing-dictionary").ondragover = (event) => {
-    if (!event.target.closest("[data-packing-dictionary-drop]")) return;
+    if (!event.target.closest("[data-packing-dictionary-drop], [data-packing-dictionary-tag-drop]")) return;
     event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
   };
   $("#packing-dictionary").ondrop = (event) => {
-    const target = event.target.closest("[data-packing-dictionary-drop]");
+    const target = event.target.closest("[data-packing-dictionary-tag-drop], [data-packing-dictionary-drop]");
     if (!target || !event.dataTransfer) return;
     event.preventDefault();
-    const tag = event.dataTransfer.getData("text/plain");
-    if (!tag) return;
-    attachPackingTagToCategory(tag, target.dataset.packingDictionaryDrop);
+    let source = state.draggedPackingDictionaryTag;
+    try { source ||= JSON.parse(event.dataTransfer.getData("text/plain")); } catch { source = null; }
+    const targetCategory = target.dataset.packingDictionaryCategory || target.dataset.packingDictionaryDrop;
+    const beforeTag = target.dataset.packingDictionaryTagDrop || "";
+    if (!source?.tag || !source.category || !targetCategory) return;
+    if (source.category === targetCategory && source.tag === beforeTag) return;
+    rememberOpenPackingDictionaryBranches();
+    state.expandedPackingDictionaryCategories.add(targetCategory);
+    movePackingDictionaryTag(source.category, source.tag, targetCategory, beforeTag);
+    state.draggedPackingDictionaryTag = null;
     renderAll();
   };
+  $("#packing-dictionary").ondragend = () => { state.draggedPackingDictionaryTag = null; };
   $("#packing-luggage-filters").onclick = (event) => {
     const button = event.target.closest("[data-packing-luggage]");
     if (!button) return;

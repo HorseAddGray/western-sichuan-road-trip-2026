@@ -464,14 +464,17 @@ main { overflow: hidden; }
 .packing-dictionary__add button { min-height: 42px; padding: 0 15px; border: 0; border-radius: 10px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .packing-dictionary-tree { display: grid; gap: 7px; }
 .packing-dictionary-root { margin: 0; padding: 0 0 7px 12px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 900; }
-.packing-dictionary-branch { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.78); }
-.packing-dictionary-branch summary { min-height: 42px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; cursor: pointer; }
+.packing-dictionary-branch { position: relative; overflow: visible; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.78); }
+.packing-dictionary-branch > summary { min-height: 42px; padding: 0 48px 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; cursor: pointer; }
 .packing-dictionary-branch summary::-webkit-details-marker { display: none; }
-.packing-dictionary-branch summary span { display: flex; align-items: baseline; gap: 8px; }
+.packing-dictionary-branch > summary span { display: flex; align-items: center; gap: 5px; }
 .packing-dictionary-branch summary strong { color: var(--ink); font-size: 14px; font-weight: 900; }
 .packing-dictionary-branch summary small { color: var(--muted); font-size: 11px; }
 .packing-dictionary-branch summary i { color: var(--lake); font-style: normal; transition: transform .18s ease; }
 .packing-dictionary-branch:not([open]) summary i { transform: rotate(-90deg); }
+.packing-dictionary-branch__actions { position: absolute; z-index: 7; top: 8px; right: 9px; }
+.packing-dictionary-branch__actions .todo-more__menu { top: 29px; }
+.packing-dictionary-branch input { width: min(210px, 48vw); min-height: 27px; padding: 0 6px; border: 1px solid var(--lake); border-radius: 6px; color: var(--ink); background: white; font: 800 13px/1 inherit; }
 .packing-dictionary-tags { min-height: 46px; padding: 9px 12px 12px 24px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); background: rgba(248,250,247,.7); }
 .packing-dictionary-tags p { margin: 0; color: var(--muted); font-size: 12px; }
 .packing-dictionary-tag { min-height: 29px; padding: 0 4px 0 9px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font-size: 12px; cursor: grab; }
