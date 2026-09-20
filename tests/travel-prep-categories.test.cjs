@@ -436,3 +436,12 @@ test("packing overview folds shared items into both personal cards without a sha
   assert.match(app, /const owners = \["ma-jia", "zai-zai"\]/);
   assert.doesNotMatch(app, /const owners = \["shared", "ma-jia", "zai-zai"\]/);
 });
+
+test("packing add and edit forms provide matching custom category and tag fields", () => {
+  assert.match(html, /data-packing-custom-category-row[^>]*hidden/);
+  assert.match(html, /data-packing-custom-property-row[^>]*hidden/);
+  assert.match(app, /packing-custom-category-field[^>]*data-packing-edit-custom-category-row/);
+  assert.match(app, /packing-custom-category-field[^>]*data-packing-edit-custom-property-row/);
+  assert.match(app, /新增标签…/);
+  assert.match(app, /function packingPropertyLabel/);
+});

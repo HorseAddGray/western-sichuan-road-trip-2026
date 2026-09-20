@@ -1004,6 +1004,18 @@ function packingCategoryEntries() {
 function packingTagsForCategory(category) {
   return PACKING_TAGS_BY_CATEGORY[category] || ["none"];
 }
+function isCustomPackingProperty(property) {
+  return typeof property === "string" && property.startsWith("custom:");
+}
+function packingPropertyLabel(property) {
+  if (isCustomPackingProperty(property)) {
+    try { return decodeURIComponent(property.slice("custom:".length)); } catch { return property.slice("custom:".length) || "其他"; }
+  }
+  return PACKING_PROPERTY_LABELS[property] || "无";
+}
+function packingTagOptions(tags, selected) {
+  return `${tags.map((key) => `<option value="${key}" ${selected === key ? "selected" : ""}>${packingPropertyLabel(key)}</option>`).join("")}${isCustomPackingProperty(selected) ? `<option value="${escapeHtml(selected)}" selected>${escapeHtml(packingPropertyLabel(selected))}</option>` : ""}<option value="__custom__">新增标签…</option>`;
+}
 function packingQuantityFor(todo) {
   return Math.min(5, Math.max(1, Number(todo.quantity) || 1));
 }
@@ -1016,10 +1028,12 @@ function syncPackingTagOptions() {
   const select = $("#packing-property");
   if (!select) return;
   const selected = tags.includes(select.value) ? select.value : tags[0];
-  select.innerHTML = tags.map((key) => `<option value="${key}">${PACKING_PROPERTY_LABELS[key]}</option>`).join("");
+  select.innerHTML = packingTagOptions(tags, selected);
   select.value = selected;
   const usesRow = $("[data-packing-uses-row]");
   if (usesRow) usesRow.hidden = select.value !== "consumable";
+  const customPropertyRow = $("[data-packing-custom-property-row]");
+  if (customPropertyRow) customPropertyRow.hidden = select.value !== "__custom__";
 }
 
 function packingLuggageFor(todo) {
@@ -1033,6 +1047,7 @@ function packingLuggageLabel(luggage) {
 function packingOwnerFor(todo) { return PACKING_OWNER_LABELS[todo.owner] ? todo.owner : "unassigned"; }
 function packingPropertyFor(todo) {
   if (todo.property === "common") return "none";
+  if (isCustomPackingProperty(todo.property)) return todo.property;
   if (PACKING_PROPERTY_LABELS[todo.property]) return todo.property;
   return Number(todo.usesTotal || 0) > 0 ? "consumable" : "none";
 }
@@ -1047,12 +1062,13 @@ function packingEditFormMarkup(todo) {
     <div class="packing-form-selectors packing-form-selectors--add">
       <label><span>物品类别</span><select data-packing-edit-category aria-label="物品类别">${packingCategoryEntries().map(([key, label]) => `<option value="${key}" ${category === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}<option value="__custom__">新增类别…</option></select></label>
       <label><span>人物归属</span><select data-packing-edit-owner aria-label="人物归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></label>
-      <label><span>物品标签</span><select data-packing-edit-property aria-label="物品标签">${tags.map((key) => `<option value="${key}" ${property === key ? "selected" : ""}>${PACKING_PROPERTY_LABELS[key]}</option>`).join("")}</select></label>
+      <label><span>物品标签</span><select data-packing-edit-property aria-label="物品标签">${packingTagOptions(tags, property)}</select></label>
       <label><span>数量</span><select data-packing-edit-quantity aria-label="物品数量">${[1, 2, 3, 4, 5].map((quantity) => `<option value="${quantity}" ${packingQuantityFor(todo) === quantity ? "selected" : ""}>${quantity}</option>`).join("")}</select></label>
       <label class="packing-form-name"><span>物品名称</span><input data-packing-edit-name type="text" maxlength="80" value="${escapeHtml(todo.text)}" aria-label="物品名称"></label>
       <div class="packing-add-todo-form__actions"><label class="packing-uses-field" data-packing-edit-uses-row ${property === "consumable" ? "" : "hidden"}><span>可用次数</span><input data-packing-edit-uses type="number" min="1" max="99" value="${usesTotal || 1}" aria-label="消耗品可用次数"></label><button type="button" data-packing-edit-submit>保存</button></div>
     </div>
-    <label class="packing-custom-category" data-packing-edit-custom-category-row hidden><span>新类别名称</span><input data-packing-edit-custom-category type="text" maxlength="12" placeholder="例如：摄影"></label>
+    <label class="packing-custom-category-field" data-packing-edit-custom-category-row ${category === "__custom__" ? "" : "hidden"}><span>新类别名称</span><input data-packing-edit-custom-category type="text" maxlength="12" placeholder="例如：摄影"></label>
+    <label class="packing-custom-category-field" data-packing-edit-custom-property-row ${isCustomPackingProperty(property) ? "" : "hidden"}><span>新物品标签</span><input data-packing-edit-custom-property type="text" maxlength="12" value="${isCustomPackingProperty(property) ? escapeHtml(packingPropertyLabel(property)) : ""}" placeholder="例如：摄影"></label>
   </form>`;
 }
 function packingWorkspaceFromHash(hash = location.hash) {
@@ -1191,7 +1207,7 @@ function packingOverviewTagTotals(owner) {
       const tag = packingPropertyFor(todo);
       const category = window.TravelPrep.normalizeTodoSubcategory(todo);
       const key = tag === "none" ? `category:${category}` : `tag:${tag}`;
-      const label = tag === "none" ? packingCategoryLabel(category) : PACKING_PROPERTY_LABELS[tag];
+      const label = tag === "none" ? packingCategoryLabel(category) : packingPropertyLabel(tag);
       totals[key] = { label, quantity: (totals[key]?.quantity || 0) + packingQuantityFor(todo) };
       return totals;
     }, {});
@@ -1230,7 +1246,7 @@ function renderPackingWorkspace() {
   renderPackingOverview();
   $("#packing-purchase-list").innerHTML = state.packingPurchases.length ? state.packingPurchases.map((item) => {
     const property = packingPropertyFor(item);
-    return `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span>${item.detail ? `<span class="todo-detail">${escapeHtml(item.detail)}</span>` : ""}<span class="todo-detail">${PACKING_PROPERTY_LABELS[property]}${property === "consumable" && item.usesTotal ? ` · 可用 ${item.usesTotal} 次` : ""}</span></span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`;
+    return `<div class="todo-item" data-purchase-id="${escapeHtml(item.id)}"><span class="todo-copy"><span class="todo-text">${escapeHtml(item.text)}</span>${item.detail ? `<span class="todo-detail">${escapeHtml(item.detail)}</span>` : ""}<span class="todo-detail">${packingPropertyLabel(property)}${property === "consumable" && item.usesTotal ? ` · 可用 ${item.usesTotal} 次` : ""}</span></span><div class="todo-actions"><button type="button" data-purchase-submit="${escapeHtml(item.id)}">提交到行囊</button><button type="button" data-purchase-delete="${escapeHtml(item.id)}">删除</button></div></div>`;
   }).join("") : `<p class="todo-empty">还没有采购项。</p>`;
   const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
   const openLuggage = state.packingCheck.openLuggage || [];
@@ -1546,7 +1562,15 @@ function renderTravelPrep() {
         $("#packing-subcategory").innerHTML = `${optionMarkup("packing")}<option value="__custom__">新增类别…</option>`;
       }
     }
-    const property = kind === "packing" ? $("#packing-property").value : "common";
+    let property = kind === "packing" ? $("#packing-property").value : "common";
+    if (kind === "packing" && property === "__custom__") {
+      const label = $("#packing-custom-property").value.trim();
+      if (!label) {
+        $("#packing-custom-property").focus();
+        return;
+      }
+      property = `custom:${encodeURIComponent(label)}`;
+    }
     const usesTotal = kind === "packing" && property === "consumable" ? Number($("#packing-uses").value) || 0 : 0;
     const owner = kind === "packing" ? $("#packing-owner").value : "unassigned";
     const todo = { id: `todo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, category: kind, subcategory, ...(kind === "packing" ? { luggage: packingLuggageFor({ category: kind, subcategory }), owner, property, quantity: Number($("#packing-quantity").value) || 1, container: packingLuggageFor({ category: kind, subcategory }), usesTotal, usesRemaining: usesTotal } : {}), completed: false };
@@ -1558,6 +1582,8 @@ function renderTravelPrep() {
       $("#packing-quantity").value = "1";
       $("#packing-custom-category").value = "";
       $("[data-packing-custom-category-row]").hidden = true;
+      $("#packing-custom-property").value = "";
+      $("[data-packing-custom-property-row]").hidden = true;
       syncPackingTagOptions();
       $("#packing-uses").value = "0";
       $("[data-packing-uses-row]").hidden = true;
@@ -1596,7 +1622,15 @@ function renderTravelPrep() {
     usesRow.hidden = !isConsumable;
     if (!isConsumable) $("input", usesRow).value = "0";
   };
-  $("#packing-property").onchange = () => updateUsesVisibility($("#packing-property"), $("[data-packing-uses-row]"));
+  const updateCustomPropertyVisibility = (propertySelect, customRow, customInput) => {
+    const isCustom = propertySelect.value === "__custom__";
+    customRow.hidden = !isCustom;
+    if (isCustom) customInput.focus();
+  };
+  $("#packing-property").onchange = () => {
+    updateUsesVisibility($("#packing-property"), $("[data-packing-uses-row]"));
+    updateCustomPropertyVisibility($("#packing-property"), $("[data-packing-custom-property-row]"), $("#packing-custom-property"));
+  };
   $("#packing-purchase-property").onchange = () => updateUsesVisibility($("#packing-purchase-property"), $("[data-packing-purchase-uses-row]"));
   const syncPackingEditFields = (form) => {
     const category = $("[data-packing-edit-category]", form).value;
@@ -1605,9 +1639,10 @@ function renderTravelPrep() {
     const property = $("[data-packing-edit-property]", form);
     const tags = packingTagsForCategory(category);
     const selected = tags.includes(property.value) ? property.value : tags[0];
-    property.innerHTML = tags.map((key) => `<option value="${key}">${PACKING_PROPERTY_LABELS[key]}</option>`).join("");
+    property.innerHTML = packingTagOptions(tags, selected);
     property.value = selected;
     updateUsesVisibility(property, $("[data-packing-edit-uses-row]", form));
+    $("[data-packing-edit-custom-property-row]", form).hidden = true;
     if (isCustom) $("[data-packing-edit-custom-category]", form).focus();
   };
   const submitPackingEdit = (event) => {
@@ -1628,7 +1663,12 @@ function renderTravelPrep() {
         localStorage.setItem(packingCustomCategoriesKey(), JSON.stringify(state.packingCustomCategories));
       }
     }
-    const property = $("[data-packing-edit-property]", form).value;
+    let property = $("[data-packing-edit-property]", form).value;
+    if (property === "__custom__") {
+      const label = $("[data-packing-edit-custom-property]", form).value.trim();
+      if (!label) { $("[data-packing-edit-custom-property]", form).focus(); return; }
+      property = `custom:${encodeURIComponent(label)}`;
+    }
     const usesTotal = property === "consumable" ? Number($("[data-packing-edit-uses]", form).value) || 1 : 0;
     Object.assign(todo, {
       text,
@@ -1687,8 +1727,14 @@ function renderTravelPrep() {
   $("#packing-list").onsubmit = submitPackingEdit;
   $("#packing-list").onchange = (event) => {
     const form = event.target.closest("[data-packing-edit-form]");
-    if (form && event.target.matches("[data-packing-edit-category], [data-packing-edit-property]")) {
+    if (form && event.target.matches("[data-packing-edit-category]")) {
       syncPackingEditFields(form);
+      return;
+    }
+    if (form && event.target.matches("[data-packing-edit-property]")) {
+      const property = $("[data-packing-edit-property]", form);
+      updateUsesVisibility(property, $("[data-packing-edit-uses-row]", form));
+      updateCustomPropertyVisibility(property, $("[data-packing-edit-custom-property-row]", form), $("[data-packing-edit-custom-property]", form));
       return;
     }
     updateTodo(event);
