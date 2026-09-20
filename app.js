@@ -2,6 +2,8 @@ const state = {
   data: null,
   config: null,
   runtimeAdapters: {},
+  localMigrationAdapter: null,
+  sharedAccessCode: "",
   expandedDay: null,
   countdownTimer: null,
   purchasedTickets: new Set(),
@@ -770,6 +772,62 @@ function rememberRemovedAuthoredPackingTodo(todo) {
   localStorage.setItem(removedAuthoredPackingTodoIdsKey(), JSON.stringify([...removed]));
 }
 
+function sharedAccessCodeStorageKey() {
+  return `travel-plan:${state.data.metadata.tripId}:shared-access-code`;
+}
+
+function d1LocalMigrationKey() {
+  return `travel-plan:${state.data.metadata.tripId}:d1-todos-migrated`;
+}
+
+function requestSharedAccessCode(errorMessage = "") {
+  const storedCode = String(localStorage.getItem(sharedAccessCodeStorageKey()) || "").trim();
+  if (storedCode) return Promise.resolve(storedCode);
+  const gate = $("#shared-access-gate");
+  const form = $("#shared-access-form");
+  const input = $("#shared-access-code");
+  const error = $("#shared-access-error");
+  if (!gate || !form || !input || !error) throw new Error("Shared access gate is required for D1 mode");
+  error.hidden = !errorMessage;
+  error.textContent = errorMessage;
+  gate.hidden = false;
+  window.setTimeout(() => input.focus(), 0);
+  return new Promise((resolve) => {
+    form.onsubmit = (event) => {
+      event.preventDefault();
+      const code = input.value.trim();
+      if (!code) {
+        error.hidden = false;
+        error.textContent = "请输入邀请码。";
+        input.focus();
+        return;
+      }
+      localStorage.setItem(sharedAccessCodeStorageKey(), code);
+      gate.hidden = true;
+      input.value = "";
+      resolve(code);
+    };
+  });
+}
+
+async function loadConfiguredRuntimeState() {
+  const sharedMode = state.config.persistence.mode === "d1";
+  let accessError = "";
+  while (true) {
+    if (sharedMode) state.sharedAccessCode = await requestSharedAccessCode(accessError);
+    createRuntimeAdapters();
+    try {
+      await loadSharedState();
+      return;
+    } catch (error) {
+      if (!sharedMode || !/^API 401$/.test(error.message)) throw error;
+      localStorage.removeItem(sharedAccessCodeStorageKey());
+      state.sharedAccessCode = "";
+      accessError = "邀请码不正确，请向马甲或仔仔确认后重试。";
+    }
+  }
+}
+
 function createRuntimeAdapters() {
   const storage = window.TravelRuntimeStorage;
   if (!storage?.createAdapter) throw new Error("runtime-storage.js is required");
@@ -789,11 +847,26 @@ function createRuntimeAdapters() {
     mode: "d1",
     tripId,
     apiBase: persistence.apiBase || "/api/trip",
-    collections: d1Collections
+    collections: d1Collections,
+    accessCode: state.sharedAccessCode
   }) : null;
+  state.localMigrationAdapter = d1Collections.length
+    ? storage.createAdapter({ mode: "local", tripId, collections: d1Collections })
+    : null;
   state.runtimeAdapters = {};
   localCollections.forEach((collection) => { state.runtimeAdapters[collection] = localAdapter; });
   d1Collections.forEach((collection) => { state.runtimeAdapters[collection] = d1Adapter; });
+}
+
+async function migrateLocalTodosToD1(todoAdapter) {
+  if (todoAdapter?.mode !== "d1" || !state.localMigrationAdapter) return;
+  if (localStorage.getItem(d1LocalMigrationKey()) === "1") return;
+  const localSnapshot = await state.localMigrationAdapter.load();
+  const localTodos = Array.isArray(localSnapshot.todos) ? localSnapshot.todos : [];
+  if (!localTodos.length) return;
+  state.todos = localTodos;
+  await Promise.all(localTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
+  localStorage.setItem(d1LocalMigrationKey(), "1");
 }
 
 async function loadSharedState() {
@@ -804,6 +877,7 @@ async function loadSharedState() {
   const todoSnapshot = snapshotFor("todos");
   const ticketSnapshot = snapshotFor("tickets");
   state.todos = Array.isArray(todoSnapshot.todos) ? todoSnapshot.todos : [];
+  if (state.todos.length === 0) await migrateLocalTodosToD1(todoAdapter);
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
   const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
   if (todoAdapter?.mode === "local" && authoredTodos.length) {
@@ -1699,9 +1773,8 @@ async function init() {
       setupTicketDialog();
     }
     if (moduleEnabled("todo") || moduleEnabled("itinerary")) {
-      createRuntimeAdapters();
       try {
-        await loadSharedState();
+        await loadConfiguredRuntimeState();
       } catch (error) {
         console.error(`${state.config.persistence.mode === "d1" ? "Shared" : "Local"} runtime data could not be loaded`, error);
         state.todos = [];

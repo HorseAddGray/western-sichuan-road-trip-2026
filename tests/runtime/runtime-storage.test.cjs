@@ -129,6 +129,26 @@ test("D1 is contacted only after an explicit d1 mode selection", async () => {
   }
 });
 
+test("D1 transport sends the configured shared access code on reads and writes", async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (url, init = {}) => {
+    calls.push({ url, init });
+    return { ok: true, async json() { return { version: 1, todos: [] }; } };
+  };
+  try {
+    const adapter = storageRuntime.createAdapter({
+      mode: "d1", tripId: "shared-trip", collections: ["todos"], accessCode: "mjjz-share", storage: createMemoryStorage()
+    });
+    await adapter.load();
+    await adapter.applyChange("todos", { id: "todo-1", text: "共享物品" });
+    assert.equal(calls[0].init.headers["x-travel-access-code"], "mjjz-share");
+    assert.equal(calls[1].init.headers["x-travel-access-code"], "mjjz-share");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
 test("D1 requires and enforces an explicit collection allowlist", async () => {
   assert.throws(() => storageRuntime.createAdapter({ mode: "d1", tripId: "shared-trip" }), /explicit shared record collection allowlist/);
   const originalFetch = global.fetch;

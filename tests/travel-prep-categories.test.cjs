@@ -359,3 +359,25 @@ test("consumable uses stay inline with the packing item name before the overflow
   assert.match(app, /packing-item-meta packing-item-meta--inline.*data-todo-use/);
   assert.match(styles, /\.packing-item-meta--inline \{[^}]*margin-top: 0/);
 });
+
+test("D1 shared mode gates access with a remembered invite code and migrates existing packing data once", () => {
+  assert.equal(tripData.config.persistence.mode, "d1");
+  assert.deepEqual(tripData.config.persistence.sharedCollections, ["todos"]);
+  assert.match(html, /id="shared-access-gate"/);
+  assert.match(html, /id="shared-access-form"/);
+  assert.match(app, /function requestSharedAccessCode/);
+  assert.match(app, /function migrateLocalTodosToD1/);
+  assert.match(app, /function d1LocalMigrationKey/);
+  assert.match(app, /accessCode: state\.sharedAccessCode/);
+});
+
+test("shared trip API hashes invite codes and restricts record writes to the requested collection", () => {
+  const api = fs.readFileSync(path.join(__dirname, "..", "functions", "api", "trip", "[tripId].js"), "utf8");
+  const schema = fs.readFileSync(path.join(__dirname, "..", "migrations", "0001_shared_trip.sql"), "utf8");
+  assert.match(api, /x-travel-access-code/);
+  assert.match(api, /crypto\.subtle\.digest\("SHA-256"/);
+  assert.match(api, /TRIP_DB/);
+  assert.match(api, /ALLOWED_COLLECTIONS/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_access/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS trip_records/);
+});

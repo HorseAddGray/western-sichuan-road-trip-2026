@@ -315,6 +315,18 @@ main { overflow: hidden; }
 .loading-error strong, .loading-error span { display: block; }
 .loading-error span { margin-top: 5px; font-size: 12px; line-height: 1.5; }
 
+.shared-access-gate { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; background: rgba(7,18,22,.64); backdrop-filter: blur(4px); }
+.shared-access-gate[hidden] { display: none; }
+.shared-access-card { width: min(100%, 390px); padding: 25px; border: 1px solid rgba(255,255,255,.34); border-radius: 20px; background: var(--paper); box-shadow: 0 22px 70px rgba(7,18,22,.3); }
+.shared-access-card .section-kicker { margin: 0; }
+.shared-access-card h2 { margin: 7px 0 9px; font-size: 25px; letter-spacing: -.04em; }
+.shared-access-card > p:not(.section-kicker):not(.shared-access-error) { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.shared-access-card label { display: grid; gap: 6px; margin-top: 20px; color: var(--ink); font-size: 12px; font-weight: 750; }
+.shared-access-card input { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: white; font: inherit; }
+.shared-access-error { margin: 9px 0 0 !important; color: #a13f34 !important; font-size: 12px !important; font-weight: 700; }
+.shared-access-card button { width: 100%; min-height: 46px; margin-top: 14px; border: 0; border-radius: 10px; color: white; background: var(--ink); font: inherit; font-size: 14px; font-weight: 760; cursor: pointer; }
+.shared-access-card small { display: block; margin-top: 13px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+
 :focus-visible { outline: 3px solid rgba(40,123,144,.45); outline-offset: 3px; }
 
 .place-map-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(7,18,22,.6); display: flex; align-items: flex-end; justify-content: center; }

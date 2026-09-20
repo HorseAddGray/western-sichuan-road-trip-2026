@@ -185,6 +185,7 @@
   function createD1Adapter(options = {}) {
     const tripId = normalizeTripId(options.tripId);
     const apiBase = normalizeApiBase(options.apiBase || "/api/trip");
+    const accessCode = String(options.accessCode || "").trim();
     const ownedCollections = normalizeCollections(options.collections);
     const ownedRecordCollections = RECORD_COLLECTIONS.filter((collection) => ownedCollections.includes(collection));
     if (!ownedRecordCollections.length) throw new Error("D1 mode requires an explicit shared record collection allowlist");
@@ -217,11 +218,12 @@
     }
 
     async function request(method, changes) {
+      const headers = accessCode ? { "x-travel-access-code": accessCode } : {};
       const init = method === "GET"
-        ? { cache: "no-store" }
+        ? { cache: "no-store", headers }
         : {
             method,
-            headers: { "content-type": "application/json" },
+            headers: { ...headers, "content-type": "application/json" },
             body: JSON.stringify({ changes })
           };
       const response = await fetch(endpoint(), init);

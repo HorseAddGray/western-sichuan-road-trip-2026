@@ -6,6 +6,7 @@ __MACOSX/
 .dev.vars
 node_modules/
 .wrangler/
+wrangler.jsonc
 .local-preview-data.json
 source-files/
 private/
