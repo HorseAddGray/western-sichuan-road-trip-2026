@@ -220,6 +220,19 @@ test("daily itinerary shows a single start time and records when a task is confi
   assert.match(styles, /\.schedule-completion-time/);
 });
 
+test("daily itinerary supports interval notes, paired scenic ratings, and memo highlighting", () => {
+  assert.match(app, /const ITINERARY_STATE_ID = "__itinerary_state__"/);
+  assert.match(app, /itineraryNotesFor\(key\)/);
+  assert.match(app, /itineraryScenicDestination\(item\)/);
+  assert.match(app, /data-itinerary-note-add/);
+  assert.match(app, /data-itinerary-rating/);
+  assert.match(app, /data-itinerary-scenic-open/);
+  assert.match(app, /state\.activeNoticeSubcategory = "scenic"/);
+  assert.match(app, /notice-subcategory--target/);
+  assert.match(styles, /itinerary-rating__circle--up/);
+  assert.match(styles, /itinerary-rating__circle--down/);
+});
+
 test("memo scenic category folds article links by scenic area without duplicate card copy", () => {
   const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
@@ -316,10 +329,9 @@ test("memo scenic category keeps Ganzi County references in its own folded area"
   assert.equal(ganzi?.text, "甘孜县");
   assert.equal(ganzi?.subcategory, "scenic");
   assert.equal(ganzi?.group, "甘孜县");
-  assert.equal(ganzi?.referenceVersion, 2);
-  assert.equal(ganzi?.links?.length, 9);
-  assert.equal(ganzi?.links?.[0]?.title, "为什么大家都忽略了甘孜县–可是它真的好美");
-  assert.ok(ganzi?.links?.[0]?.url.includes("69dce871000000001a034e75"));
+  assert.equal(ganzi?.referenceVersion, 3);
+  assert.equal(ganzi?.links?.length, 8);
+  assert.ok(!ganzi?.links?.some((link) => link.url.includes("69dce871000000001a034e75")));
   assert.ok(ganzi?.links?.some((link) => link.url.includes("15oxTfrI8zc")));
   assert.ok(ganzi?.links?.some((link) => link.url.includes("6ynfZmvw39J")));
 });
@@ -525,7 +537,7 @@ test("consumable uses stay inline with the packing item name before the overflow
 
 test("D1 shared mode gates access with a remembered invite code and migrates existing packing data once", () => {
   assert.equal(tripData.config.persistence.mode, "d1");
-  assert.deepEqual(tripData.config.persistence.sharedCollections, ["todos"]);
+  assert.deepEqual(tripData.config.persistence.sharedCollections, ["todos", "tickets"]);
   assert.match(html, /id="shared-access-gate"/);
   assert.match(html, /id="shared-access-form"/);
   assert.match(app, /function requestSharedAccessCode/);

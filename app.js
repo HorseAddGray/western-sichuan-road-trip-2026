@@ -7,6 +7,8 @@ const state = {
   expandedDay: null,
   selectedDayPlans: {},
   scheduleCompletions: {},
+  itineraryState: { completions: {}, notes: {}, ratings: {} },
+  editingItineraryNote: null,
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
@@ -58,6 +60,7 @@ const state = {
 
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
 const SHARED_COLLECTIONS = Object.freeze(["todos", "tickets", "ledger"]);
+const ITINERARY_STATE_ID = "__itinerary_state__";
 const OBSOLETE_PACKING_ITEM_IDS = new Set([
   "packing-documents", "packing-clothes", "packing-medicines", "packing-hygiene",
   "packing-weather", "packing-electronics", "packing-supplies"
@@ -512,23 +515,112 @@ function scheduleCompletionStorageKey() {
   return `travel-plan:${state.data.metadata.tripId}:schedule-completions`;
 }
 
+function recordMap(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function normalizeItineraryState(value) {
+  return {
+    completions: recordMap(value?.completions),
+    notes: recordMap(value?.notes),
+    ratings: recordMap(value?.ratings)
+  };
+}
+
+function itineraryStateRecord() {
+  return { id: ITINERARY_STATE_ID, ...state.itineraryState };
+}
+
+function saveItineraryState() {
+  return saveSharedChange("tickets", itineraryStateRecord()).catch(console.error);
+}
+
 function loadScheduleCompletions() {
+  if (Object.keys(state.itineraryState.completions).length) {
+    state.scheduleCompletions = { ...state.itineraryState.completions };
+    return;
+  }
   try {
     const saved = JSON.parse(localStorage.getItem(scheduleCompletionStorageKey()) || "{}");
     state.scheduleCompletions = saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
   } catch {
     state.scheduleCompletions = {};
   }
+  state.itineraryState.completions = { ...state.scheduleCompletions };
 }
 
 function saveScheduleCompletions() {
+  state.itineraryState.completions = { ...state.scheduleCompletions };
   localStorage.setItem(scheduleCompletionStorageKey(), JSON.stringify(state.scheduleCompletions));
+  saveItineraryState();
 }
 
 function scheduleCompletionTimestamp(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function itineraryNotesFor(key) {
+  const notes = state.itineraryState.notes[key];
+  return Array.isArray(notes) ? notes : [];
+}
+
+function itineraryRatingFor(key, owner) {
+  const value = state.itineraryState.ratings[key]?.[owner];
+  return value === "up" || value === "down" ? value : "";
+}
+
+function itineraryScenicDestination(item) {
+  const text = String(item.text || "");
+  if (!text.includes("抵达")) return null;
+  const aliases = {
+    "甘孜县城": "甘孜县",
+    "康定县城": "康定镇",
+    "康定": "康定镇",
+    "新都桥": "新都桥镇",
+    "塔公草原": "塔公镇"
+  };
+  const scenicItems = state.todos.filter((todo) =>
+    window.TravelPrep.normalizeTodoCategory(todo) === "notice" &&
+    window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic"
+  );
+  return scenicItems.find((todo) => {
+    const group = todo.group || todo.text;
+    const alias = Object.entries(aliases).find(([, target]) => target === group)?.[0];
+    return text.includes(group) || Boolean(alias && text.includes(alias));
+  }) || null;
+}
+
+function itineraryRatingMarkup(key) {
+  const control = (owner, label) => {
+    const value = itineraryRatingFor(key, owner);
+    const symbol = value === "up" ? "✓" : value === "down" ? "×" : "";
+    const stateLabel = value === "up" ? "满意" : value === "down" ? "不满意" : "未评分";
+    return `<div class="itinerary-rating"><span>${label}</span><details><summary aria-label="${label}评分：${stateLabel}"><i class="itinerary-rating__circle${value ? ` itinerary-rating__circle--${value}` : ""}" aria-hidden="true">${symbol}</i></summary><div class="itinerary-rating__choices"><button type="button" data-itinerary-rating="up" data-itinerary-rating-key="${escapeHtml(key)}" data-itinerary-rating-owner="${owner}" aria-label="${label}给好评">✓</button><button type="button" data-itinerary-rating="down" data-itinerary-rating-key="${escapeHtml(key)}" data-itinerary-rating-owner="${owner}" aria-label="${label}给差评">×</button>${value ? `<button type="button" data-itinerary-rating="clear" data-itinerary-rating-key="${escapeHtml(key)}" data-itinerary-rating-owner="${owner}">清除</button>` : ""}</div></details></div>`;
+  };
+  return `<div class="itinerary-ratings" aria-label="景点评分">${control("majia", "马甲")}${control("zaizai", "仔仔")}</div>`;
+}
+
+function itineraryNotesMarkup(key) {
+  const notes = itineraryNotesFor(key);
+  const editing = state.editingItineraryNote?.key === key ? state.editingItineraryNote : null;
+  return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>行程安排 / 备注</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map((note) => `<article class="itinerary-note"><p>${escapeHtml(note.text)}</p><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`).join("")}${editing ? `<form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="行程安排或备注">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form>` : ""}</div></li>`;
+}
+
+function openItineraryScenicMemo(group) {
+  state.activeNoticeSubcategory = "scenic";
+  localStorage.setItem(`travel-plan:${state.data.metadata.tripId}:notice-subcategory`, "scenic");
+  state.collapsedNoticeGroups.delete(noticeGroupId("scenic", group));
+  if (location.hash !== "#notices") location.hash = "#notices";
+  renderTravelPrep();
+  setTimeout(() => {
+    const target = $$(".notice-subcategory", $("#notice-list")).find((item) => item.dataset.noticeGroup === group);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add("notice-subcategory--target");
+    setTimeout(() => target.classList.remove("notice-subcategory--target"), 2200);
+  }, 40);
 }
 
 function dayCard(day) {
@@ -542,6 +634,7 @@ function dayCard(day) {
     const destinations = navigationDestinations(item);
     const completionKey = scheduleCompletionKey(day, item, index);
     const completedAt = state.scheduleCompletions[completionKey];
+    const scenic = itineraryScenicDestination(item);
     const mapLinks = destinations.map((destination) => `
       <button type="button" class="schedule-map-link" data-map-query="${escapeHtml(destination.query)}" data-map-url="${escapeHtml(destination.url || "")}" data-map-label="${escapeHtml(destination.label)}" aria-haspopup="dialog" aria-controls="place-map" aria-label="查看 ${escapeHtml(destination.label)} 的地图">📍 ${escapeHtml(destination.label)}</button>
     `).join("");
@@ -551,13 +644,13 @@ function dayCard(day) {
         <span class="schedule-time">${escapeHtml(scheduleDisplayTime(item.time))}</span>
         <label class="schedule-item__toggle"><input type="checkbox" data-schedule-complete="${escapeHtml(completionKey)}" aria-label="确认行程：${escapeHtml(item.text)}" ${completedAt ? "checked" : ""}><span class="schedule-item__check" aria-hidden="true">✓</span></label>
         <div class="schedule-content">
-          <div class="schedule-text">${escapeHtml(item.text)}</div>
+          <div class="schedule-content__head"><div class="schedule-text">${scenic ? `<button type="button" class="itinerary-scenic-link" data-itinerary-scenic-open="${escapeHtml(scenic.group || scenic.text)}">⭐ ${escapeHtml(item.text)}</button>` : escapeHtml(item.text)}</div>${scenic ? itineraryRatingMarkup(completionKey) : ""}</div>
           ${item.detail ? `<div class="schedule-detail">${escapeHtml(item.detail)}</div>` : ""}
           ${completedAt ? `<div class="schedule-completion-time">已确认 · ${escapeHtml(scheduleCompletionTimestamp(completedAt))}</div>` : ""}
           ${scheduleTickets}
           ${mapLinks ? `<div class="schedule-map-links">${mapLinks}</div>` : ""}
         </div>
-      </li>
+      </li>${index < (activePlan?.schedule || day.schedule).length - 1 ? itineraryNotesMarkup(completionKey) : ""}
     `;
   }).join("");
   const notes = [...(day.notes || []), ...(day.sourceDateLabelConflict ? [day.sourceDateLabelConflict] : [])];
@@ -668,6 +761,53 @@ function renderTimeline(preserveExpanded = false) {
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
   $("#timeline").onclick = (event) => {
+    const scenicButton = event.target.closest("[data-itinerary-scenic-open]");
+    if (scenicButton) {
+      openItineraryScenicMemo(scenicButton.dataset.itineraryScenicOpen);
+      return;
+    }
+    const ratingButton = event.target.closest("[data-itinerary-rating]");
+    if (ratingButton) {
+      const key = ratingButton.dataset.itineraryRatingKey;
+      const owner = ratingButton.dataset.itineraryRatingOwner;
+      const ratings = { ...(state.itineraryState.ratings[key] || {}) };
+      if (ratingButton.dataset.itineraryRating === "clear") delete ratings[owner];
+      else ratings[owner] = ratingButton.dataset.itineraryRating;
+      if (Object.keys(ratings).length) state.itineraryState.ratings[key] = ratings;
+      else delete state.itineraryState.ratings[key];
+      saveItineraryState();
+      renderTimeline(true);
+      return;
+    }
+    const addNote = event.target.closest("[data-itinerary-note-add]");
+    if (addNote) {
+      state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", text: "" };
+      renderTimeline(true);
+      return;
+    }
+    const editNote = event.target.closest("[data-itinerary-note-edit]");
+    if (editNote) {
+      const key = editNote.dataset.itineraryNoteKey;
+      const note = itineraryNotesFor(key).find((item) => item.id === editNote.dataset.itineraryNoteEdit);
+      if (!note) return;
+      state.editingItineraryNote = { key, id: note.id, text: note.text };
+      renderTimeline(true);
+      return;
+    }
+    const deleteNote = event.target.closest("[data-itinerary-note-delete]");
+    if (deleteNote) {
+      const key = deleteNote.dataset.itineraryNoteKey;
+      state.itineraryState.notes[key] = itineraryNotesFor(key).filter((note) => note.id !== deleteNote.dataset.itineraryNoteDelete);
+      if (!state.itineraryState.notes[key].length) delete state.itineraryState.notes[key];
+      saveItineraryState();
+      renderTimeline(true);
+      return;
+    }
+    if (event.target.closest("[data-itinerary-note-cancel]")) {
+      state.editingItineraryNote = null;
+      renderTimeline(true);
+      return;
+    }
     const ticketButton = event.target.closest("[data-ticket-open]");
     if (ticketButton) {
       openTicketDialog(ticketButton.dataset.ticketOpen, ticketButton);
@@ -695,6 +835,27 @@ function renderTimeline(preserveExpanded = false) {
     } else {
       state.expandedDay = null;
     }
+  };
+  $("#timeline").onsubmit = (event) => {
+    const form = event.target.closest("[data-itinerary-note-form]");
+    if (!form) return;
+    event.preventDefault();
+    const text = String(new FormData(form).get("text") || "").trim();
+    if (!text) {
+      $("textarea", form)?.focus();
+      return;
+    }
+    const key = form.dataset.itineraryNoteKey;
+    const id = form.dataset.itineraryNoteId || (globalThis.crypto?.randomUUID?.() || `note-${Date.now().toString(36)}`);
+    const notes = [...itineraryNotesFor(key)];
+    const index = notes.findIndex((note) => note.id === id);
+    const note = { id, text, createdAt: index >= 0 ? notes[index].createdAt : new Date().toISOString() };
+    if (index >= 0) notes[index] = note;
+    else notes.push(note);
+    state.itineraryState.notes[key] = notes;
+    state.editingItineraryNote = null;
+    saveItineraryState();
+    renderTimeline(true);
   };
   $("#timeline").onchange = (event) => {
     const scheduleCheckbox = event.target.closest("[data-schedule-complete]");
@@ -993,7 +1154,10 @@ async function loadSharedState() {
   const ticketSnapshot = snapshotFor("tickets");
   state.todos = Array.isArray(todoSnapshot.todos) ? todoSnapshot.todos : [];
   if (state.todos.length === 0) await migrateLocalTodosToD1(todoAdapter, Boolean(todoSnapshot.initialized));
-  state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
+  const ticketRecords = Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : [];
+  const itineraryRecord = ticketRecords.find((item) => item?.id === ITINERARY_STATE_ID);
+  state.itineraryState = normalizeItineraryState(itineraryRecord);
+  state.purchasedTickets = new Set(ticketRecords.filter((item) => item.id !== ITINERARY_STATE_ID && item.completed).map((item) => item.id));
   const authoredTodos = authoredTodosForMigration();
   if (todoAdapter?.mode === "d1") {
     const existingIds = new Set(state.todos.map((item) => String(item.id)));

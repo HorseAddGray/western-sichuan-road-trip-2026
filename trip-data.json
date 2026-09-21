@@ -16,7 +16,8 @@
       "mode": "d1",
       "apiBase": "/api/trip",
       "sharedCollections": [
-        "todos"
+        "todos",
+        "tickets"
       ]
     }
   },
@@ -1318,12 +1319,8 @@
         "category": "notice",
         "subcategory": "scenic",
         "group": "甘孜县",
-        "referenceVersion": 2,
+        "referenceVersion": 3,
         "links": [
-          {
-            "title": "为什么大家都忽略了甘孜县–可是它真的好美",
-            "url": "https://www.xiaohongshu.com/discovery/item/69dce871000000001a034e75?source=webshare&xhsshare=pc_web&xsec_token=AB0H9v6mmjhi97uAhVEL2sLVgUH1ar4phfej2-np7wXgA=&xsec_source=pc_share"
-          },
           { "title": "川西路上绝美县城，甘孜的甘孜。", "url": "https://xhslink.cn/o/15oxTfrI8zc" },
           { "title": "甘孜县！你美的有点过分了", "url": "https://xhslink.cn/o/3gp7SyDN3fj" },
           { "title": "一起说说川西甘孜，不是甘孜州而是甘孜县", "url": "https://xhslink.cn/o/ANL6nBewpzr" },
