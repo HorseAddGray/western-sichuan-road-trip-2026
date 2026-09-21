@@ -293,6 +293,7 @@ test("memo scenic category keeps Luhuo County references in its own folded area"
   assert.equal(luhuo?.text, "炉霍县");
   assert.equal(luhuo?.subcategory, "scenic");
   assert.equal(luhuo?.group, "炉霍县");
+  assert.equal(luhuo?.referenceVersion, 2);
   assert.equal(luhuo?.links?.length, 5);
   assert.ok(luhuo?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
   assert.ok(luhuo?.links?.some((link) => link.url.includes("7AKsQbg1N3Y")));
