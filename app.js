@@ -1132,6 +1132,17 @@ function todoLinksFor(item) {
   }).filter((link) => link.title && link.url);
 }
 
+function parseScenicShareText(value) {
+  const source = String(value || "").trim();
+  const match = source.match(/https?:\/\/[^\s\])}>]+/i);
+  if (!match || match.index === undefined) return null;
+  const url = safeExternalUrl(match[0].replace(/[，。；！,.;!]+$/, ""));
+  const beforeUrl = source.slice(0, match.index).replace(/[\s\[\(（]+$/, "").trim();
+  const firstLine = beforeUrl.split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
+  const title = firstLine.split(/\s*(?:\.{3,}|…)\s*/)[0].trim();
+  return title && url ? { title, url } : null;
+}
+
 async function migrateLocalTodosToD1(todoAdapter, remoteInitialized) {
   if (todoAdapter?.mode !== "d1" || !state.localMigrationAdapter) return;
   if (localStorage.getItem(d1LocalMigrationKey()) === "1") return;
@@ -1923,6 +1934,13 @@ function renderTravelPrep() {
     $("[data-packing-filter-reset]").classList.toggle("is-active", hasActivePackingFilters());
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
     const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
+    const isScenic = state.activeNoticeSubcategory === "scenic";
+    $("[data-notice-form-open]").textContent = isScenic ? "新增链接" : "新增";
+    $("#notice-form-heading").textContent = isScenic ? "新增链接" : "新增信息";
+    $("#notice-info-fields").hidden = isScenic;
+    $("#notice-scenic-link-fields").hidden = !isScenic;
+    $("[data-scenic-link-submit]").textContent = isScenic ? "添加链接" : "添加";
+    if (isScenic) $("#scenic-link-target").innerHTML = activeItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("");
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
@@ -2527,7 +2545,24 @@ function renderTravelPrep() {
   const submitPackingForm = submitForm("packing");
   $("#packing-form").onsubmit = submitPackingForm;
   $("[data-packing-add-submit]").onclick = () => submitPackingForm({ preventDefault() {} });
-  $("#notice-form").onsubmit = submitForm("notice");
+  $("#notice-form").onsubmit = (event) => {
+    if (state.activeNoticeSubcategory !== "scenic") return submitForm("notice")(event);
+    event.preventDefault();
+    const target = state.todos.find((todo) => todo.id === $("#scenic-link-target").value && window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
+    const parsed = parseScenicShareText($("#scenic-link-share").value);
+    if (!target || !parsed) {
+      $("#scenic-link-share").focus();
+      return;
+    }
+    const title = $("#scenic-link-title").value.trim();
+    if (title) parsed.title = title;
+    target.links = todoLinksFor(target);
+    target.links.push(parsed);
+    $("#scenic-link-share").value = "";
+    $("#scenic-link-title").value = "";
+    saveSharedChange("todos", target).catch(console.error);
+    renderAll();
+  };
   $("[data-packing-purchase-form-open]").onclick = () => {
     $("#packing-purchase-form-panel").hidden = false;
     $("#packing-purchase-input").focus();
@@ -2535,9 +2570,13 @@ function renderTravelPrep() {
   $("[data-packing-purchase-form-close]").onclick = () => { $("#packing-purchase-form-panel").hidden = true; };
   $("[data-notice-form-open]").onclick = () => {
     $("#notice-form-panel").hidden = false;
-    $("#notice-title-input").focus();
+    (state.activeNoticeSubcategory === "scenic" ? $("#scenic-link-share") : $("#notice-title-input")).focus();
   };
   $("[data-notice-form-close]").onclick = () => { $("#notice-form-panel").hidden = true; };
+  $("#scenic-link-share").oninput = () => {
+    const parsed = parseScenicShareText($("#scenic-link-share").value);
+    if (parsed) $("#scenic-link-title").value = parsed.title;
+  };
   $("[data-packing-form-open]").onclick = () => {
     $("#packing-search-panel").hidden = true;
     $("#packing-form-panel").hidden = false;

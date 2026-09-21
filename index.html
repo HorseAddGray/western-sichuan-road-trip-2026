@@ -14,7 +14,7 @@
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260921-8" defer></script>
-  <script src="app.js?v=20260921-61" defer></script>
+  <script src="app.js?v=20260921-62" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260920-4" defer></script>
@@ -159,12 +159,19 @@
         <div id="notice-category-settings" aria-label="当前备忘录类别的子类别设置"></div>
       </details>
       <section class="packing-add-form" id="notice-form-panel" hidden>
-        <div class="packing-form-heading"><strong>新增信息</strong><button type="button" data-notice-form-close aria-label="关闭新增信息">×</button></div>
+        <div class="packing-form-heading"><strong id="notice-form-heading">新增信息</strong><button type="button" data-notice-form-close aria-label="关闭新增信息">×</button></div>
         <form id="notice-form">
-          <label class="packing-form-name"><span>标题</span><input id="notice-title-input" type="text" maxlength="80" placeholder="添加一条信息" aria-label="信息标题"></label>
-          <label class="packing-form-description"><span>内容</span><textarea id="notice-detail-input" maxlength="1000" placeholder="补充详细内容" aria-label="信息内容"></textarea></label>
-          <label class="packing-form-select"><span>子类别</span><select id="notice-subcategory" aria-label="备忘录子类别"></select></label>
-          <button type="submit" class="packing-action-trigger">添加</button>
+          <div id="notice-info-fields">
+            <label class="packing-form-name"><span>标题</span><input id="notice-title-input" type="text" maxlength="80" placeholder="添加一条信息" aria-label="信息标题"></label>
+            <label class="packing-form-description"><span>内容</span><textarea id="notice-detail-input" maxlength="1000" placeholder="补充详细内容" aria-label="信息内容"></textarea></label>
+            <label class="packing-form-select"><span>子类别</span><select id="notice-subcategory" aria-label="备忘录子类别"></select></label>
+          </div>
+          <div id="notice-scenic-link-fields" hidden>
+            <label class="packing-form-select"><span>归属景点</span><select id="scenic-link-target" data-scenic-link-target aria-label="归属景点"></select></label>
+            <label class="packing-form-description"><span>小红书分享内容</span><textarea id="scenic-link-share" data-scenic-link-share maxlength="4000" placeholder="粘贴小红书分享文本，自动提取文章标题和链接" aria-label="小红书分享内容"></textarea></label>
+            <label class="packing-form-name"><span>文章标题</span><input id="scenic-link-title" type="text" maxlength="160" placeholder="粘贴后自动提取，可修改" aria-label="文章标题"></label>
+          </div>
+          <button type="submit" class="packing-action-trigger" data-scenic-link-submit>添加</button>
         </form>
       </section>
       <div class="toilet-map" id="toilet-map" hidden></div>

@@ -257,6 +257,14 @@ test("memo scenic category folds article links by scenic area without duplicate 
   assert.doesNotMatch(styles, /\.notice-image-gallery/);
 });
 
+test("scenic memo entry parses a pasted Xiaohongshu share into the selected scenic links", () => {
+  assert.match(app, /function parseScenicShareText\(value\)/);
+  assert.match(html, /data-scenic-link-target/);
+  assert.match(html, /data-scenic-link-share/);
+  assert.match(html, /data-scenic-link-submit/);
+  assert.match(app, /target\.links\.push\(parsed\)/);
+});
+
 test("memo scenic category keeps Kangding Town references in its own folded area", () => {
   const kangding = tripData.preTrip.packingItems.find((item) => item.id === "scenic-kangding-town");
   assert.equal(kangding?.text, "康定镇");
