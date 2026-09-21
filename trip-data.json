@@ -1260,6 +1260,25 @@
           { "title": "来川西/新都桥 伴手礼", "url": "https://xhslink.cn/o/9cfohK77bqi" }
         ],
         "completed": false
+      },
+      {
+        "id": "scenic-tagong-town",
+        "text": "塔公镇",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "塔公镇",
+        "referenceVersion": 1,
+        "links": [
+          { "title": "塔公镇｜半日躺平攻略🛏️", "url": "https://xhslink.cn/o/VyY47DcTao" },
+          { "title": "来川西一定不要错过这个地方❗️", "url": "https://xhslink.cn/o/7eUawEKHQdn" },
+          { "title": "好看到必须要发两条的民宿咖啡店之第一条", "url": "https://xhslink.cn/o/6pAOkn7uIsz" },
+          { "title": "甘孜的秋🍂｜姑弄村 绝美的雪山咖啡🏔️", "url": "https://xhslink.cn/o/4YxEkuQkjH5" },
+          { "title": "为了一扇窗，去的姑弄村～", "url": "https://xhslink.cn/o/APVLk2IXqsk" },
+          { "title": "塔公草原岗日噶玛咖啡店☕️", "url": "https://xhslink.cn/o/7bZMkn1D1VW" },
+          { "title": "在瓦乌咖啡待了整整三个小时", "url": "https://xhslink.cn/o/5Kp1Fohk2iW" },
+          { "title": "这不是一家会被所有人喜欢的咖啡馆", "url": "https://xhslink.cn/o/3cSnvxhXzyl" }
+        ],
+        "completed": false
       }
     ],
     "toiletMapPins": [

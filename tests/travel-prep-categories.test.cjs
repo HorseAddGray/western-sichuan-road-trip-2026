@@ -277,6 +277,17 @@ test("memo scenic category keeps Xinduqiao Town references in its own folded are
   assert.ok(xinduqiao?.links?.some((link) => link.url.includes("9cfohK77bqi")));
 });
 
+test("memo scenic category keeps Tagong Town references in its own folded area", () => {
+  const tagong = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tagong-town");
+  assert.equal(tagong?.text, "塔公镇");
+  assert.equal(tagong?.subcategory, "scenic");
+  assert.equal(tagong?.group, "塔公镇");
+  assert.equal(tagong?.links?.length, 8);
+  assert.ok(tagong?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(tagong?.links?.some((link) => link.url.includes("VyY47DcTao")));
+  assert.ok(tagong?.links?.some((link) => link.url.includes("3cSnvxhXzyl")));
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
