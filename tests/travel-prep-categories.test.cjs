@@ -237,10 +237,10 @@ test("memo scenic category folds article links by scenic area without duplicate 
   assert.match(app, /const articleCount = activeCategory === "scenic"/);
   assert.match(app, /data-scenic-link-index/);
   assert.match(app, /draggedScenicLink/);
-  assert.match(app, /data-scenic-link-move/);
+  assert.doesNotMatch(app, /data-scenic-link-move/);
   assert.match(styles, /\.notice-links/);
   assert.match(styles, /\.notice-link-row/);
-  assert.match(styles, /\.notice-link-row__moves/);
+  assert.doesNotMatch(styles, /\.notice-link-row__moves/);
   assert.doesNotMatch(styles, /\.notice-image-gallery/);
 });
 

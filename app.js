@@ -1400,7 +1400,7 @@ function renderTodoList(kind) {
       const links = todoLinksFor(todo);
       const isScenic = activeCategory === "scenic";
       const linkMarkup = (link, index) => isScenic
-        ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a><span class="notice-link-row__moves"><button type="button" data-scenic-link-move="up" ${index === 0 ? "disabled" : ""} aria-label="上移文章">↑</button><button type="button" data-scenic-link-move="down" ${index === links.length - 1 ? "disabled" : ""} aria-label="下移文章">↓</button></span></span>`
+        ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a></span>`
         : `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`;
       const copy = isScenic
         ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`
@@ -2071,19 +2071,6 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#notice-list").onclick = (event) => {
-    const move = event.target.closest("[data-scenic-link-move]");
-    if (move) {
-      const row = move.closest("[data-scenic-link-index]");
-      const todoId = row?.closest("[data-todo-id]")?.dataset.todoId;
-      const index = Number(row?.dataset.scenicLinkIndex);
-      const targetIndex = move.dataset.scenicLinkMove === "up" ? index - 1 : index + 1;
-      const todo = state.todos.find((item) => item.id === todoId);
-      if (!todo || !Array.isArray(todo.links) || targetIndex < 0 || targetIndex >= todo.links.length) return;
-      [todo.links[index], todo.links[targetIndex]] = [todo.links[targetIndex], todo.links[index]];
-      saveSharedChange("todos", todo).catch(console.error);
-      renderAll();
-      return;
-    }
     const button = event.target.closest("[data-notice-group-toggle]");
     if (!button) return;
     const id = noticeGroupId(state.activeNoticeSubcategory, button.dataset.noticeGroupToggle);
