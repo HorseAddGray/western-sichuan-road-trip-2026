@@ -293,10 +293,21 @@ test("memo scenic category keeps Luhuo County references in its own folded area"
   assert.equal(luhuo?.text, "炉霍县");
   assert.equal(luhuo?.subcategory, "scenic");
   assert.equal(luhuo?.group, "炉霍县");
-  assert.equal(luhuo?.links?.length, 10);
+  assert.equal(luhuo?.links?.length, 5);
   assert.ok(luhuo?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
   assert.ok(luhuo?.links?.some((link) => link.url.includes("7AKsQbg1N3Y")));
-  assert.ok(luhuo?.links?.some((link) => link.url.includes("62XQAphTvki")));
+  assert.ok(luhuo?.links?.some((link) => link.url.includes("25xgwfcvAAW")));
+});
+
+test("memo scenic category keeps Kasa Lake references in its own folded area", () => {
+  const kasaLake = tripData.preTrip.packingItems.find((item) => item.id === "scenic-kasa-lake");
+  assert.equal(kasaLake?.text, "卡萨湖");
+  assert.equal(kasaLake?.subcategory, "scenic");
+  assert.equal(kasaLake?.group, "卡萨湖");
+  assert.equal(kasaLake?.links?.length, 5);
+  assert.ok(kasaLake?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(kasaLake?.links?.some((link) => link.url.includes("8hnTM5RKitZ")));
+  assert.ok(kasaLake?.links?.some((link) => link.url.includes("62XQAphTvki")));
 });
 
 test("packing migration removes only the seven replaced generic system items", () => {
