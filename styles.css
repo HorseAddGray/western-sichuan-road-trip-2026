@@ -446,10 +446,17 @@ main { overflow: hidden; }
 .packing-overview-category-toggle small { color: var(--muted); font-size: 11px; font-weight: 700; }
 .packing-overview-category-toggle i { color: var(--lake); font-style: normal; font-size: 15px; transition: transform .18s ease; }
 .packing-overview-category-toggle[aria-expanded="false"] i { transform: rotate(-90deg); }
-.packing-overview-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border-top: 1px solid var(--line); }
+.packing-overview-item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border: 0; border-top: 1px solid var(--line); color: var(--ink); background: transparent; text-align: left; font: inherit; cursor: pointer; }
+.packing-overview-item:hover { background: rgba(40,123,144,.06); }
 .packing-overview-tag { color: var(--ink); font-size: 17px; font-weight: 900; letter-spacing: .03em; }
 .packing-overview-value { color: var(--lake); font-size: 29px; font-weight: 950; letter-spacing: -.05em; white-space: nowrap; }
 .packing-overview-value i { margin-left: 3px; color: var(--ink); font-style: normal; font-size: 13px; font-weight: 800; letter-spacing: 0; }
+.packing-overview-dialog { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(16,31,39,.38); }
+.packing-overview-dialog > section { width: min(420px, 100%); max-height: min(560px, calc(100vh - 40px)); overflow: auto; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 18px 50px rgba(16,31,39,.22); }
+.packing-overview-dialog > section > small { display: block; margin-top: -4px; color: var(--muted); font-size: 11px; }
+.packing-overview-dialog__items { display: grid; gap: 7px; margin-top: 12px; }
+.packing-overview-dialog__items p { margin: 0; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font-size: 13px; }
+.packing-overview-dialog__items p span { color: var(--lake); font-weight: 900; }
 .packing-dictionary { display: grid; gap: 14px; }
 .packing-dictionary__heading { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .packing-dictionary__heading > div { display: grid; gap: 4px; }

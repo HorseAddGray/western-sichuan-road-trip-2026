@@ -477,6 +477,14 @@ test("packing overview groups tag totals in collapsible categories sorted by qua
   assert.match(app, /sort\(\(first, second\) => second\.quantity - first\.quantity\)/);
 });
 
+test("packing overview resolves categories and tags through the dictionary and opens tag item lists", () => {
+  assert.match(app, /function packingDictionaryCategoryFor\(todo\)/);
+  assert.match(app, /function packingDictionaryPropertyFor\(todo, category/);
+  assert.match(app, /data-packing-overview-tag/);
+  assert.match(app, /packing-overview-dialog/);
+  assert.match(app, /data-packing-overview-dialog-close/);
+});
+
 test("packing dictionary exposes category-to-tag associations and manages them", () => {
   assert.match(html, /href="#packing-dictionary"[^>]*>字典</);
   assert.match(html, /id="packing-dictionary"/);
