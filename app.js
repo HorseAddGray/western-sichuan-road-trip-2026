@@ -6,6 +6,7 @@ const state = {
   sharedAccessCode: "",
   expandedDay: null,
   selectedDayPlans: {},
+  scheduleCompletions: {},
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
@@ -498,6 +499,37 @@ function inlineTicketMarkup(ticket) {
     </div>`;
 }
 
+function scheduleDisplayTime(value) {
+  return String(value || "").match(/\d{1,2}:\d{2}/)?.[0] || String(value || "");
+}
+
+function scheduleCompletionKey(day, item, index) {
+  return `${day.day}:${item.id || index}`;
+}
+
+function scheduleCompletionStorageKey() {
+  return `travel-plan:${state.data.metadata.tripId}:schedule-completions`;
+}
+
+function loadScheduleCompletions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(scheduleCompletionStorageKey()) || "{}");
+    state.scheduleCompletions = saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  } catch {
+    state.scheduleCompletions = {};
+  }
+}
+
+function saveScheduleCompletions() {
+  localStorage.setItem(scheduleCompletionStorageKey(), JSON.stringify(state.scheduleCompletions));
+}
+
+function scheduleCompletionTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function dayCard(day) {
   const today = todayForTrip();
   const isToday = day.date === today;
@@ -505,18 +537,22 @@ function dayCard(day) {
   const plans = Array.isArray(day.plans) ? day.plans : [];
   const activePlan = plans.find((plan) => plan.id === state.selectedDayPlans[day.day]) || plans[0] || null;
   const locations = activePlan?.locations || day.locations;
-  const schedule = (activePlan?.schedule || day.schedule).map((item) => {
+  const schedule = (activePlan?.schedule || day.schedule).map((item, index) => {
     const destinations = navigationDestinations(item);
+    const completionKey = scheduleCompletionKey(day, item, index);
+    const completedAt = state.scheduleCompletions[completionKey];
     const mapLinks = destinations.map((destination) => `
       <button type="button" class="schedule-map-link" data-map-query="${escapeHtml(destination.query)}" data-map-url="${escapeHtml(destination.url || "")}" data-map-label="${escapeHtml(destination.label)}" aria-haspopup="dialog" aria-controls="place-map" aria-label="查看 ${escapeHtml(destination.label)} 的地图">📍 ${escapeHtml(destination.label)}</button>
     `).join("");
     const scheduleTickets = ticketsForSchedule(day, item).map(inlineTicketMarkup).join("");
     return `
-      <li class="schedule-item">
-        <span class="schedule-time">${escapeHtml(item.time)}</span>
+      <li class="schedule-item${completedAt ? " is-complete" : ""}">
+        <span class="schedule-time">${escapeHtml(scheduleDisplayTime(item.time))}</span>
+        <label class="schedule-item__toggle"><input type="checkbox" data-schedule-complete="${escapeHtml(completionKey)}" aria-label="确认行程：${escapeHtml(item.text)}" ${completedAt ? "checked" : ""}><span class="schedule-item__check" aria-hidden="true">✓</span></label>
         <div class="schedule-content">
           <div class="schedule-text">${escapeHtml(item.text)}</div>
           ${item.detail ? `<div class="schedule-detail">${escapeHtml(item.detail)}</div>` : ""}
+          ${completedAt ? `<div class="schedule-completion-time">已确认 · ${escapeHtml(scheduleCompletionTimestamp(completedAt))}</div>` : ""}
           ${scheduleTickets}
           ${mapLinks ? `<div class="schedule-map-links">${mapLinks}</div>` : ""}
         </div>
@@ -660,6 +696,15 @@ function renderTimeline(preserveExpanded = false) {
     }
   };
   $("#timeline").onchange = (event) => {
+    const scheduleCheckbox = event.target.closest("[data-schedule-complete]");
+    if (scheduleCheckbox) {
+      const key = scheduleCheckbox.dataset.scheduleComplete;
+      if (scheduleCheckbox.checked) state.scheduleCompletions[key] = new Date().toISOString();
+      else delete state.scheduleCompletions[key];
+      saveScheduleCompletions();
+      renderTimeline(true);
+      return;
+    }
     const checkbox = event.target.closest(".schedule-ticket input[type='checkbox']");
     if (!checkbox) return;
     if (checkbox.checked) state.purchasedTickets.add(checkbox.value);
@@ -2621,7 +2666,10 @@ async function init() {
         state.purchasedTickets = new Set();
       }
     }
-    if (moduleEnabled("itinerary")) renderTimeline();
+    if (moduleEnabled("itinerary")) {
+      loadScheduleCompletions();
+      renderTimeline();
+    }
     if (moduleEnabled("driving")) renderRental();
     if (moduleEnabled("todo")) renderTravelPrep();
     if (moduleEnabled("ledger")) {

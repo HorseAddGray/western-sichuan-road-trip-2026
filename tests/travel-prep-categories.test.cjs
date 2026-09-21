@@ -211,6 +211,15 @@ test("later days retain the supplied timed routes and give day four a selectable
   assert.match(app, /renderTimeline\(true\)/);
 });
 
+test("daily itinerary shows a single start time and records when a task is confirmed", () => {
+  assert.match(app, /function scheduleDisplayTime/);
+  assert.match(app, /data-schedule-complete/);
+  assert.match(app, /function scheduleCompletionTimestamp/);
+  assert.match(app, /schedule-completions/);
+  assert.match(styles, /\.schedule-item__toggle/);
+  assert.match(styles, /\.schedule-completion-time/);
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
