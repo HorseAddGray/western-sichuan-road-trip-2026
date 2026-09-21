@@ -504,6 +504,14 @@ test("dictionary has category and luggage-use subcategories with sortable catego
   assert.match(app, /packing-overview-owner="all"[^>]*>共同</);
 });
 
+test("packing luggage management hides detail container filters and uses direct actions", () => {
+  assert.doesNotMatch(html, /id="packing-container-filter-group"/);
+  assert.match(app, /class="packing-luggage-actions"/);
+  assert.match(app, /data-packing-luggage-parent/);
+  assert.match(app, /todo\.container = key/);
+  assert.match(app, /todo\.luggage = parent \|\| key/);
+});
+
 test("new packing categories and labels synchronize into dictionary branches", () => {
   assert.match(app, /function syncPackingDictionaryCategory\(category, property = ""\)/);
   assert.match(app, /state\.packingCustomCategories\[subcategory\] = label/);

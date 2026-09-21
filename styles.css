@@ -406,9 +406,6 @@ main { overflow: hidden; }
 .packing-luggage-filter[aria-pressed="true"] { border-color: var(--lake); background: rgba(40,123,144,.1); box-shadow: inset 0 0 0 1px var(--lake); }
 .packing-luggage-filter.is-highlighted { border-color: #e1aa3d; background: #fff2d6; box-shadow: 0 0 0 2px #e1aa3d; animation: luggage-pulse .7s ease-in-out 2; }
 @keyframes luggage-pulse { 50% { transform: translateY(-2px); } }
-.packing-container-filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 10px; }
-.packing-container-filters button { min-height: 34px; padding: 0 10px; border: 1px dashed #8ca5a7; border-radius: 9px; background: transparent; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
-.packing-container-filters button[aria-pressed="true"] { border-style: solid; border-color: var(--lake); background: rgba(40,123,144,.1); }
 .packing-item-title { min-width: 0; display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; }
 .packing-item-title .todo-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .packing-item-title select { flex: 0 0 auto; min-height: 26px; max-width: 110px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--muted); font: inherit; font-size: 11px; }
@@ -486,14 +483,17 @@ main { overflow: hidden; }
 .packing-dictionary-tag-add { display: flex; gap: 7px; padding: 9px 12px 12px 24px; border-top: 1px solid var(--line); background: rgba(248,250,247,.7); }
 .packing-dictionary-tag-add input { min-width: 0; flex: 1; min-height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; font-size: 12px; }
 .packing-dictionary-tag-add button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 8px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
-.packing-luggage-add, .packing-luggage-edit { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 7px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(248,250,247,.7); }
+.packing-luggage-add, .packing-luggage-edit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 7px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(248,250,247,.7); }
 .packing-luggage-add label, .packing-luggage-edit label { min-width: 0; display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
 .packing-luggage-add select, .packing-luggage-add input, .packing-luggage-edit select { min-width: 0; min-height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font: inherit; font-size: 12px; }
 .packing-luggage-add button, .packing-luggage-edit button { align-self: end; min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; color: white; background: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .packing-luggage-children { display: grid; gap: 7px; padding: 0 10px 10px 26px; }
 .packing-luggage-children .packing-dictionary-branch { background: rgba(248,250,247,.7); }
 .packing-luggage-branch summary b { font-size: 16px; }
-.packing-luggage-branch summary small { padding-left: 3px; }
+.packing-luggage-branch > summary { padding-right: 106px; }
+.packing-luggage-actions { position: absolute; z-index: 7; top: 8px; right: 10px; display: inline-flex; gap: 5px; }
+.packing-luggage-actions button { min-height: 27px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.packing-luggage-actions .todo-delete { color: #a23e3e; }
 .packing-filter-toolbar { display: grid; grid-template-columns: minmax(0, 190px) auto; gap: 7px; align-items: end; margin: 0 0 9px; }
 .packing-filter-toolbar label { min-width: 0; display: grid; gap: 4px; }
 .packing-filter-toolbar label > span { color: var(--muted); font-size: 11px; }
