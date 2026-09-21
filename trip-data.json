@@ -1221,6 +1221,27 @@
           { "title": "再见了康定 两个小时找不到停车位的城市", "url": "https://xhslink.cn/o/4sDPwWq4Gvt" }
         ],
         "completed": false
+      },
+      {
+        "id": "scenic-honghaizi",
+        "text": "红海子",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "红海子",
+        "referenceVersion": 1,
+        "links": [
+          { "title": "红海子绝美live图⛰️", "url": "https://xhslink.cn/o/3k7HSh2FYqy" },
+          { "title": "川西红海子｜很多人不知道的康定小众秘境", "url": "https://xhslink.cn/o/4NlcxImk8MR" },
+          { "title": "S434红海子｜保姆出片攻略", "url": "https://xhslink.cn/o/945wbxaltwb" },
+          { "title": "打卡｜川西红海子迦嘎措❄️（日落金山美哭🥹）", "url": "https://xhslink.cn/o/8FdLTiEjy3p" },
+          { "title": "川西红海子｜7个打卡点，一个都不漏", "url": "https://xhslink.cn/o/8oHqqUy6unT" },
+          { "title": "避雷帖：原来红海子的真面目是这样的？", "url": "https://xhslink.cn/o/3ZxGFjBYvEj" },
+          { "title": "为什么我总是推荐走省道434", "url": "https://xhslink.cn/o/2dG3nceXMbG" },
+          { "title": "偏爱434省道，胜过人声鼎沸的318", "url": "https://xhslink.cn/o/5nNDLUerBIs" },
+          { "title": "从康定到新都桥｜不堵车🚗的绝美公路434", "url": "https://xhslink.cn/o/34KFkZHM7UO" },
+          { "title": "最美省道S434 康定-塔公段", "url": "https://xhslink.cn/o/8z66BK7Eaf1" }
+        ],
+        "completed": false
       }
     ],
     "toiletMapPins": [

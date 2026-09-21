@@ -255,6 +255,17 @@ test("memo scenic category keeps Kangding Town references in its own folded area
   assert.ok(kangding?.links?.some((link) => link.url.includes("4sDPwWq4Gvt")));
 });
 
+test("memo scenic category keeps Honghaizi references in its own folded area", () => {
+  const honghaizi = tripData.preTrip.packingItems.find((item) => item.id === "scenic-honghaizi");
+  assert.equal(honghaizi?.text, "红海子");
+  assert.equal(honghaizi?.subcategory, "scenic");
+  assert.equal(honghaizi?.group, "红海子");
+  assert.equal(honghaizi?.links?.length, 10);
+  assert.ok(honghaizi?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(honghaizi?.links?.some((link) => link.url.includes("3k7HSh2FYqy")));
+  assert.ok(honghaizi?.links?.some((link) => link.url.includes("8z66BK7Eaf1")));
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
