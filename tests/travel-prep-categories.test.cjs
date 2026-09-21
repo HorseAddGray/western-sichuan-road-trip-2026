@@ -220,21 +220,20 @@ test("daily itinerary shows a single start time and records when a task is confi
   assert.match(styles, /\.schedule-completion-time/);
 });
 
-test("memo scenic category folds references by scenic area without edit controls", () => {
+test("memo scenic category folds article links by scenic area without duplicate card copy", () => {
   const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
   assert.equal(scenic?.text, "天全服务区");
   assert.equal(scenic?.group, "天全服务区");
-  assert.equal(scenic?.detail, "参考文献");
   assert.equal(scenic?.subcategory, "scenic");
   assert.equal(scenic?.links?.length, 4);
   assert.ok(scenic?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
-  assert.equal(scenic?.images?.length, 2);
+  assert.equal(scenic?.images, undefined);
   assert.match(app, /notice-links/);
-  assert.match(app, /notice-image-gallery/);
   assert.match(app, /activeCategory === "scenic"/);
+  assert.match(app, /const articleCount = activeCategory === "scenic"/);
   assert.match(styles, /\.notice-links/);
-  assert.match(styles, /\.notice-image-gallery/);
+  assert.doesNotMatch(styles, /\.notice-image-gallery/);
 });
 
 test("packing migration removes only the seven replaced generic system items", () => {

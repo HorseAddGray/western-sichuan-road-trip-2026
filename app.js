@@ -969,13 +969,6 @@ function todoLinksFor(item) {
   }).filter((link) => link.title && link.url);
 }
 
-function todoImagesFor(item) {
-  return (Array.isArray(item?.images) ? item.images : []).map((image) => {
-    const src = localAssetUrl(image?.src);
-    return { src, alt: String(image?.alt || item?.text || "景点图片").trim() };
-  }).filter((image) => image.src);
-}
-
 async function migrateLocalTodosToD1(todoAdapter, remoteInitialized) {
   if (todoAdapter?.mode !== "d1" || !state.localMigrationAdapter) return;
   if (localStorage.getItem(d1LocalMigrationKey()) === "1") return;
@@ -1398,18 +1391,21 @@ function renderTodoList(kind) {
     $("#notice-count").textContent = `${orderedTodos.length} 条信息`;
     const itemMarkup = (todo) => {
       const links = todoLinksFor(todo);
-      const images = todoImagesFor(todo);
       const isScenic = activeCategory === "scenic";
+      const copy = isScenic
+        ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>`
+        : `<span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>`;
       return `
-      <article class="notice-item" data-todo-id="${escapeHtml(todo.id)}">
-        <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${images.length ? `<span class="notice-image-gallery">${images.map((image) => `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy">`).join("")}</span>` : ""}${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>
+      <article class="notice-item${isScenic ? " notice-item--scenic" : ""}" data-todo-id="${escapeHtml(todo.id)}">
+        ${copy}
         ${isScenic ? "" : `<div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-notice-edit="${escapeHtml(todo.id)}">编辑</button><button type="button" class="todo-delete" data-notice-delete="${escapeHtml(todo.id)}">删除</button></div></details></div>`}
       </article>${state.editingNoticeId === todo.id ? `<form class="notice-edit-form" data-notice-edit-form data-todo-id="${escapeHtml(todo.id)}"><label><span>标题</span><input data-notice-edit-title value="${escapeHtml(todo.text)}" maxlength="80"></label><label><span>内容</span><textarea data-notice-edit-detail maxlength="1000">${escapeHtml(todo.detail || "")}</textarea></label><label><span>子类别</span><select data-notice-edit-subcategory>${Object.entries(PREP_LABELS.notice).map(([key, label]) => `<option value="${key}" ${window.TravelPrep.normalizeTodoSubcategory(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></label><button type="submit">保存</button><button type="button" data-notice-edit-cancel>×</button></form>` : ""}`;
     };
     $("#notice-list").innerHTML = orderedTodos.length ? noticeGroups(activeCategory, orderedTodos).map(({ group, id, label, collapsed }) => {
       const groupedItems = orderedTodos.filter((todo) => (todo.group || "其他信息") === group);
+      const articleCount = activeCategory === "scenic" ? groupedItems.reduce((total, todo) => total + todoLinksFor(todo).length, 0) : groupedItems.length;
       const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
-      return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span class="notice-subcategory__title">${escapeHtml(label)}<i aria-hidden="true">⌄</i></span><small>${groupedItems.length} 条</small></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
+      return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span class="notice-subcategory__title">${escapeHtml(label)}<i aria-hidden="true">⌄</i></span><small>${articleCount} 条</small></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
     }).join("") : `<p class="todo-empty">该类别还没有信息。</p>`;
     return;
   }

@@ -1187,14 +1187,9 @@
       {
         "id": "scenic-tianquan-service-area",
         "text": "天全服务区",
-        "detail": "参考文献",
         "category": "notice",
         "subcategory": "scenic",
         "group": "天全服务区",
-        "images": [
-          { "src": "assets/scenic/tianquan-service-area-signs.png", "alt": "天全服务区路牌墙" },
-          { "src": "assets/scenic/tianquan-service-area-318.png", "alt": "318此生必驾地标" }
-        ],
         "links": [
           { "title": "📍川西自驾第一站｜天全服务区 免费出片 川西第一站", "url": "https://xhslink.cn/o/4O8AL8qyYEH" },
           { "title": "天全服务区🐼 318集合点 自驾川西/川藏 进藏第一站", "url": "https://xhslink.cn/o/643oaUowXlK" },
