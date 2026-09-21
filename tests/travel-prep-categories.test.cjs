@@ -288,6 +288,17 @@ test("memo scenic category keeps Tagong Town references in its own folded area",
   assert.ok(tagong?.links?.some((link) => link.url.includes("3cSnvxhXzyl")));
 });
 
+test("memo scenic category keeps Luhuo County references in its own folded area", () => {
+  const luhuo = tripData.preTrip.packingItems.find((item) => item.id === "scenic-luhuo-county");
+  assert.equal(luhuo?.text, "炉霍县");
+  assert.equal(luhuo?.subcategory, "scenic");
+  assert.equal(luhuo?.group, "炉霍县");
+  assert.equal(luhuo?.links?.length, 10);
+  assert.ok(luhuo?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(luhuo?.links?.some((link) => link.url.includes("7AKsQbg1N3Y")));
+  assert.ok(luhuo?.links?.some((link) => link.url.includes("62XQAphTvki")));
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);

@@ -1279,6 +1279,27 @@
           { "title": "这不是一家会被所有人喜欢的咖啡馆", "url": "https://xhslink.cn/o/3cSnvxhXzyl" }
         ],
         "completed": false
+      },
+      {
+        "id": "scenic-luhuo-county",
+        "text": "炉霍县",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "炉霍县",
+        "referenceVersion": 1,
+        "links": [
+          { "title": "炉霍，一个被低估的川西小城，五一冲", "url": "https://xhslink.cn/o/7AKsQbg1N3Y" },
+          { "title": "高原夕阳+崩科民居=川西的黄金光影构图", "url": "https://xhslink.cn/o/1slBE5mYrRZ" },
+          { "title": "川西最“孤独”的图书馆", "url": "https://xhslink.cn/o/6uh4xyrcDnO" },
+          { "title": "雪山森林下，不输大城市审美的乡村图书馆", "url": "https://xhslink.cn/o/9oTBgIL6pni" },
+          { "title": "炉霍 德巴图书馆", "url": "https://xhslink.cn/o/25xgwfcvAAW" },
+          { "title": "卡萨湖：川西夏日很美但很容易被忽略的地方", "url": "https://xhslink.cn/o/8hnTM5RKitZ" },
+          { "title": "谁懂啊！我好像闯进了宫崎骏的漫画里", "url": "https://xhslink.cn/o/83UL570PFEi" },
+          { "title": "甘孜自驾｜山是漫长地质年代里极其缓慢的浪", "url": "https://xhslink.cn/o/6YDnSaaqrB2" },
+          { "title": "卡萨湖｜惊鸿一瞥，惦念了整个四季", "url": "https://xhslink.cn/o/8mrtgKNYrl1" },
+          { "title": "山路边被低估了宝藏湖泊", "url": "https://xhslink.cn/o/62XQAphTvki" }
+        ],
+        "completed": false
       }
     ],
     "toiletMapPins": [
