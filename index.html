@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260921-34">
+  <link rel="stylesheet" href="styles.css?v=20260921-35">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260920-3" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
-  <script src="travel-prep.js?v=20260918-6" defer></script>
-  <script src="app.js?v=20260921-51" defer></script>
+  <script src="travel-prep.js?v=20260921-7" defer></script>
+  <script src="app.js?v=20260921-52" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260920-4" defer></script>
@@ -43,7 +43,7 @@
           <a href="#packing-dictionary" role="menuitem" data-module="todo" hidden>字典</a>
         </div>
       </details>
-      <a class="primary-navigation__ledger" href="#notices" data-module="todo" hidden>注意事项</a>
+      <a class="primary-navigation__ledger" href="#notices" data-module="todo" hidden>备忘录</a>
       <a class="primary-navigation__ledger" id="ledger-navigation-link" href="#ledger" data-module="ledger" hidden>记账</a>
     </nav>
   </header>
@@ -149,21 +149,21 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">TRIP NOTES</p>
-          <h2 id="notices-title">注意事项</h2>
+          <h2 id="notices-title">备忘录</h2>
         </div>
         <span class="notice-heading-actions"><span class="soft-label" id="notice-count">0 条信息</span><button type="button" class="packing-action-trigger" data-notice-form-open>新增</button></span>
       </div>
-      <div class="prep-tabs" id="notice-category-tabs" role="tablist" aria-label="注意事项类别选择"></div>
+      <div class="prep-tabs" id="notice-category-tabs" role="tablist" aria-label="备忘录类别选择"></div>
       <details class="notice-category-manager" id="notice-category-manager">
         <summary>管理当前类别的子类别</summary>
-        <div id="notice-category-settings" aria-label="当前注意事项类别的子类别设置"></div>
+        <div id="notice-category-settings" aria-label="当前备忘录类别的子类别设置"></div>
       </details>
       <section class="packing-add-form" id="notice-form-panel" hidden>
         <div class="packing-form-heading"><strong>新增信息</strong><button type="button" data-notice-form-close aria-label="关闭新增信息">×</button></div>
         <form id="notice-form">
           <label class="packing-form-name"><span>标题</span><input id="notice-title-input" type="text" maxlength="80" placeholder="添加一条信息" aria-label="信息标题"></label>
           <label class="packing-form-description"><span>内容</span><textarea id="notice-detail-input" maxlength="1000" placeholder="补充详细内容" aria-label="信息内容"></textarea></label>
-          <label class="packing-form-select"><span>子类别</span><select id="notice-subcategory" aria-label="注意事项子类别"></select></label>
+          <label class="packing-form-select"><span>子类别</span><select id="notice-subcategory" aria-label="备忘录子类别"></select></label>
           <button type="submit" class="packing-action-trigger">添加</button>
         </form>
       </section>

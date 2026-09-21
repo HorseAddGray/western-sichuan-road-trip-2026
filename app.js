@@ -975,7 +975,7 @@ async function saveSharedChange(collection, value, op = "upsert") {
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
 const PREP_LABELS = {
-  notice: { health: "健康", toilet: "厕所" },
+  notice: { health: "健康", toilet: "厕所", food: "美食" },
   packing: { documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", daily: "日用品", other: "户外", misc: "其他" }
 };
 const PACKING_WORKSPACE_TITLES = { overview: "行囊总览", details: "行囊明细", purchase: "采购清单", check: "检查行囊", dictionary: "字典设置" };

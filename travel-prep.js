@@ -11,7 +11,7 @@
     return String(todo?.subcategory || "other");
   }
 
-  const noticeSubcategoryOrder = ["health", "rental", "road", "toilet", "trip", "other"];
+  const noticeSubcategoryOrder = ["health", "rental", "road", "toilet", "food", "trip", "other"];
   const noticeGroupOrder = ["吸氧费用", "温馨提示", "装备购买建议", "使用经验与消耗", "科学用药指南", "殿堂级", "雷区警示"];
 
   function sortNoticeItems(items) {

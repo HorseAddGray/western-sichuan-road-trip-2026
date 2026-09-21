@@ -29,11 +29,18 @@ test("missing subcategory becomes other", () => {
 
 test("packing and notices have independent navigation and controls", () => {
   assert.match(html, /id="packing-navigation"/);
-  assert.match(html, /href="#notices"[^>]*>注意事项</);
+  assert.match(html, /href="#notices"[^>]*>备忘录</);
   assert.match(html, /id="packing-category-filter-select"/);
   assert.match(html, /id="notice-category-manager"/);
   assert.match(html, /id="packing-list"/);
   assert.match(html, /id="notice-list"/);
+});
+
+test("memo navigation includes a food category and aligned luggage controls", () => {
+  assert.match(html, /<h2 id="notices-title">备忘录</);
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食" \}/);
+  assert.match(styles, /\.packing-luggage-branch__header strong/);
+  assert.match(styles, /\.packing-check-start-actions > button/);
 });
 
 test("packing exposes five editable luggage filters", () => {
@@ -332,8 +339,8 @@ test("notices provide a single-category selector and drag-managed collapsible su
   assert.doesNotMatch(app, /data-notice-category-move/);
 });
 
-test("notices keep only health and toilet categories and reset subcategories to expanded by default", () => {
-  assert.match(app, /notice: \{ health: "健康", toilet: "厕所" \}/);
+test("memos keep health, toilet, and food categories and reset subcategories to expanded by default", () => {
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食" \}/);
   assert.doesNotMatch(app, /rental: "租车与验车"/);
   assert.match(app, /notice-group-settings-v2/);
   assert.match(app, /collapsed: \[\]/);
