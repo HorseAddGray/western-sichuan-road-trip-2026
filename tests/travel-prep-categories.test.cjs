@@ -128,9 +128,9 @@ test("packing additions support reusable custom categories, quantity, and catego
   assert.match(app, /daily: "日用品"/);
   assert.match(app, /misc: "其他"/);
   assert.match(app, /PACKING_TAGS_BY_CATEGORY/);
-  assert.match(app, /clothing: \["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other", "none"\]/);
-  assert.match(app, /electronics: \["appliance", "none"\]/);
-  assert.match(app, /daily: \["none", "consumable"\]/);
+  assert.match(app, /clothing: \["coat", "trousers", "sweater", "base", "sleepwear", "consumable", "other"\]/);
+  assert.match(app, /electronics: \["appliance"\]/);
+  assert.match(app, /daily: \["consumable"\]/);
   assert.match(app, /quantity: Number\(\$\("#packing-quantity"\)\.value\) \|\| 1/);
   assert.match(app, /packing-custom-categories/);
 });
@@ -353,9 +353,9 @@ test("packing overview shows each person's actual category and tag quantities wi
 });
 
 test("packing supports an untagged option, migrates common to it, and shows its item category in the overview", () => {
-  assert.match(app, /none: "无"/);
-  assert.match(app, /todo\.property === "common"\) return "none"/);
-  assert.match(app, /label: tag === "none" \? packingCategoryLabel\(category\)/);
+  assert.match(app, /value="" \$\{!selected \? "selected" : ""\}>无标签/);
+  assert.match(app, /todo\.property === "common" \|\| todo\.property === "none"\) return ""/);
+  assert.match(app, /label: !tag \? packingCategoryLabel\(category\)/);
   assert.doesNotMatch(app, /common: "常用"/);
 });
 
@@ -485,6 +485,15 @@ test("packing overview resolves categories and tags through the dictionary and o
   assert.match(app, /data-packing-overview-dialog-close/);
 });
 
+test("packing supports untagged items, child-only luggage folding, and luggage reset before checking", () => {
+  assert.match(app, /function packingDictionaryPropertyFor\(todo, category/);
+  assert.match(app, /data-packing-luggage-add-open/);
+  assert.match(app, /data-packing-check-luggage-reset/);
+  assert.match(app, /hasChildren \? `<details/);
+  assert.match(app, /value=""[^>]*>无标签/);
+  assert.match(app, /function packingDictionaryLuggageFor\(todo\)/);
+});
+
 test("packing dictionary exposes category-to-tag associations and manages them", () => {
   assert.match(html, /href="#packing-dictionary"[^>]*>字典</);
   assert.match(html, /id="packing-dictionary"/);
@@ -554,7 +563,7 @@ test("packing dictionary hides tag counts, dismisses category editing on outside
 });
 
 test("packing additions keep the last category, owner, tag, and quantity for repeated entry", () => {
-  assert.match(app, /packingAddDefaults: \{ subcategory: "documents", owner: "shared", property: "none", quantity: "1", usesTotal: "1" \}/);
+  assert.match(app, /packingAddDefaults: \{ subcategory: "documents", owner: "shared", property: "", quantity: "1", usesTotal: "1" \}/);
   assert.match(app, /state\.packingAddDefaults = \{ subcategory, owner, property/);
   assert.match(app, /\$\("#packing-subcategory"\)\.value = packingAddDefaults\.subcategory/);
   assert.doesNotMatch(app, /\$\("#packing-owner"\)\.value = "shared"/);

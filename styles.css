@@ -498,6 +498,9 @@ main { overflow: hidden; }
 .packing-luggage-children .packing-dictionary-branch { background: rgba(248,250,247,.7); }
 .packing-luggage-branch summary b { font-size: 16px; }
 .packing-luggage-branch > summary { padding-right: 106px; }
+.packing-luggage-branch__header { min-height: 42px; padding: 0 106px 0 12px; display: flex; align-items: center; }
+.packing-luggage-branch__header > span { display: flex; align-items: center; gap: 5px; }
+.packing-luggage-branch__header b { font-size: 16px; }
 .packing-luggage-actions { position: absolute; z-index: 7; top: 8px; right: 10px; display: inline-flex; gap: 5px; }
 .packing-luggage-actions button { min-height: 27px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 .packing-luggage-actions .todo-delete { color: #a23e3e; }
@@ -525,6 +528,7 @@ main { overflow: hidden; }
 .packing-check-children { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 14px; }
 .packing-check-children button { border-style: dashed; }
 .packing-check-actions { display: flex; align-items: stretch; gap: 8px; }
+.packing-check-start-actions { display: flex; align-items: center; gap: 8px; }
 .packing-check-actions > div { display: grid; gap: 6px; }
 .packing-form-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 9px; color: var(--ink); font-size: 12px; }
 .packing-form-heading button { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: 500 22px/1 sans-serif; cursor: pointer; }
