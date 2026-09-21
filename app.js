@@ -957,8 +957,16 @@ function authoredTodosForMigration() {
     checked: Boolean(item.checked),
     detail: String(item.detail || "").trim(),
     group: String(item.group || "").trim(),
+    links: todoLinksFor(item),
     completed: Boolean(item.completed)
   })).filter((item) => item.text && !OBSOLETE_PACKING_ITEM_IDS.has(item.id));
+}
+
+function todoLinksFor(item) {
+  return (Array.isArray(item?.links) ? item.links : []).map((link) => {
+    const url = safeExternalUrl(link?.url);
+    return { title: String(link?.title || "").trim(), url };
+  }).filter((link) => link.title && link.url);
 }
 
 async function migrateLocalTodosToD1(todoAdapter, remoteInitialized) {
@@ -984,7 +992,15 @@ async function loadSharedState() {
   state.todos = Array.isArray(todoSnapshot.todos) ? todoSnapshot.todos : [];
   if (state.todos.length === 0) await migrateLocalTodosToD1(todoAdapter, Boolean(todoSnapshot.initialized));
   state.purchasedTickets = new Set((Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : []).filter((item) => item.completed).map((item) => item.id));
-  const authoredTodos = state.data.preTrip?.todoItems || state.data.preTrip?.packingItems || [];
+  const authoredTodos = authoredTodosForMigration();
+  if (todoAdapter?.mode === "d1") {
+    const existingIds = new Set(state.todos.map((item) => String(item.id)));
+    const newScenicTodos = authoredTodos.filter((todo) => todo.subcategory === "scenic" && !existingIds.has(todo.id));
+    if (newScenicTodos.length) {
+      state.todos.push(...newScenicTodos);
+      await Promise.all(newScenicTodos.map((todo) => todoAdapter.applyChange("todos", todo, "upsert")));
+    }
+  }
   if (todoAdapter?.mode === "local" && authoredTodos.length) {
     const removedAuthoredTodoIds = readRemovedAuthoredPackingTodoIds();
     const obsoleteTodos = state.todos.filter((todo) => OBSOLETE_PACKING_ITEM_IDS.has(todo.id));
@@ -1007,6 +1023,7 @@ async function loadSharedState() {
       checked: Boolean(item.checked),
       detail: String(item.detail || "").trim(),
       group: String(item.group || "").trim(),
+      links: todoLinksFor(item),
       completed: Boolean(item.completed)
     })).filter((item) => item.text && !existingIds.has(item.id) && !removedAuthoredTodoIds.has(item.id));
     state.todos.push(...missingTodos);
@@ -1035,7 +1052,7 @@ async function saveSharedChange(collection, value, op = "upsert") {
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
 const PREP_LABELS = {
-  notice: { health: "健康", toilet: "厕所", food: "美食" },
+  notice: { health: "健康", toilet: "厕所", food: "美食", scenic: "景点" },
   packing: { documents: "证件", clothing: "衣物", care: "洗护", medicine: "药品", electronics: "电子", daily: "日用品", other: "户外", misc: "其他" }
 };
 const PACKING_WORKSPACE_TITLES = { overview: "行囊总览", details: "行囊明细", purchase: "采购清单", check: "检查行囊", dictionary: "字典设置" };
@@ -1367,11 +1384,14 @@ function renderTodoList(kind) {
     const activeCategory = state.activeNoticeSubcategory;
     const orderedTodos = window.TravelPrep.sortNoticeItems(categoryTodos.filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === activeCategory));
     $("#notice-count").textContent = `${orderedTodos.length} 条信息`;
-    const itemMarkup = (todo) => `
+    const itemMarkup = (todo) => {
+      const links = todoLinksFor(todo);
+      return `
       <article class="notice-item" data-todo-id="${escapeHtml(todo.id)}">
-        <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
+        <span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>
         <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-notice-edit="${escapeHtml(todo.id)}">编辑</button><button type="button" class="todo-delete" data-notice-delete="${escapeHtml(todo.id)}">删除</button></div></details></div>
       </article>${state.editingNoticeId === todo.id ? `<form class="notice-edit-form" data-notice-edit-form data-todo-id="${escapeHtml(todo.id)}"><label><span>标题</span><input data-notice-edit-title value="${escapeHtml(todo.text)}" maxlength="80"></label><label><span>内容</span><textarea data-notice-edit-detail maxlength="1000">${escapeHtml(todo.detail || "")}</textarea></label><label><span>子类别</span><select data-notice-edit-subcategory>${Object.entries(PREP_LABELS.notice).map(([key, label]) => `<option value="${key}" ${window.TravelPrep.normalizeTodoSubcategory(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></label><button type="submit">保存</button><button type="button" data-notice-edit-cancel>×</button></form>` : ""}`;
+    };
     $("#notice-list").innerHTML = orderedTodos.length ? noticeGroups(activeCategory, orderedTodos).map(({ group, id, label, collapsed }) => {
       const groupedItems = orderedTodos.filter((todo) => (todo.group || "其他信息") === group);
       const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";

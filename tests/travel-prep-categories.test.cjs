@@ -38,7 +38,7 @@ test("packing and notices have independent navigation and controls", () => {
 
 test("memo navigation includes a food category and aligned luggage controls", () => {
   assert.match(html, /<h2 id="notices-title">备忘录</);
-  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食" \}/);
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
   assert.match(styles, /\.packing-luggage-branch__header strong/);
   assert.match(styles, /\.packing-check-start-actions > button/);
 });
@@ -220,6 +220,17 @@ test("daily itinerary shows a single start time and records when a task is confi
   assert.match(styles, /\.schedule-completion-time/);
 });
 
+test("memo scenic category shows Tianquan article links", () => {
+  const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
+  assert.equal(scenic?.text, "天全服务区");
+  assert.equal(scenic?.subcategory, "scenic");
+  assert.equal(scenic?.links?.length, 3);
+  assert.ok(scenic?.links?.every((link) => link.title.includes("天全服务区") && link.url.includes("xiaohongshu.com/explore/")));
+  assert.match(app, /notice-links/);
+  assert.match(styles, /\.notice-links/);
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
@@ -375,8 +386,8 @@ test("notices provide a single-category selector and drag-managed collapsible su
   assert.doesNotMatch(app, /data-notice-category-move/);
 });
 
-test("memos keep health, toilet, and food categories and reset subcategories to expanded by default", () => {
-  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食" \}/);
+test("memos keep health, toilet, food, and scenic categories and reset subcategories to expanded by default", () => {
+  assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
   assert.doesNotMatch(app, /rental: "租车与验车"/);
   assert.match(app, /notice-group-settings-v2/);
   assert.match(app, /collapsed: \[\]/);

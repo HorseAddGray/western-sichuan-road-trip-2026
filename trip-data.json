@@ -1183,7 +1183,21 @@
       { "id": "packing-tissues", "text": "纸巾（2包）", "category": "packing", "subcategory": "other", "luggage": "daily-bag", "completed": false },
       { "id": "packing-hair-ties", "text": "头绳（3个）", "category": "packing", "subcategory": "other", "luggage": "daily-bag", "completed": false },
       { "id": "packing-sanitary-pads", "text": "卫生巾（1包）", "category": "packing", "subcategory": "other", "luggage": "daily-bag", "completed": false },
-      { "id": "packing-toilet-seat-cover", "text": "一次性马桶垫（2个）", "category": "packing", "subcategory": "other", "luggage": "daily-bag", "completed": false }
+      { "id": "packing-toilet-seat-cover", "text": "一次性马桶垫（2个）", "category": "packing", "subcategory": "other", "luggage": "daily-bag", "completed": false },
+      {
+        "id": "scenic-tianquan-service-area",
+        "text": "天全服务区",
+        "detail": "旅行参考文章",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "沿途景点",
+        "links": [
+          { "title": "天全服务区｜小红书参考文章 1", "url": "https://www.xiaohongshu.com/explore/6a5aefad000000000101da0c?xsec_token=ABrCwpiOX4Svy_kS6LD9zAjDzhpcK4DgNICRkob_OBp94=&xsec_source=pc_search&source=web_search_result_notes" },
+          { "title": "天全服务区｜小红书参考文章 2", "url": "https://www.xiaohongshu.com/explore/699c16f8000000000c037d97?xsec_token=ABfOEUWj24I0GGcgDR4PByr9vBkVpeAn19gc-wZLe9Rt0=&xsec_source=pc_search&source=web_search_result_notes" },
+          { "title": "天全服务区｜小红书参考文章 3", "url": "https://www.xiaohongshu.com/explore/6a9f3ac700000000280030ef?xsec_token=ABCEqEP6XkUuiAK6pO4V_RHTZWkRNkI5n0ryD9Yd3JABw=&xsec_source=pc_search&source=web_search_result_notes" }
+        ],
+        "completed": false
+      }
     ],
     "toiletMapPins": [
       { "todoId": "toilet-shuangqiaogou", "x": 948, "y": 372 },
