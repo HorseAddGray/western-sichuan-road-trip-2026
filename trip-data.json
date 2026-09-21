@@ -1311,6 +1311,21 @@
           { "title": "山路边被低估了宝藏湖泊", "url": "https://xhslink.cn/o/62XQAphTvki" }
         ],
         "completed": false
+      },
+      {
+        "id": "scenic-ganzi-county",
+        "text": "甘孜县",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "甘孜县",
+        "referenceVersion": 1,
+        "links": [
+          {
+            "title": "为什么大家都忽略了甘孜县–可是它真的好美",
+            "url": "https://www.xiaohongshu.com/discovery/item/69dce871000000001a034e75?source=webshare&xhsshare=pc_web&xsec_token=AB0H9v6mmjhi97uAhVEL2sLVgUH1ar4phfej2-np7wXgA=&xsec_source=pc_share"
+          }
+        ],
+        "completed": false
       }
     ],
     "toiletMapPins": [

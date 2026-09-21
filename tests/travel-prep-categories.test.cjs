@@ -311,6 +311,16 @@ test("memo scenic category keeps Kasa Lake references in its own folded area", (
   assert.ok(kasaLake?.links?.some((link) => link.url.includes("62XQAphTvki")));
 });
 
+test("memo scenic category keeps Ganzi County references in its own folded area", () => {
+  const ganzi = tripData.preTrip.packingItems.find((item) => item.id === "scenic-ganzi-county");
+  assert.equal(ganzi?.text, "甘孜县");
+  assert.equal(ganzi?.subcategory, "scenic");
+  assert.equal(ganzi?.group, "甘孜县");
+  assert.equal(ganzi?.links?.length, 1);
+  assert.equal(ganzi?.links?.[0]?.title, "为什么大家都忽略了甘孜县–可是它真的好美");
+  assert.ok(ganzi?.links?.[0]?.url.includes("69dce871000000001a034e75"));
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
