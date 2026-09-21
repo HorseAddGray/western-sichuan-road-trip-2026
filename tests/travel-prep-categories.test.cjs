@@ -316,9 +316,12 @@ test("memo scenic category keeps Ganzi County references in its own folded area"
   assert.equal(ganzi?.text, "甘孜县");
   assert.equal(ganzi?.subcategory, "scenic");
   assert.equal(ganzi?.group, "甘孜县");
-  assert.equal(ganzi?.links?.length, 1);
+  assert.equal(ganzi?.referenceVersion, 2);
+  assert.equal(ganzi?.links?.length, 9);
   assert.equal(ganzi?.links?.[0]?.title, "为什么大家都忽略了甘孜县–可是它真的好美");
   assert.ok(ganzi?.links?.[0]?.url.includes("69dce871000000001a034e75"));
+  assert.ok(ganzi?.links?.some((link) => link.url.includes("15oxTfrI8zc")));
+  assert.ok(ganzi?.links?.some((link) => link.url.includes("6ynfZmvw39J")));
 });
 
 test("packing migration removes only the seven replaced generic system items", () => {
