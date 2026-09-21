@@ -244,6 +244,17 @@ test("memo scenic category folds article links by scenic area without duplicate 
   assert.doesNotMatch(styles, /\.notice-image-gallery/);
 });
 
+test("memo scenic category keeps Kangding Town references in its own folded area", () => {
+  const kangding = tripData.preTrip.packingItems.find((item) => item.id === "scenic-kangding-town");
+  assert.equal(kangding?.text, "康定镇");
+  assert.equal(kangding?.subcategory, "scenic");
+  assert.equal(kangding?.group, "康定镇");
+  assert.equal(kangding?.links?.length, 10);
+  assert.ok(kangding?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(kangding?.links?.some((link) => link.url.includes("AxgLHSXVLDi")));
+  assert.ok(kangding?.links?.some((link) => link.url.includes("4sDPwWq4Gvt")));
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);

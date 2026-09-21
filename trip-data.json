@@ -1200,6 +1200,27 @@
           { "title": "318国道天全服务区最全打卡点", "url": "https://xhslink.cn/o/79KLRv78bWE" }
         ],
         "completed": false
+      },
+      {
+        "id": "scenic-kangding-town",
+        "text": "康定镇",
+        "category": "notice",
+        "subcategory": "scenic",
+        "group": "康定镇",
+        "referenceVersion": 1,
+        "links": [
+          { "title": "📍康定美食推荐➕Citywalk一日游", "url": "https://xhslink.cn/o/AxgLHSXVLDi" },
+          { "title": "康定2日游攻略｜溜溜城慢逛🏕️森林温泉", "url": "https://xhslink.cn/o/2rIihaTsPdo" },
+          { "title": "逛吃康定｜郭达桥市场+溜溜城+夜景全打卡", "url": "https://xhslink.cn/o/AGqefcWQ5XD" },
+          { "title": "康定city walk Ⅰ 别再把它当新都桥中转站", "url": "https://xhslink.cn/o/1yG1ZfQ8mMa" },
+          { "title": "康定城市一日游·在山河古寺间遇见小城浪漫", "url": "https://xhslink.cn/o/4PGfHeEILax" },
+          { "title": "Fujifilm｜康定的扫街日记📷附参数", "url": "https://xhslink.cn/o/AmIgqfRMFXj" },
+          { "title": "打卡｜甘孜康定·溜溜城🏯（吃喝玩乐躺平版✔️）", "url": "https://xhslink.cn/o/7qX3r9oXKoG" },
+          { "title": "实测康定城区不难停车", "url": "https://xhslink.cn/o/g7Nu3pHnvy" },
+          { "title": "在康定溜溜城绕了三圈没有找到车位的看过来", "url": "https://xhslink.cn/o/4EIfFLEEmIx" },
+          { "title": "再见了康定 两个小时找不到停车位的城市", "url": "https://xhslink.cn/o/4sDPwWq4Gvt" }
+        ],
+        "completed": false
       }
     ],
     "toiletMapPins": [
