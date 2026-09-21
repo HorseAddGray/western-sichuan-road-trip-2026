@@ -184,6 +184,20 @@ test("packing data keeps every supplied item on its own row and assigns luggage"
   assert.ok(packing.some((item) => item.text === "一次性马桶垫（2个）" && item.luggage === "daily-bag"));
 });
 
+test("the first two days keep the supplied timed driving itinerary", () => {
+  const [dayOne, dayTwo] = tripData.days;
+  assert.equal(dayOne.schedule[0].time, "10:30");
+  assert.ok(dayOne.schedule.some((item) => item.time === "13:00" && item.text.includes("抵达天全服务区") && item.detail.includes("打卡318标志")));
+  assert.ok(dayOne.schedule.some((item) => item.time === "20:55" && item.text.includes("抵达新都桥") && item.text.includes("Holiday View")));
+  assert.ok(dayOne.schedule.some((item) => item.time === "22:55" && item.text.includes("回房休息")));
+  assert.equal(dayTwo.schedule[0].time, "08:00");
+  assert.ok(dayTwo.schedule.some((item) => item.time === "11:57" && item.text.includes("抵达道孚县") && item.detail.includes("中国熊猫大道/G350")));
+  assert.ok(dayTwo.schedule.some((item) => item.time === "14:28" && item.text.includes("抵达炉霍县") && item.detail.includes("400米道路施工")));
+  assert.ok(dayTwo.schedule.some((item) => item.time === "16:40" && item.text.includes("抵达格萨尔王城")));
+  assert.equal(dayTwo.locations.at(-1), "格萨尔王城");
+  assert.match(app, /item\.detail \? `<div class="schedule-detail">/);
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);

@@ -512,6 +512,7 @@ function dayCard(day) {
         <span class="schedule-time">${escapeHtml(item.time)}</span>
         <div class="schedule-content">
           <div class="schedule-text">${escapeHtml(item.text)}</div>
+          ${item.detail ? `<div class="schedule-detail">${escapeHtml(item.detail)}</div>` : ""}
           ${scheduleTickets}
           ${mapLinks ? `<div class="schedule-map-links">${mapLinks}</div>` : ""}
         </div>

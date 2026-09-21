@@ -206,6 +206,7 @@ main { overflow: hidden; }
 .schedule-time { position: absolute; left: 0; top: 0; width: 62px; color: var(--muted); font: 700 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .schedule-item::after { content: ""; position: absolute; left: 66px; top: 5px; width: 9px; height: 9px; border: 2px solid var(--lake); border-radius: 50%; background: var(--paper); }
 .schedule-text { font-size: 13px; line-height: 1.65; }
+.schedule-detail { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.65; }
 .schedule-map-links { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 6px; }
 .schedule-map-link { min-height: 32px; padding: 6px 9px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 11px; font-weight: 700; }
 .schedule-ticket { margin-top: 9px; border: 1px solid #e8c8b8; border-radius: 12px; background: #fff8f4; overflow: hidden; }
