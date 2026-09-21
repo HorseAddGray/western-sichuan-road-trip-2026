@@ -15,6 +15,7 @@ const state = {
   noticeGroupLabels: {},
   collapsedNoticeGroups: new Set(),
   draggedNoticeGroup: "",
+  draggedScenicLink: null,
   selectedPackingSubcategories: new Set(),
   selectedPackingLuggage: "",
   selectedPackingContainer: "",
@@ -958,6 +959,7 @@ function authoredTodosForMigration() {
     detail: String(item.detail || "").trim(),
     group: String(item.group || "").trim(),
     links: todoLinksFor(item),
+    referenceVersion: Number(item.referenceVersion || 0),
     completed: Boolean(item.completed)
   })).filter((item) => item.text && !OBSOLETE_PACKING_ITEM_IDS.has(item.id));
 }
@@ -996,7 +998,11 @@ async function loadSharedState() {
   if (todoAdapter?.mode === "d1") {
     const existingIds = new Set(state.todos.map((item) => String(item.id)));
     const newScenicTodos = authoredTodos.filter((todo) => todo.subcategory === "scenic" && !existingIds.has(todo.id));
-    const existingScenicTodos = authoredTodos.filter((todo) => todo.subcategory === "scenic" && existingIds.has(todo.id));
+    const existingScenicTodos = authoredTodos.filter((todo) => {
+      if (todo.subcategory !== "scenic" || !existingIds.has(todo.id)) return false;
+      const savedTodo = state.todos.find((item) => String(item.id) === todo.id);
+      return Number(savedTodo?.referenceVersion || 0) < Number(todo.referenceVersion || 0);
+    });
     if (newScenicTodos.length) {
       state.todos.push(...newScenicTodos);
     }
@@ -1029,6 +1035,7 @@ async function loadSharedState() {
       detail: String(item.detail || "").trim(),
       group: String(item.group || "").trim(),
       links: todoLinksFor(item),
+      referenceVersion: Number(item.referenceVersion || 0),
       completed: Boolean(item.completed)
     })).filter((item) => item.text && !existingIds.has(item.id) && !removedAuthoredTodoIds.has(item.id));
     state.todos.push(...missingTodos);
@@ -1392,9 +1399,12 @@ function renderTodoList(kind) {
     const itemMarkup = (todo) => {
       const links = todoLinksFor(todo);
       const isScenic = activeCategory === "scenic";
+      const linkMarkup = (link, index) => isScenic
+        ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a></span>`
+        : `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`;
       const copy = isScenic
-        ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>`
-        : `<span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`).join("")}</span>` : ""}</span>`;
+        ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`
+        : `<span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`;
       return `
       <article class="notice-item${isScenic ? " notice-item--scenic" : ""}" data-todo-id="${escapeHtml(todo.id)}">
         ${copy}
@@ -2068,6 +2078,33 @@ function renderTravelPrep() {
     saveNoticeGroupSettings();
     renderAll();
   };
+  $("#notice-list").ondragstart = (event) => {
+    const row = event.target.closest("[data-scenic-link-index]");
+    const todo = row?.closest("[data-todo-id]");
+    if (!row || !todo) return;
+    state.draggedScenicLink = { todoId: todo.dataset.todoId, index: Number(row.dataset.scenicLinkIndex) };
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", `${todo.dataset.todoId}:${row.dataset.scenicLinkIndex}`);
+  };
+  $("#notice-list").ondragover = (event) => {
+    if (event.target.closest("[data-scenic-link-index]")) event.preventDefault();
+  };
+  $("#notice-list").ondrop = (event) => {
+    const row = event.target.closest("[data-scenic-link-index]");
+    const todoId = row?.closest("[data-todo-id]")?.dataset.todoId;
+    const source = state.draggedScenicLink;
+    const targetIndex = Number(row?.dataset.scenicLinkIndex);
+    if (!row || !source || source.todoId !== todoId || source.index === targetIndex) return;
+    event.preventDefault();
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo || !Array.isArray(todo.links)) return;
+    const [link] = todo.links.splice(source.index, 1);
+    todo.links.splice(targetIndex, 0, link);
+    state.draggedScenicLink = null;
+    saveSharedChange("todos", todo).catch(console.error);
+    renderAll();
+  };
+  $("#notice-list").ondragend = () => { state.draggedScenicLink = null; };
   $("#notice-category-settings").onchange = (event) => {
     const input = event.target.closest("[data-notice-group-label]");
     if (!input) return;

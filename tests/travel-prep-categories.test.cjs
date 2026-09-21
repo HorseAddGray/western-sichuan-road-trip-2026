@@ -226,13 +226,19 @@ test("memo scenic category folds article links by scenic area without duplicate 
   assert.equal(scenic?.text, "天全服务区");
   assert.equal(scenic?.group, "天全服务区");
   assert.equal(scenic?.subcategory, "scenic");
-  assert.equal(scenic?.links?.length, 4);
+  assert.equal(scenic?.referenceVersion, 2);
+  assert.equal(scenic?.links?.length, 6);
   assert.ok(scenic?.links?.every((link) => link.url.includes("xhslink.cn/o/")));
+  assert.ok(scenic?.links?.some((link) => link.url.includes("49XwH3Od3FI")));
+  assert.ok(scenic?.links?.some((link) => link.url.includes("79KLRv78bWE")));
   assert.equal(scenic?.images, undefined);
   assert.match(app, /notice-links/);
   assert.match(app, /activeCategory === "scenic"/);
   assert.match(app, /const articleCount = activeCategory === "scenic"/);
+  assert.match(app, /data-scenic-link-index/);
+  assert.match(app, /draggedScenicLink/);
   assert.match(styles, /\.notice-links/);
+  assert.match(styles, /\.notice-link-row/);
   assert.doesNotMatch(styles, /\.notice-image-gallery/);
 });
 

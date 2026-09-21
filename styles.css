@@ -620,6 +620,9 @@ main { overflow: hidden; }
 .notice-links { display: grid; gap: 5px; margin-top: 3px; }
 .notice-links a { width: fit-content; color: var(--lake); font-size: 11px; font-weight: 750; line-height: 1.5; text-decoration: underline; text-underline-offset: 2px; }
 .notice-links a:hover { color: var(--terracotta); }
+.notice-link-row { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 5px; align-items: start; padding: 3px 0; cursor: grab; }
+.notice-link-row:active { cursor: grabbing; }
+.notice-link-row__handle { padding-top: 1px; color: var(--muted); font: 800 12px/1 sans-serif; letter-spacing: -1px; user-select: none; }
 .notice-item--scenic { grid-template-columns: minmax(0, 1fr); }
 .notice-item--scenic::before { display: none; }
 .prep-group--trusted h3 { color: #43654a; }

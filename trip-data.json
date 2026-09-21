@@ -1190,11 +1190,14 @@
         "category": "notice",
         "subcategory": "scenic",
         "group": "天全服务区",
+        "referenceVersion": 2,
         "links": [
           { "title": "📍川西自驾第一站｜天全服务区 免费出片 川西第一站", "url": "https://xhslink.cn/o/4O8AL8qyYEH" },
           { "title": "天全服务区🐼 318集合点 自驾川西/川藏 进藏第一站", "url": "https://xhslink.cn/o/643oaUowXlK" },
           { "title": "进藏当然要有仪式感｜记录川藏318零公里 川藏318起始", "url": "https://xhslink.cn/o/JKkXWsjmQM" },
-          { "title": "318此生必驾黄色地标别找啦！", "url": "https://xhslink.cn/o/9kMdLzbQT8S" }
+          { "title": "318此生必驾黄色地标别找啦！", "url": "https://xhslink.cn/o/9kMdLzbQT8S" },
+          { "title": "G318进藏第一站｜天全服务区保姆级攻略🐼", "url": "https://xhslink.cn/o/49XwH3Od3FI" },
+          { "title": "318国道天全服务区最全打卡点", "url": "https://xhslink.cn/o/79KLRv78bWE" }
         ],
         "completed": false
       }
