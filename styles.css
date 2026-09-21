@@ -199,6 +199,11 @@ main { overflow: hidden; }
 .day-toggle[aria-expanded="true"] .day-chevron { transform: rotate(45deg); }
 .day-detail { padding: 18px 0 26px; }
 .day-detail[hidden] { display: none; }
+.day-plan-selector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin: 0 0 15px; }
+.day-plan-selector button { min-height: 58px; padding: 9px 10px; display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: rgba(255,255,255,.72); text-align: left; font: inherit; cursor: pointer; }
+.day-plan-selector button[aria-pressed="true"] { border-color: var(--lake); color: var(--ink); background: rgba(40,123,144,.1); }
+.day-plan-selector strong { font-size: 12px; }
+.day-plan-selector small { font-size: 10px; line-height: 1.45; }
 .schedule { margin: 0; padding: 0; list-style: none; }
 .schedule-item { position: relative; padding: 0 0 21px 82px; min-height: 50px; }
 .schedule-item::before { content: ""; position: absolute; left: 70px; top: 6px; bottom: 0; width: 1px; background: #dce4e2; }

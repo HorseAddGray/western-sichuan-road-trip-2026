@@ -5,6 +5,7 @@ const state = {
   localMigrationAdapter: null,
   sharedAccessCode: "",
   expandedDay: null,
+  selectedDayPlans: {},
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
@@ -501,7 +502,10 @@ function dayCard(day) {
   const today = todayForTrip();
   const isToday = day.date === today;
   const expanded = state.expandedDay === day.day;
-  const schedule = day.schedule.map((item) => {
+  const plans = Array.isArray(day.plans) ? day.plans : [];
+  const activePlan = plans.find((plan) => plan.id === state.selectedDayPlans[day.day]) || plans[0] || null;
+  const locations = activePlan?.locations || day.locations;
+  const schedule = (activePlan?.schedule || day.schedule).map((item) => {
     const destinations = navigationDestinations(item);
     const mapLinks = destinations.map((destination) => `
       <button type="button" class="schedule-map-link" data-map-query="${escapeHtml(destination.query)}" data-map-url="${escapeHtml(destination.url || "")}" data-map-label="${escapeHtml(destination.label)}" aria-haspopup="dialog" aria-controls="place-map" aria-label="查看 ${escapeHtml(destination.label)} 的地图">📍 ${escapeHtml(destination.label)}</button>
@@ -526,6 +530,7 @@ function dayCard(day) {
   const ticketSummary = dayTickets.length
     ? `<span class="day-ticket-summary ${pendingTicketCount ? "has-pending" : "is-complete"}">${pendingTicketCount ? `${pendingTicketCount} 项待购票` : "门票已准备"}</span>`
     : "";
+  const planSelector = plans.length > 1 ? `<div class="day-plan-selector" role="group" aria-label="Day ${day.day} 行程方案">${plans.map((plan) => `<button type="button" data-day-plan="${escapeHtml(plan.id)}" aria-pressed="${activePlan?.id === plan.id}"><strong>${escapeHtml(plan.label)}</strong><small>${escapeHtml(plan.description || "")}</small></button>`).join("")}</div>` : "";
   return `
     <article class="day-card${isToday ? " is-today" : ""}" data-day="${day.day}">
       <span class="day-dot" aria-hidden="true"></span>
@@ -533,12 +538,13 @@ function dayCard(day) {
         <span>
           <span class="day-meta">DAY ${String(day.day).padStart(2, "0")} · ${escapeHtml(formatCompactDate(day.date))}${isToday ? " · 今天" : ""}</span>
           <span class="day-title">${escapeHtml(day.title)}</span>
-          <span class="day-locations">${escapeHtml(day.locations.join(" → "))}</span>
+          <span class="day-locations">${escapeHtml(locations.join(" → "))}</span>
           ${ticketSummary}
         </span>
         <span class="day-chevron" aria-hidden="true">+</span>
       </button>
       <div class="day-detail" id="day-detail-${day.day}" ${expanded ? "" : "hidden"}>
+        ${planSelector}
         <ol class="schedule">${schedule}</ol>
         ${costs ? `<div class="costs">${costs}</div>` : ""}
         ${notes.map((note) => `<p class="detail-note">${escapeHtml(note)}</p>`).join("")}
@@ -619,15 +625,23 @@ function currentTripDay() {
   return state.data.days.find((day) => day.date === today)?.day || null;
 }
 
-function renderTimeline() {
+function renderTimeline(preserveExpanded = false) {
   const today = currentTripDay();
-  state.expandedDay = today;
+  if (!preserveExpanded) state.expandedDay = today;
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
   $("#timeline").onclick = (event) => {
     const ticketButton = event.target.closest("[data-ticket-open]");
     if (ticketButton) {
       openTicketDialog(ticketButton.dataset.ticketOpen, ticketButton);
+      return;
+    }
+    const planButton = event.target.closest("[data-day-plan]");
+    if (planButton) {
+      const card = planButton.closest(".day-card");
+      state.selectedDayPlans[Number(card.dataset.day)] = planButton.dataset.dayPlan;
+      state.expandedDay = Number(card.dataset.day);
+      renderTimeline(true);
       return;
     }
     const toggle = event.target.closest(".day-toggle");

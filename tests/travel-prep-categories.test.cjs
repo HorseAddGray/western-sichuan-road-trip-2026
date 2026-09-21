@@ -198,6 +198,19 @@ test("the first two days keep the supplied timed driving itinerary", () => {
   assert.match(app, /item\.detail \? `<div class="schedule-detail">/);
 });
 
+test("later days retain the supplied timed routes and give day four a selectable plan", () => {
+  const [, , dayThree, dayFour, dayFive] = tripData.days;
+  assert.ok(dayThree.schedule.some((item) => item.time === "09:10" && item.text.includes("抵达亚青寺") && item.detail.includes("严禁飞无人机")));
+  assert.ok(dayThree.schedule.some((item) => item.time === "16:50" && item.text.includes("抵达玉龙拉措") && item.detail.includes("77元起")));
+  assert.ok(dayThree.schedule.some((item) => item.time === "20:20" && item.text.includes("抵达甘孜县城")));
+  assert.deepEqual(dayFour.plans.map((plan) => plan.id), ["plan-a", "plan-b"]);
+  assert.ok(dayFour.plans[0].schedule.some((item) => item.time === "14:30" && item.text.includes("理塘县出发")));
+  assert.ok(dayFour.plans[1].schedule.some((item) => item.time === "14:30" && item.text.includes("抵达八美镇")));
+  assert.ok(dayFive.schedule.some((item) => item.time === "20:00" && item.text.includes("抵达双流，还车")));
+  assert.match(app, /data-day-plan/);
+  assert.match(app, /renderTimeline\(true\)/);
+});
+
 test("packing migration removes only the seven replaced generic system items", () => {
   assert.match(app, /const OBSOLETE_PACKING_ITEM_IDS = new Set/);
   assert.match(app, /packing-documents/);
