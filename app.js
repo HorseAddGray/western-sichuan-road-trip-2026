@@ -7,9 +7,10 @@ const state = {
   expandedDay: null,
   selectedDayPlans: {},
   scheduleCompletions: {},
-  itineraryState: { completions: {}, notes: {}, ratings: {} },
+  itineraryState: { completions: {}, notes: {}, ratings: {}, scenicAssignments: {} },
   editingItineraryNote: null,
   itineraryNoteMenu: null,
+  itineraryScenicMenu: null,
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
@@ -528,7 +529,8 @@ function normalizeItineraryState(value) {
   return {
     completions: recordMap(value?.completions),
     notes: recordMap(value?.notes),
-    ratings: recordMap(value?.ratings)
+    ratings: recordMap(value?.ratings),
+    scenicAssignments: recordMap(value?.scenicAssignments)
   };
 }
 
@@ -600,6 +602,11 @@ function itineraryMoodTypeFor(note) {
 
 function itineraryMoodNeedsName(type) {
   return ["food", "hotel", "scenic"].includes(type);
+}
+
+function itineraryScenicAssignmentFor(key) {
+  const group = state.itineraryState.scenicAssignments[key];
+  return typeof group === "string" && group.trim() ? group : "";
 }
 
 function itineraryMoodNameLabel(type) {

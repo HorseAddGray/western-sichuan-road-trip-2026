@@ -233,6 +233,12 @@ test("daily itinerary supports interval notes, paired scenic ratings, and memo h
   assert.match(styles, /itinerary-rating__circle--down/);
 });
 
+test("daily itinerary stores one manually selected scenic destination per time node", () => {
+  assert.match(app, /scenicAssignments: \{\}/);
+  assert.match(app, /function itineraryScenicAssignmentFor\(key\)/);
+  assert.match(app, /state\.itineraryState\.scenicAssignments\[key\]/);
+});
+
 test("daily itinerary records typed travel moods with ordered timestamps and scoped ratings", () => {
   assert.match(app, /旅途心情/);
   assert.match(app, /data-itinerary-mood-type/);
