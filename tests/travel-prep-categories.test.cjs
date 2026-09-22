@@ -239,6 +239,15 @@ test("daily itinerary stores one manually selected scenic destination per time n
   assert.match(app, /state\.itineraryState\.scenicAssignments\[key\]/);
 });
 
+test("daily itinerary titles select one scenic memo destination from a context menu", () => {
+  assert.match(html, /id="itinerary-scenic-menu"/);
+  assert.match(app, /data-itinerary-scenic-assign/);
+  assert.match(app, /data-itinerary-scenic-clear/);
+  assert.match(app, /data-itinerary-scenic-menu-open/);
+  assert.match(app, /itineraryScenicAssignmentFor\(completionKey\)/);
+  assert.match(styles, /\.itinerary-scenic-menu \{/);
+});
+
 test("daily itinerary records typed travel moods with ordered timestamps and scoped ratings", () => {
   assert.match(app, /旅途心情/);
   assert.match(app, /data-itinerary-mood-type/);

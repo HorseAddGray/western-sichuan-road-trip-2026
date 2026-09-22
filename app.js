@@ -131,6 +131,7 @@ document.addEventListener("click", (event) => {
   }
   if (!event.target.closest("#scenic-link-menu, [data-scenic-link-index]")) hideScenicLinkMenu();
   if (!event.target.closest("#itinerary-note-menu, [data-itinerary-note-id]")) hideItineraryNoteMenu();
+  if (!event.target.closest("#itinerary-scenic-menu, [data-itinerary-scenic-menu-open]")) hideItineraryScenicMenu();
 });
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;",
@@ -591,6 +592,30 @@ function showItineraryNoteMenu(row, x, y) {
   menu.style.top = `${Math.min(Math.max(8, y), window.innerHeight - menu.offsetHeight - 8)}px`;
 }
 
+function hideItineraryScenicMenu() {
+  const menu = $("#itinerary-scenic-menu");
+  if (menu) menu.hidden = true;
+  state.itineraryScenicMenu = null;
+}
+
+function itineraryScenicGroups() {
+  const items = window.TravelPrep.filterTodosByCategory(state.todos, "notice")
+    .filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
+  return noticeGroups("scenic", items).map(({ group, label }) => ({ group, label }));
+}
+
+function showItineraryScenicMenu(key, x, y) {
+  const menu = $("#itinerary-scenic-menu");
+  const groups = itineraryScenicGroups();
+  if (!key || !menu || !groups.length) return;
+  const selected = itineraryScenicAssignmentFor(key);
+  menu.innerHTML = `<strong>关联景点</strong>${groups.map(({ group, label }) => `<button type="button" data-itinerary-scenic-assign="${escapeHtml(group)}" aria-pressed="${selected === group}">${selected === group ? "✓ " : ""}${escapeHtml(label)}</button>`).join("")}${selected ? `<button type="button" data-itinerary-scenic-clear>取消关联</button>` : ""}`;
+  state.itineraryScenicMenu = { key };
+  menu.hidden = false;
+  menu.style.left = `${Math.min(Math.max(8, x), window.innerWidth - menu.offsetWidth - 8)}px`;
+  menu.style.top = `${Math.min(Math.max(8, y), window.innerHeight - menu.offsetHeight - 8)}px`;
+}
+
 function itineraryNotesFor(key) {
   const notes = Array.isArray(state.itineraryState.notes[key]) ? [...state.itineraryState.notes[key]] : [];
   return notes.sort((first, second) => String(first.createdAt).localeCompare(String(second.createdAt)));
@@ -693,7 +718,13 @@ function dayCard(day) {
     const destinations = navigationDestinations(item);
     const completionKey = scheduleCompletionKey(day, item, index);
     const completedAt = state.scheduleCompletions[completionKey];
-    const scenic = itineraryScenicDestination(item);
+    const automaticScenic = itineraryScenicDestination(item);
+    const assignedScenic = itineraryScenicAssignmentFor(completionKey);
+    const scenicGroup = assignedScenic || automaticScenic?.group || automaticScenic?.text || "";
+    const scenic = scenicGroup ? { group: scenicGroup } : null;
+    const title = scenic
+      ? `<button type="button" class="itinerary-scenic-link" data-itinerary-scenic-open="${escapeHtml(scenicGroup)}" data-itinerary-scenic-menu-open="${escapeHtml(completionKey)}">⭐ ${escapeHtml(item.text)}</button>`
+      : `<button type="button" class="itinerary-schedule-title" data-itinerary-scenic-menu-open="${escapeHtml(completionKey)}">${escapeHtml(item.text)}</button>`;
     const mapLinks = destinations.map((destination) => `
       <button type="button" class="schedule-map-link" data-map-query="${escapeHtml(destination.query)}" data-map-url="${escapeHtml(destination.url || "")}" data-map-label="${escapeHtml(destination.label)}" aria-haspopup="dialog" aria-controls="place-map" aria-label="查看 ${escapeHtml(destination.label)} 的地图">📍 ${escapeHtml(destination.label)}</button>
     `).join("");
@@ -703,7 +734,7 @@ function dayCard(day) {
         <span class="schedule-time">${escapeHtml(scheduleDisplayTime(item.time))}</span>
         <label class="schedule-item__toggle"><input type="checkbox" data-schedule-complete="${escapeHtml(completionKey)}" aria-label="确认行程：${escapeHtml(item.text)}" ${completedAt ? "checked" : ""}><span class="schedule-item__check" aria-hidden="true">✓</span></label>
         <div class="schedule-content">
-          <div class="schedule-content__head"><div class="schedule-text">${scenic ? `<button type="button" class="itinerary-scenic-link" data-itinerary-scenic-open="${escapeHtml(scenic.group || scenic.text)}">⭐ ${escapeHtml(item.text)}</button>` : escapeHtml(item.text)}</div>${scenic ? itineraryRatingMarkup(completionKey) : ""}</div>
+          <div class="schedule-content__head"><div class="schedule-text">${title}</div>${scenic ? itineraryRatingMarkup(completionKey) : ""}</div>
           ${item.detail ? `<div class="schedule-detail">${escapeHtml(item.detail)}</div>` : ""}
           ${completedAt ? `<div class="schedule-completion-time">已确认 · ${escapeHtml(scheduleCompletionTimestamp(completedAt))}</div>` : ""}
           ${scheduleTickets}
@@ -961,11 +992,28 @@ function renderTimeline(preserveExpanded = false) {
     saveItineraryState();
     renderTimeline(true);
   };
+  const itineraryScenicMenu = $("#itinerary-scenic-menu");
+  itineraryScenicMenu.onclick = (event) => {
+    const action = event.target.closest("[data-itinerary-scenic-assign], [data-itinerary-scenic-clear]");
+    const context = state.itineraryScenicMenu;
+    if (!action || !context) return;
+    if (action.matches("[data-itinerary-scenic-clear]")) delete state.itineraryState.scenicAssignments[context.key];
+    else state.itineraryState.scenicAssignments[context.key] = action.dataset.itineraryScenicAssign;
+    hideItineraryScenicMenu();
+    saveItineraryState();
+    renderTimeline(true);
+  };
   $("#timeline").oncontextmenu = (event) => {
     const row = event.target.closest("[data-itinerary-note-id]");
-    if (!row) return;
+    if (row) {
+      event.preventDefault();
+      showItineraryNoteMenu(row, event.clientX, event.clientY);
+      return;
+    }
+    const title = event.target.closest("[data-itinerary-scenic-menu-open]");
+    if (!title) return;
     event.preventDefault();
-    showItineraryNoteMenu(row, event.clientX, event.clientY);
+    showItineraryScenicMenu(title.dataset.itineraryScenicMenuOpen, event.clientX, event.clientY);
   };
   let itineraryLongPressTimer = null;
   let itineraryLongPressHandled = false;
@@ -977,11 +1025,13 @@ function renderTimeline(preserveExpanded = false) {
   };
   $("#timeline").ontouchstart = (event) => {
     const row = event.target.closest("[data-itinerary-note-id]");
-    if (!row) return;
+    const title = event.target.closest("[data-itinerary-scenic-menu-open]");
+    if (!row && !title) return;
     const touch = event.touches[0];
     itineraryLongPressTimer = setTimeout(() => {
       itineraryLongPressHandled = true;
-      showItineraryNoteMenu(row, touch.clientX, touch.clientY);
+      if (row) showItineraryNoteMenu(row, touch.clientX, touch.clientY);
+      else showItineraryScenicMenu(title.dataset.itineraryScenicMenuOpen, touch.clientX, touch.clientY);
     }, 550);
   };
   $("#timeline").ontouchend = clearItineraryLongPress;
