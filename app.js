@@ -9,6 +9,7 @@ const state = {
   scheduleCompletions: {},
   itineraryState: { completions: {}, notes: {}, ratings: {} },
   editingItineraryNote: null,
+  itineraryNoteMenu: null,
   countdownTimer: null,
   purchasedTickets: new Set(),
   todos: [],
@@ -128,6 +129,7 @@ document.addEventListener("click", (event) => {
     document.querySelectorAll(".todo-more[open]").forEach((menu) => { menu.open = false; });
   }
   if (!event.target.closest("#scenic-link-menu, [data-scenic-link-index]")) hideScenicLinkMenu();
+  if (!event.target.closest("#itinerary-note-menu, [data-itinerary-note-id]")) hideItineraryNoteMenu();
 });
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;",
@@ -570,6 +572,23 @@ function itineraryNoteTime(value) {
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
+function hideItineraryNoteMenu() {
+  const menu = $("#itinerary-note-menu");
+  if (menu) menu.hidden = true;
+  state.itineraryNoteMenu = null;
+}
+
+function showItineraryNoteMenu(row, x, y) {
+  const key = row?.dataset.itineraryNoteKey;
+  const id = row?.dataset.itineraryNoteId;
+  const menu = $("#itinerary-note-menu");
+  if (!key || !id || !menu) return;
+  state.itineraryNoteMenu = { key, id };
+  menu.hidden = false;
+  menu.style.left = `${Math.min(Math.max(8, x), window.innerWidth - menu.offsetWidth - 8)}px`;
+  menu.style.top = `${Math.min(Math.max(8, y), window.innerHeight - menu.offsetHeight - 8)}px`;
+}
+
 function itineraryNotesFor(key) {
   const notes = Array.isArray(state.itineraryState.notes[key]) ? [...state.itineraryState.notes[key]] : [];
   return notes.sort((first, second) => String(first.createdAt).localeCompare(String(second.createdAt)));
@@ -636,7 +655,7 @@ function itineraryNotesMarkup(key) {
   const noteMarkup = (note) => {
     const type = itineraryMoodTypeFor(note);
     const name = String(note.name || "").trim();
-    return `<article class="itinerary-note itinerary-note--${type}"><div class="itinerary-note__heading"><div class="itinerary-note__metadata"><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}${note.createdAt ? `<time>${escapeHtml(itineraryNoteTime(note.createdAt))}</time>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`;
+    return `<article class="itinerary-note itinerary-note--${type}" data-itinerary-note-id="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}"><div class="itinerary-note__heading"><div class="itinerary-note__metadata"><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}${note.createdAt ? `<time>${escapeHtml(itineraryNoteTime(note.createdAt))}</time>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p></article>`;
   };
   return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>旅途心情</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map(noteMarkup).join("")}</div></li>`;
 }
@@ -824,25 +843,6 @@ function renderTimeline(preserveExpanded = false) {
       requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
       return;
     }
-    const editNote = event.target.closest("[data-itinerary-note-edit]");
-    if (editNote) {
-      const key = editNote.dataset.itineraryNoteKey;
-      const note = itineraryNotesFor(key).find((item) => item.id === editNote.dataset.itineraryNoteEdit);
-      if (!note) return;
-      state.editingItineraryNote = { key, id: note.id, type: itineraryMoodTypeFor(note), name: note.name || "", text: note.text };
-      renderTimeline(true);
-      requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
-      return;
-    }
-    const deleteNote = event.target.closest("[data-itinerary-note-delete]");
-    if (deleteNote) {
-      const key = deleteNote.dataset.itineraryNoteKey;
-      state.itineraryState.notes[key] = itineraryNotesFor(key).filter((note) => note.id !== deleteNote.dataset.itineraryNoteDelete);
-      if (!state.itineraryState.notes[key].length) delete state.itineraryState.notes[key];
-      saveItineraryState();
-      renderTimeline(true);
-      return;
-    }
     if (event.target.closest("[data-itinerary-note-cancel], [data-itinerary-note-dialog-close]")) {
       state.editingItineraryNote = null;
       renderTimeline(true);
@@ -933,6 +933,53 @@ function renderTimeline(preserveExpanded = false) {
     saveTicketState(checkbox.value, checkbox.checked);
     updateInlineTicketState(checkbox.value, checkbox.checked);
   };
+  const itineraryNoteMenu = $("#itinerary-note-menu");
+  itineraryNoteMenu.onclick = (event) => {
+    const action = event.target.closest("[data-itinerary-note-menu-edit], [data-itinerary-note-menu-delete]");
+    const context = state.itineraryNoteMenu;
+    if (!action || !context) return;
+    const notes = itineraryNotesFor(context.key);
+    const note = notes.find((item) => item.id === context.id);
+    if (!note) return hideItineraryNoteMenu();
+    if (action.matches("[data-itinerary-note-menu-edit]")) {
+      state.editingItineraryNote = { key: context.key, id: note.id, type: itineraryMoodTypeFor(note), name: note.name || "", text: note.text };
+      hideItineraryNoteMenu();
+      renderTimeline(true);
+      requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
+      return;
+    }
+    state.itineraryState.notes[context.key] = notes.filter((item) => item.id !== context.id);
+    if (!state.itineraryState.notes[context.key].length) delete state.itineraryState.notes[context.key];
+    hideItineraryNoteMenu();
+    saveItineraryState();
+    renderTimeline(true);
+  };
+  $("#timeline").oncontextmenu = (event) => {
+    const row = event.target.closest("[data-itinerary-note-id]");
+    if (!row) return;
+    event.preventDefault();
+    showItineraryNoteMenu(row, event.clientX, event.clientY);
+  };
+  let itineraryLongPressTimer = null;
+  let itineraryLongPressHandled = false;
+  const clearItineraryLongPress = (event) => {
+    if (itineraryLongPressTimer) clearTimeout(itineraryLongPressTimer);
+    itineraryLongPressTimer = null;
+    if (itineraryLongPressHandled) event.preventDefault();
+    itineraryLongPressHandled = false;
+  };
+  $("#timeline").ontouchstart = (event) => {
+    const row = event.target.closest("[data-itinerary-note-id]");
+    if (!row) return;
+    const touch = event.touches[0];
+    itineraryLongPressTimer = setTimeout(() => {
+      itineraryLongPressHandled = true;
+      showItineraryNoteMenu(row, touch.clientX, touch.clientY);
+    }, 550);
+  };
+  $("#timeline").ontouchend = clearItineraryLongPress;
+  $("#timeline").ontouchmove = clearItineraryLongPress;
+  $("#timeline").ontouchcancel = clearItineraryLongPress;
 }
 
 function updateInlineTicketState(ticketId, purchased) {
@@ -2020,6 +2067,7 @@ function renderTravelPrep() {
     $("[data-scenic-link-submit]").textContent = "添加";
     if (isScenic) $("#scenic-link-target").innerHTML = `${activeItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("")}<option value="__new__">新增景点…</option>`;
     $("#scenic-link-new-target-row").hidden = !isScenic || $("#scenic-link-target").value !== "__new__";
+    const noticeCategoryManager = $("#notice-category-manager"); $("summary", noticeCategoryManager).textContent = isScenic ? "管理景点排序" : "管理当前类别的子类别";
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };

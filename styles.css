@@ -253,6 +253,7 @@ main { overflow: hidden; }
 .itinerary-note-dialog__heading button { width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: 400 25px/1 sans-serif; cursor: pointer; }
 .itinerary-note-form { display: grid; gap: 7px; margin-top: 8px; }
 .itinerary-note-form label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
+.itinerary-note-form label[hidden] { display: none; }
 .itinerary-note-form select, .itinerary-note-form input { min-height: 34px; padding: 0 8px; border: 1px solid #b9d5d7; border-radius: 8px; color: var(--ink); background: white; font: inherit; }
 .itinerary-note-form textarea { width: 100%; min-height: 76px; resize: vertical; padding: 8px; border: 1px solid #b9d5d7; border-radius: 8px; color: var(--ink); background: white; font: inherit; font-size: 12px; line-height: 1.55; }
 .itinerary-note-form div { display: flex; gap: 6px; justify-content: flex-end; }
@@ -567,6 +568,7 @@ main { overflow: hidden; }
 .packing-search-form[hidden], .packing-add-form[hidden] { display: none; }
 .packing-form-description, .packing-form-select { display: grid; gap: 5px; margin-top: 9px; color: var(--muted); font-size: 11px; font-weight: 800; }
 label.scenic-link-title-field { margin-top: 18px; }
+.scenic-link-new-target[hidden] { display: none; }
 .packing-form-description textarea { width: 100%; min-height: 76px; resize: vertical; padding: 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; font-size: 12px; line-height: 1.5; }
 .packing-form-select select { min-height: 36px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; }
 .packing-purchase-heading { margin-bottom: 12px; }
@@ -670,6 +672,11 @@ label.scenic-link-title-field { margin-top: 18px; }
 .scenic-link-menu button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--ink); background: transparent; text-align: left; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
 .scenic-link-menu button:hover { background: #edf6f5; }
 .scenic-link-menu button[data-scenic-link-delete] { color: #a13f34; }
+.itinerary-note-menu { position: fixed; z-index: 130; min-width: 104px; padding: 5px; display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 10px; background: white; box-shadow: 0 12px 28px rgba(19,38,47,.2); }
+.itinerary-note-menu[hidden] { display: none; }
+.itinerary-note-menu button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--ink); background: transparent; text-align: left; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.itinerary-note-menu button:hover { background: #edf6f5; }
+.itinerary-note-menu button[data-itinerary-note-menu-delete] { color: #a13f34; }
 .notice-item--scenic { grid-template-columns: minmax(0, 1fr); }
 .notice-item--scenic::before { display: none; }
 .prep-group--trusted h3 { color: #43654a; }

@@ -253,6 +253,17 @@ test("itinerary moods use a closable dialog and compact type-and-time metadata",
   assert.match(styles, /\.itinerary-note__type \{[^}]*font-size: 12px/);
 });
 
+test("mood dialogs hide names and manage saved moods from a context menu", () => {
+  assert.match(html, /id="itinerary-note-menu"/);
+  assert.match(html, /data-itinerary-note-menu-edit/);
+  assert.match(html, /data-itinerary-note-menu-delete/);
+  assert.match(styles, /\.itinerary-note-form label\[hidden\] \{ display: none; \}/);
+  assert.match(app, /showItineraryNoteMenu/);
+  assert.match(app, /itineraryNoteMenu/);
+  assert.doesNotMatch(app, /data-itinerary-note-edit/);
+  assert.doesNotMatch(app, /data-itinerary-note-delete/);
+});
+
 test("memo scenic category folds article links by scenic area without duplicate card copy", () => {
   const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
@@ -291,6 +302,12 @@ test("scenic reference entry can create a scenic destination and overview omits 
   assert.match(app, /Object\.values\(category\.tags\)\.filter\(\(tag\) => tag\.key\)/);
   assert.match(app, /text: scenicName/);
   assert.match(app, /data-scenic-link-submit.*textContent = "添加"/);
+});
+
+test("new scenic destination names stay hidden until the new-destination option is selected", () => {
+  assert.match(styles, /\.scenic-link-new-target\[hidden\] \{ display: none; \}/);
+  assert.match(app, /noticeCategoryManager.*管理景点排序/);
+  assert.match(app, /#notice-category-settings\"\)\.ondragstart/);
 });
 
 test("scenic reference links support featured and deletion actions from a context menu", () => {

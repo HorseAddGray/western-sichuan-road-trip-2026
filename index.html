@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260922-45">
+  <link rel="stylesheet" href="styles.css?v=20260922-46">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260920-3" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260921-8" defer></script>
-  <script src="app.js?v=20260922-64" defer></script>
+  <script src="app.js?v=20260922-65" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260920-4" defer></script>
@@ -88,6 +88,10 @@
         <span class="soft-label" id="day-count"></span>
       </div>
       <div class="timeline" id="timeline"></div>
+      <div class="itinerary-note-menu" id="itinerary-note-menu" role="menu" hidden>
+        <button type="button" data-itinerary-note-menu-edit role="menuitem">编辑</button>
+        <button type="button" data-itinerary-note-menu-delete role="menuitem">删除</button>
+      </div>
     </section>
 
     <section class="section drive-section" id="drive" aria-labelledby="drive-title" data-module="driving" data-travel-panel="info" hidden>
