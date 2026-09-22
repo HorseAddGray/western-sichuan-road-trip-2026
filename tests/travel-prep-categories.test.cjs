@@ -248,6 +248,11 @@ test("daily itinerary titles select one scenic memo destination from a context m
   assert.match(styles, /\.itinerary-scenic-menu \{/);
 });
 
+test("starred itinerary links settle on the expanded scenic memo target", () => {
+  assert.match(app, /requestAnimationFrame\(\(\) => requestAnimationFrame/);
+  assert.match(app, /target\.scrollIntoView\(\{ behavior: "smooth", block: "center" \}\)/);
+});
+
 test("daily itinerary records typed travel moods with ordered timestamps and scoped ratings", () => {
   assert.match(app, /旅途心情/);
   assert.match(app, /data-itinerary-mood-type/);

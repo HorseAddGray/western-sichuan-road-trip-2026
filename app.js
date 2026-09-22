@@ -698,13 +698,13 @@ function openItineraryScenicMemo(group) {
   state.collapsedNoticeGroups.delete(noticeGroupId("scenic", group));
   if (location.hash !== "#notices") location.hash = "#notices";
   renderTravelPrep();
-  setTimeout(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const target = $$(".notice-subcategory", $("#notice-list")).find((item) => item.dataset.noticeGroup === group);
     if (!target) return;
     target.scrollIntoView({ behavior: "smooth", block: "center" });
     target.classList.add("notice-subcategory--target");
     setTimeout(() => target.classList.remove("notice-subcategory--target"), 2200);
-  }, 40);
+  }));
 }
 
 function dayCard(day) {
