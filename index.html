@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI 旅行网页模板</title>
-  <link rel="stylesheet" href="styles.css?v=20260921-43">
+  <link rel="stylesheet" href="styles.css?v=20260922-44">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
   <script src="runtime-storage.js?v=20260920-3" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260921-8" defer></script>
-  <script src="app.js?v=20260921-62" defer></script>
+  <script src="app.js?v=20260922-63" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260920-4" defer></script>
@@ -168,8 +168,9 @@
           </div>
           <div id="notice-scenic-link-fields" hidden>
             <label class="packing-form-select"><span>归属景点</span><select id="scenic-link-target" data-scenic-link-target aria-label="归属景点"></select></label>
+            <label class="packing-form-name scenic-link-new-target" id="scenic-link-new-target-row" hidden><span>新景点名称</span><input id="scenic-link-new-target" data-scenic-link-new-target type="text" maxlength="80" placeholder="例如：墨石公园" aria-label="新景点名称"></label>
             <label class="packing-form-description"><span>小红书分享内容</span><textarea id="scenic-link-share" data-scenic-link-share maxlength="4000" placeholder="粘贴小红书分享文本，自动提取文章标题和链接" aria-label="小红书分享内容"></textarea></label>
-            <label class="packing-form-name"><span>文章标题</span><input id="scenic-link-title" type="text" maxlength="160" placeholder="粘贴后自动提取，可修改" aria-label="文章标题"></label>
+            <label class="packing-form-name scenic-link-title-field"><span>文章标题</span><input id="scenic-link-title" type="text" maxlength="160" placeholder="粘贴后自动提取，可修改" aria-label="文章标题"></label>
           </div>
           <button type="submit" class="packing-action-trigger" data-scenic-link-submit>添加</button>
         </form>

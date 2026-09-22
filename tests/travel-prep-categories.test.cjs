@@ -188,7 +188,7 @@ test("the first two days keep the supplied timed driving itinerary", () => {
   const [dayOne, dayTwo] = tripData.days;
   assert.equal(dayOne.schedule[0].time, "10:30");
   assert.ok(dayOne.schedule.some((item) => item.time === "13:00" && item.text.includes("抵达天全服务区") && item.detail.includes("打卡318标志")));
-  assert.ok(dayOne.schedule.some((item) => item.time === "20:55" && item.text.includes("抵达新都桥") && item.text.includes("Holiday View")));
+  assert.ok(dayOne.schedule.some((item) => item.time === "20:55" && item.text === "抵达新都桥。"));
   assert.ok(dayOne.schedule.some((item) => item.time === "22:55" && item.text.includes("回房休息")));
   assert.equal(dayTwo.schedule[0].time, "08:00");
   assert.ok(dayTwo.schedule.some((item) => item.time === "11:57" && item.text.includes("抵达道孚县") && item.detail.includes("中国熊猫大道/G350")));
@@ -233,6 +233,17 @@ test("daily itinerary supports interval notes, paired scenic ratings, and memo h
   assert.match(styles, /itinerary-rating__circle--down/);
 });
 
+test("daily itinerary records typed travel moods with ordered timestamps and scoped ratings", () => {
+  assert.match(app, /旅途心情/);
+  assert.match(app, /data-itinerary-mood-type/);
+  assert.match(app, /data-itinerary-mood-name/);
+  assert.match(app, /itineraryMoodNeedsName/);
+  assert.match(app, /notes\.sort\(\(first, second\) => String\(first\.createdAt\)/);
+  assert.match(app, /itineraryRatingMarkup\(note\.id\)/);
+  assert.match(styles, /\.schedule-item__check \{ width: 22px/);
+  assert.match(styles, /label\.scenic-link-title-field \{ margin-top: 18px/);
+});
+
 test("memo scenic category folds article links by scenic area without duplicate card copy", () => {
   const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
@@ -263,6 +274,14 @@ test("scenic memo entry parses a pasted Xiaohongshu share into the selected scen
   assert.match(html, /data-scenic-link-share/);
   assert.match(html, /data-scenic-link-submit/);
   assert.match(app, /target\.links\.push\(parsed\)/);
+});
+
+test("scenic reference entry can create a scenic destination and overview omits duplicate untagged rows", () => {
+  assert.match(html, /scenic-link-new-target/);
+  assert.match(html, /data-scenic-link-new-target/);
+  assert.match(app, /Object\.values\(category\.tags\)\.filter\(\(tag\) => tag\.key\)/);
+  assert.match(app, /text: scenicName/);
+  assert.match(app, /data-scenic-link-submit.*textContent = "添加"/);
 });
 
 test("memo scenic category keeps Kangding Town references in its own folded area", () => {

@@ -61,6 +61,7 @@ const state = {
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
 const SHARED_COLLECTIONS = Object.freeze(["todos", "tickets", "ledger"]);
 const ITINERARY_STATE_ID = "__itinerary_state__";
+const ITINERARY_MOOD_TYPES = Object.freeze({ food: "美食", hotel: "酒店", scenic: "景点", mood: "心情" });
 const OBSOLETE_PACKING_ITEM_IDS = new Set([
   "packing-documents", "packing-clothes", "packing-medicines", "packing-hygiene",
   "packing-weather", "packing-electronics", "packing-supplies"
@@ -562,8 +563,20 @@ function scheduleCompletionTimestamp(value) {
 }
 
 function itineraryNotesFor(key) {
-  const notes = state.itineraryState.notes[key];
-  return Array.isArray(notes) ? notes : [];
+  const notes = Array.isArray(state.itineraryState.notes[key]) ? [...state.itineraryState.notes[key]] : [];
+  return notes.sort((first, second) => String(first.createdAt).localeCompare(String(second.createdAt)));
+}
+
+function itineraryMoodTypeFor(note) {
+  return ITINERARY_MOOD_TYPES[note?.type] ? note.type : "mood";
+}
+
+function itineraryMoodNeedsName(type) {
+  return ["food", "hotel", "scenic"].includes(type);
+}
+
+function itineraryMoodNameLabel(type) {
+  return { food: "美食名称", hotel: "酒店名称", scenic: "景点名称" }[type] || "名称";
 }
 
 function itineraryRatingFor(key, owner) {
@@ -605,7 +618,14 @@ function itineraryRatingMarkup(key) {
 function itineraryNotesMarkup(key) {
   const notes = itineraryNotesFor(key);
   const editing = state.editingItineraryNote?.key === key ? state.editingItineraryNote : null;
-  return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>行程安排 / 备注</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map((note) => `<article class="itinerary-note"><p>${escapeHtml(note.text)}</p><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`).join("")}${editing ? `<form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="行程安排或备注">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form>` : ""}</div></li>`;
+  const noteMarkup = (note) => {
+    const type = itineraryMoodTypeFor(note);
+    const name = String(note.name || "").trim();
+    return `<article class="itinerary-note itinerary-note--${type}"><div class="itinerary-note__heading"><div><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p><time>添加于 ${escapeHtml(scheduleCompletionTimestamp(note.createdAt))}</time><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`;
+  };
+  const editingType = itineraryMoodTypeFor(editing);
+  const typeOptions = Object.entries(ITINERARY_MOOD_TYPES).map(([type, label]) => `<option value="${type}" ${editingType === type ? "selected" : ""}>${label}</option>`).join("");
+  return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>旅途心情</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map(noteMarkup).join("")}${editing ? `<form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><label><span>类型</span><select name="type" data-itinerary-mood-type aria-label="旅途心情类型">${typeOptions}</select></label><label data-itinerary-mood-name-row ${itineraryMoodNeedsName(editingType) ? "" : "hidden"}><span data-itinerary-mood-name-label>${itineraryMoodNameLabel(editingType)}</span><input name="name" data-itinerary-mood-name maxlength="80" value="${escapeHtml(editing.name || "")}" placeholder="填写${itineraryMoodNameLabel(editingType)}" aria-label="旅途心情名称"></label><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="旅途心情内容">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form>` : ""}</div></li>`;
 }
 
 function openItineraryScenicMemo(group) {
@@ -781,7 +801,7 @@ function renderTimeline(preserveExpanded = false) {
     }
     const addNote = event.target.closest("[data-itinerary-note-add]");
     if (addNote) {
-      state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", text: "" };
+      state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", type: "mood", name: "", text: "" };
       renderTimeline(true);
       return;
     }
@@ -790,7 +810,7 @@ function renderTimeline(preserveExpanded = false) {
       const key = editNote.dataset.itineraryNoteKey;
       const note = itineraryNotesFor(key).find((item) => item.id === editNote.dataset.itineraryNoteEdit);
       if (!note) return;
-      state.editingItineraryNote = { key, id: note.id, text: note.text };
+      state.editingItineraryNote = { key, id: note.id, type: itineraryMoodTypeFor(note), name: note.name || "", text: note.text };
       renderTimeline(true);
       return;
     }
@@ -840,16 +860,23 @@ function renderTimeline(preserveExpanded = false) {
     const form = event.target.closest("[data-itinerary-note-form]");
     if (!form) return;
     event.preventDefault();
-    const text = String(new FormData(form).get("text") || "").trim();
+    const formData = new FormData(form);
+    const text = String(formData.get("text") || "").trim();
     if (!text) {
       $("textarea", form)?.focus();
+      return;
+    }
+    const type = String(formData.get("type") || "mood");
+    const name = String(formData.get("name") || "").trim();
+    if (itineraryMoodNeedsName(type) && !name) {
+      $("[data-itinerary-mood-name]", form)?.focus();
       return;
     }
     const key = form.dataset.itineraryNoteKey;
     const id = form.dataset.itineraryNoteId || (globalThis.crypto?.randomUUID?.() || `note-${Date.now().toString(36)}`);
     const notes = [...itineraryNotesFor(key)];
     const index = notes.findIndex((note) => note.id === id);
-    const note = { id, text, createdAt: index >= 0 ? notes[index].createdAt : new Date().toISOString() };
+    const note = { id, type, name, text, createdAt: index >= 0 ? notes[index].createdAt : new Date().toISOString() };
     if (index >= 0) notes[index] = note;
     else notes.push(note);
     state.itineraryState.notes[key] = notes;
@@ -858,6 +885,18 @@ function renderTimeline(preserveExpanded = false) {
     renderTimeline(true);
   };
   $("#timeline").onchange = (event) => {
+    const moodType = event.target.closest("[data-itinerary-mood-type]");
+    if (moodType) {
+      const form = moodType.closest("[data-itinerary-note-form]");
+      const needsName = itineraryMoodNeedsName(moodType.value);
+      const nameRow = $("[data-itinerary-mood-name-row]", form);
+      nameRow.hidden = !needsName;
+      $("[data-itinerary-mood-name-label]", form).textContent = itineraryMoodNameLabel(moodType.value);
+      const nameInput = $("[data-itinerary-mood-name]", form);
+      nameInput.placeholder = `填写${itineraryMoodNameLabel(moodType.value)}`;
+      nameInput.required = needsName;
+      return;
+    }
     const scheduleCheckbox = event.target.closest("[data-schedule-complete]");
     if (scheduleCheckbox) {
       const key = scheduleCheckbox.dataset.scheduleComplete;
@@ -1480,7 +1519,7 @@ function packingPropertyFor(todo) {
 }
 function packingContainerFor(todo) { return todo.container || packingLuggageFor(todo); }
 function packingEditFormMarkup(todo) {
-  const category = packingDictionaryCategoryFor(todo);
+        const category = packingDictionaryCategoryFor(todo);
   const property = packingDictionaryPropertyFor(todo, category);
   const tags = packingTagsForCategory(category);
   const usesTotal = Number(todo.usesTotal || 0);
@@ -1671,14 +1710,14 @@ function renderPackingOverview() {
   const visibleOwners = state.packingOverviewOwner === "all" ? owners : owners.filter((owner) => owner === state.packingOverviewOwner);
   const cardMarkup = (owner) => {
     const categories = Object.values(packingOverviewCategoryTotals(owner))
-      .map((category) => ({ ...category, tags: Object.values(category.tags).sort((first, second) => second.quantity - first.quantity) }))
+      .map((category) => ({ ...category, tags: Object.values(category.tags).filter((tag) => tag.key).sort((first, second) => second.quantity - first.quantity) }))
       .sort((first, second) => second.quantity - first.quantity);
     return `<article class="packing-overview-card">
-      <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>实际物品标签数量</small></div>
+      <div class="packing-overview-card__heading"><span>${PACKING_OWNER_LABELS[owner]}</span><small>实际物品数量</small></div>
       <div class="packing-overview-card__items">${categories.length ? categories.map((category) => {
         const categoryId = `${owner}:${category.key}`;
         const collapsed = state.collapsedPackingOverviewCategories.has(categoryId);
-        return `<section class="packing-overview-category"><button type="button" class="packing-overview-category-toggle" data-packing-overview-category="${escapeHtml(category.key)}" data-packing-overview-owner="${owner}" aria-expanded="${!collapsed}"><span><strong>${escapeHtml(category.label)}</strong><small>${category.quantity}件</small></span><i aria-hidden="true">⌄</i></button><div class="packing-overview-category__items" ${collapsed ? "hidden" : ""}>${category.tags.map((tag) => `<button type="button" class="packing-overview-item" data-packing-overview-tag="${escapeHtml(tag.key || "")}" data-packing-overview-category="${escapeHtml(category.key)}" data-packing-overview-owner="${owner}"><strong class="packing-overview-tag">${escapeHtml(tag.label)}</strong><strong class="packing-overview-value">${tag.quantity}<i>件</i></strong></button>`).join("")}</div></section>`;
+        return `<section class="packing-overview-category"><button type="button" class="packing-overview-category-toggle" data-packing-overview-category="${escapeHtml(category.key)}" data-packing-overview-owner="${owner}" aria-expanded="${!collapsed}"><span><strong>${escapeHtml(category.label)}</strong><small>${category.quantity}件</small></span><i aria-hidden="true">⌄</i></button><div class="packing-overview-category__items" ${collapsed || !category.tags.length ? "hidden" : ""}>${category.tags.map((tag) => `<button type="button" class="packing-overview-item" data-packing-overview-tag="${escapeHtml(tag.key)}" data-packing-overview-category="${escapeHtml(category.key)}" data-packing-overview-owner="${owner}"><strong class="packing-overview-tag">${escapeHtml(tag.label)}</strong><strong class="packing-overview-value">${tag.quantity}<i>件</i></strong></button>`).join("")}</div></section>`;
       }).join("") : `<p class="todo-empty">行囊明细中还没有归属给${PACKING_OWNER_LABELS[owner]}的物品。</p>`}</div>
     </article>`;
   };
@@ -1939,8 +1978,9 @@ function renderTravelPrep() {
     $("#notice-form-heading").textContent = isScenic ? "新增链接" : "新增信息";
     $("#notice-info-fields").hidden = isScenic;
     $("#notice-scenic-link-fields").hidden = !isScenic;
-    $("[data-scenic-link-submit]").textContent = isScenic ? "添加链接" : "添加";
-    if (isScenic) $("#scenic-link-target").innerHTML = activeItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("");
+    $("[data-scenic-link-submit]").textContent = "添加";
+    if (isScenic) $("#scenic-link-target").innerHTML = `${activeItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("")}<option value="__new__">新增景点…</option>`;
+    $("#scenic-link-new-target-row").hidden = !isScenic || $("#scenic-link-target").value !== "__new__";
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
@@ -2548,18 +2588,33 @@ function renderTravelPrep() {
   $("#notice-form").onsubmit = (event) => {
     if (state.activeNoticeSubcategory !== "scenic") return submitForm("notice")(event);
     event.preventDefault();
-    const target = state.todos.find((todo) => todo.id === $("#scenic-link-target").value && window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
     const parsed = parseScenicShareText($("#scenic-link-share").value);
-    if (!target || !parsed) {
+    if (!parsed) {
       $("#scenic-link-share").focus();
       return;
     }
+    const targetId = $("#scenic-link-target").value;
+    const scenicName = $("#scenic-link-new-target").value.trim();
+    let target = state.todos.find((todo) => todo.id === targetId && window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
+    if (targetId === "__new__") {
+      if (!scenicName) {
+        $("#scenic-link-new-target").focus();
+        return;
+      }
+      target = state.todos.find((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic" && (todo.group || todo.text) === scenicName);
+      if (!target) {
+        target = { id: `scenic-${Date.now().toString(36)}`, text: scenicName, category: "notice", subcategory: "scenic", group: scenicName, links: [], completed: false };
+        state.todos.push(target);
+      }
+    }
+    if (!target) return;
     const title = $("#scenic-link-title").value.trim();
     if (title) parsed.title = title;
     target.links = todoLinksFor(target);
     target.links.push(parsed);
     $("#scenic-link-share").value = "";
     $("#scenic-link-title").value = "";
+    $("#scenic-link-new-target").value = "";
     saveSharedChange("todos", target).catch(console.error);
     renderAll();
   };
@@ -2576,6 +2631,10 @@ function renderTravelPrep() {
   $("#scenic-link-share").oninput = () => {
     const parsed = parseScenicShareText($("#scenic-link-share").value);
     if (parsed) $("#scenic-link-title").value = parsed.title;
+  };
+  $("#scenic-link-target").onchange = () => {
+    $("#scenic-link-new-target-row").hidden = $("#scenic-link-target").value !== "__new__";
+    if ($("#scenic-link-target").value === "__new__") $("#scenic-link-new-target").focus();
   };
   $("[data-packing-form-open]").onclick = () => {
     $("#packing-search-panel").hidden = true;
