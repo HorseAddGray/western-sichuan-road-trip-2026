@@ -298,7 +298,7 @@ test("memo scenic category folds article links by scenic area without duplicate 
   assert.equal(scenic?.images, undefined);
   assert.match(app, /notice-links/);
   assert.match(app, /activeCategory === "scenic"/);
-  assert.match(app, /const articleCount = activeCategory === "scenic"/);
+  assert.match(app, /const articleCount = \["scenic", "food"\]\.includes\(activeCategory\)/);
   assert.match(app, /data-scenic-link-index/);
   assert.match(app, /draggedScenicLink/);
   assert.doesNotMatch(app, /data-scenic-link-move/);
@@ -326,8 +326,15 @@ test("scenic reference entry can create a scenic destination and overview omits 
 
 test("new scenic destination names stay hidden until the new-destination option is selected", () => {
   assert.match(styles, /\.scenic-link-new-target\[hidden\] \{ display: none; \}/);
-  assert.match(app, /noticeCategoryManager.*管理景点排序/);
+  assert.match(app, /noticeCategoryManager.*管理子类别排序/);
   assert.match(app, /#notice-category-settings\"\)\.ondragstart/);
+});
+
+test("food links use the scenic destination picker and shared link controls", () => {
+  assert.match(app, /const isLocationLinks = \["scenic", "food"\]\.includes/);
+  assert.match(html, /data-location-link-target/);
+  assert.match(app, /activeCategory === "food"/);
+  assert.match(app, /data-scenic-link-feature/);
 });
 
 test("scenic reference links support featured and deletion actions from a context menu", () => {

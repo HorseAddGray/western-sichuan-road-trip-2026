@@ -1755,22 +1755,23 @@ function renderTodoList(kind) {
     $("#notice-count").textContent = `${orderedTodos.length} 条信息`;
     const itemMarkup = (todo) => {
       const links = todoLinksFor(todo);
-      const isScenic = activeCategory === "scenic";
-      const linkMarkup = (link, index) => isScenic
+      const isLocationLinks = ["scenic", "food"].includes(activeCategory);
+      const isLocationLinkItem = isLocationLinks && links.length > 0;
+      const linkMarkup = (link, index) => isLocationLinkItem
         ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}" data-scenic-link-featured="${link.featured}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span>${link.featured ? `<b class="notice-link-row__featured" aria-label="已加精">⭐</b>` : ""}<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a></span>`
         : `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`;
-      const copy = isScenic
+      const copy = isLocationLinkItem
         ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`
         : `<span class="todo-copy"><span class="todo-text">${escapeHtml(todo.text)}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`;
       return `
-      <article class="notice-item${isScenic ? " notice-item--scenic" : ""}" data-todo-id="${escapeHtml(todo.id)}">
+      <article class="notice-item${isLocationLinkItem ? " notice-item--scenic notice-item--location" : ""}" data-todo-id="${escapeHtml(todo.id)}">
         ${copy}
-        ${isScenic ? "" : `<div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-notice-edit="${escapeHtml(todo.id)}">编辑</button><button type="button" class="todo-delete" data-notice-delete="${escapeHtml(todo.id)}">删除</button></div></details></div>`}
+        ${isLocationLinkItem ? "" : `<div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-notice-edit="${escapeHtml(todo.id)}">编辑</button><button type="button" class="todo-delete" data-notice-delete="${escapeHtml(todo.id)}">删除</button></div></details></div>`}
       </article>${state.editingNoticeId === todo.id ? `<form class="notice-edit-form" data-notice-edit-form data-todo-id="${escapeHtml(todo.id)}"><label><span>标题</span><input data-notice-edit-title value="${escapeHtml(todo.text)}" maxlength="80"></label><label><span>内容</span><textarea data-notice-edit-detail maxlength="1000">${escapeHtml(todo.detail || "")}</textarea></label><label><span>子类别</span><select data-notice-edit-subcategory>${Object.entries(PREP_LABELS.notice).map(([key, label]) => `<option value="${key}" ${window.TravelPrep.normalizeTodoSubcategory(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select></label><button type="submit">保存</button><button type="button" data-notice-edit-cancel>×</button></form>` : ""}`;
     };
     $("#notice-list").innerHTML = orderedTodos.length ? noticeGroups(activeCategory, orderedTodos).map(({ group, id, label, collapsed }) => {
       const groupedItems = orderedTodos.filter((todo) => (todo.group || "其他信息") === group);
-      const articleCount = activeCategory === "scenic" ? groupedItems.reduce((total, todo) => total + todoLinksFor(todo).length, 0) : groupedItems.length;
+      const articleCount = ["scenic", "food"].includes(activeCategory) ? groupedItems.reduce((total, todo) => total + (todoLinksFor(todo).length || 1), 0) : groupedItems.length;
       const tone = group === "殿堂级" ? "trusted" : group === "雷区警示" ? "warning" : "";
       return `<section class="notice-subcategory${tone ? ` notice-subcategory--${tone}` : ""}" data-notice-group="${escapeHtml(group)}"><button type="button" class="notice-subcategory__toggle" data-notice-group-toggle="${escapeHtml(group)}" aria-expanded="${!collapsed}"><span class="notice-subcategory__title">${escapeHtml(label)}<i aria-hidden="true">⌄</i></span><small>${articleCount} 条</small></button><div class="notice-subcategory__panel" ${collapsed ? "hidden" : ""}><div class="todo-list">${groupedItems.map(itemMarkup).join("")}</div></div></section>`;
     }).join("") : `<p class="todo-empty">该类别还没有信息。</p>`;
@@ -2116,15 +2117,17 @@ function renderTravelPrep() {
     $("[data-packing-filter-reset]").classList.toggle("is-active", hasActivePackingFilters());
     $("#notice-category-tabs").innerHTML = Object.entries(PREP_LABELS.notice).map(([key, label]) => `<button type="button" data-notice-subcategory="${key}" aria-selected="${key === state.activeNoticeSubcategory}">${label}</button>`).join("");
     const activeItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === state.activeNoticeSubcategory));
-    const isScenic = state.activeNoticeSubcategory === "scenic";
-    $("[data-notice-form-open]").textContent = isScenic ? "新增链接" : "新增";
-    $("#notice-form-heading").textContent = isScenic ? "新增链接" : "新增信息";
-    $("#notice-info-fields").hidden = isScenic;
-    $("#notice-scenic-link-fields").hidden = !isScenic;
+    const activeCategory = state.activeNoticeSubcategory;
+    const isLocationLinks = ["scenic", "food"].includes(activeCategory);
+    const scenicItems = window.TravelPrep.sortNoticeItems(window.TravelPrep.filterTodosByCategory(state.todos, "notice").filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic"));
+    $("[data-notice-form-open]").textContent = isLocationLinks ? "新增链接" : "新增";
+    $("#notice-form-heading").textContent = isLocationLinks ? "新增链接" : "新增信息";
+    $("#notice-info-fields").hidden = isLocationLinks;
+    $("#notice-scenic-link-fields").hidden = !isLocationLinks;
     $("[data-scenic-link-submit]").textContent = "添加";
-    if (isScenic) $("#scenic-link-target").innerHTML = `${activeItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("")}<option value="__new__">新增景点…</option>`;
-    $("#scenic-link-new-target-row").hidden = !isScenic || $("#scenic-link-target").value !== "__new__";
-    const noticeCategoryManager = $("#notice-category-manager"); $("summary", noticeCategoryManager).textContent = isScenic ? "管理景点排序" : "管理当前类别的子类别";
+    if (isLocationLinks) $("#scenic-link-target").innerHTML = `${scenicItems.map((todo) => `<option value="${escapeHtml(todo.id)}">${escapeHtml(todo.group || todo.text)}</option>`).join("")}<option value="__new__">新增景点…</option>`;
+    $("#scenic-link-new-target-row").hidden = !isLocationLinks || $("#scenic-link-target").value !== "__new__";
+    const noticeCategoryManager = $("#notice-category-manager"); $("summary", noticeCategoryManager).textContent = "管理子类别排序";
     $("#notice-category-settings").innerHTML = noticeGroups(state.activeNoticeSubcategory, activeItems).map(({ group, label }) => `<div class="notice-subcategory-setting" draggable="true" data-notice-group="${escapeHtml(group)}"><span class="notice-subcategory-setting__handle" aria-hidden="true">⋮⋮</span><input type="text" maxlength="24" value="${escapeHtml(label)}" data-notice-group-label="${escapeHtml(group)}" aria-label="${escapeHtml(group)}名称"></div>`).join("") || `<p class="todo-empty">该类别还没有子类别。</p>`;
   };
   const renderAll = () => { renderControls(); renderTodoList("packing"); renderTodoList("notice"); renderToiletMap(); renderPackingWorkspace(); };
@@ -2770,7 +2773,8 @@ function renderTravelPrep() {
   $("#packing-form").onsubmit = submitPackingForm;
   $("[data-packing-add-submit]").onclick = () => submitPackingForm({ preventDefault() {} });
   $("#notice-form").onsubmit = (event) => {
-    if (state.activeNoticeSubcategory !== "scenic") return submitForm("notice")(event);
+    const activeCategory = state.activeNoticeSubcategory;
+    if (!["scenic", "food"].includes(activeCategory)) return submitForm("notice")(event);
     event.preventDefault();
     const parsed = parseScenicShareText($("#scenic-link-share").value);
     if (!parsed) {
@@ -2779,19 +2783,29 @@ function renderTravelPrep() {
     }
     const targetId = $("#scenic-link-target").value;
     const scenicName = $("#scenic-link-new-target").value.trim();
-    let target = state.todos.find((todo) => todo.id === targetId && window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
+    let scenicTarget = state.todos.find((todo) => todo.id === targetId && window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic");
     if (targetId === "__new__") {
       if (!scenicName) {
         $("#scenic-link-new-target").focus();
         return;
       }
-      target = state.todos.find((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic" && (todo.group || todo.text) === scenicName);
-      if (!target) {
-        target = { id: `scenic-${Date.now().toString(36)}`, text: scenicName, category: "notice", subcategory: "scenic", group: scenicName, links: [], completed: false };
-        state.todos.push(target);
+      scenicTarget = state.todos.find((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "scenic" && (todo.group || todo.text) === scenicName);
+      if (!scenicTarget) {
+        scenicTarget = { id: `scenic-${Date.now().toString(36)}`, text: scenicName, category: "notice", subcategory: "scenic", group: scenicName, links: [], completed: false };
+        state.todos.push(scenicTarget);
       }
     }
-    if (!target) return;
+    if (!scenicTarget) return;
+    const locationName = scenicTarget.group || scenicTarget.text;
+    let target = activeCategory === "scenic"
+      ? scenicTarget
+      : activeCategory === "food"
+        ? state.todos.find((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === "food" && (todo.group || todo.text) === locationName && Array.isArray(todo.links))
+        : null;
+    if (!target) {
+      target = { id: `food-location-${Date.now().toString(36)}`, text: locationName, category: "notice", subcategory: "food", group: locationName, links: [], completed: false };
+      state.todos.push(target);
+    }
     const title = $("#scenic-link-title").value.trim();
     if (title) parsed.title = title;
     target.links = todoLinksFor(target);
@@ -2799,6 +2813,7 @@ function renderTravelPrep() {
     $("#scenic-link-share").value = "";
     $("#scenic-link-title").value = "";
     $("#scenic-link-new-target").value = "";
+    if (scenicTarget !== target) saveSharedChange("todos", scenicTarget).catch(console.error);
     saveSharedChange("todos", target).catch(console.error);
     renderAll();
   };
@@ -2809,7 +2824,7 @@ function renderTravelPrep() {
   $("[data-packing-purchase-form-close]").onclick = () => { $("#packing-purchase-form-panel").hidden = true; };
   $("[data-notice-form-open]").onclick = () => {
     $("#notice-form-panel").hidden = false;
-    (state.activeNoticeSubcategory === "scenic" ? $("#scenic-link-share") : $("#notice-title-input")).focus();
+    (["scenic", "food"].includes(state.activeNoticeSubcategory) ? $("#scenic-link-share") : $("#notice-title-input")).focus();
   };
   $("[data-notice-form-close]").onclick = () => { $("#notice-form-panel").hidden = true; };
   $("#scenic-link-share").oninput = () => {
