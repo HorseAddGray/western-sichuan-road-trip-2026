@@ -18,6 +18,7 @@ const state = {
   collapsedNoticeGroups: new Set(),
   draggedNoticeGroup: "",
   draggedScenicLink: null,
+  scenicLinkMenu: null,
   selectedPackingSubcategories: new Set(),
   selectedPackingLuggage: "",
   selectedPackingContainer: "",
@@ -126,6 +127,7 @@ document.addEventListener("click", (event) => {
   if (!event.target.closest(".todo-more")) {
     document.querySelectorAll(".todo-more[open]").forEach((menu) => { menu.open = false; });
   }
+  if (!event.target.closest("#scenic-link-menu, [data-scenic-link-index]")) hideScenicLinkMenu();
 });
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;",
@@ -562,6 +564,12 @@ function scheduleCompletionTimestamp(value) {
   return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
+function itineraryNoteTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function itineraryNotesFor(key) {
   const notes = Array.isArray(state.itineraryState.notes[key]) ? [...state.itineraryState.notes[key]] : [];
   return notes.sort((first, second) => String(first.createdAt).localeCompare(String(second.createdAt)));
@@ -615,17 +623,22 @@ function itineraryRatingMarkup(key) {
   return `<div class="itinerary-ratings" aria-label="景点评分">${control("majia", "马甲")}${control("zaizai", "仔仔")}</div>`;
 }
 
+function itineraryNoteDialogMarkup() {
+  const editing = state.editingItineraryNote;
+  if (!editing) return "";
+  const type = itineraryMoodTypeFor(editing);
+  const typeOptions = Object.entries(ITINERARY_MOOD_TYPES).map(([key, label]) => `<option value="${key}" ${type === key ? "selected" : ""}>${label}</option>`).join("");
+  return `<div class="itinerary-note-dialog" data-itinerary-note-dialog><section role="dialog" aria-modal="true" aria-labelledby="itinerary-note-dialog-title"><div class="itinerary-note-dialog__heading"><strong id="itinerary-note-dialog-title">${editing.id ? "编辑旅途心情" : "添加旅途心情"}</strong><button type="button" data-itinerary-note-dialog-close aria-label="关闭旅途心情">×</button></div><form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(editing.key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><label><span>类型</span><select name="type" data-itinerary-mood-type aria-label="旅途心情类型">${typeOptions}</select></label><label data-itinerary-mood-name-row ${itineraryMoodNeedsName(type) ? "" : "hidden"}><span data-itinerary-mood-name-label>${itineraryMoodNameLabel(type)}</span><input name="name" data-itinerary-mood-name maxlength="80" value="${escapeHtml(editing.name || "")}" placeholder="填写${itineraryMoodNameLabel(type)}" aria-label="旅途心情名称"></label><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="旅途心情内容">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form></section></div>`;
+}
+
 function itineraryNotesMarkup(key) {
   const notes = itineraryNotesFor(key);
-  const editing = state.editingItineraryNote?.key === key ? state.editingItineraryNote : null;
   const noteMarkup = (note) => {
     const type = itineraryMoodTypeFor(note);
     const name = String(note.name || "").trim();
-    return `<article class="itinerary-note itinerary-note--${type}"><div class="itinerary-note__heading"><div><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p><time>添加于 ${escapeHtml(scheduleCompletionTimestamp(note.createdAt))}</time><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`;
+    return `<article class="itinerary-note itinerary-note--${type}"><div class="itinerary-note__heading"><div class="itinerary-note__metadata"><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}${note.createdAt ? `<time>${escapeHtml(itineraryNoteTime(note.createdAt))}</time>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p><div><button type="button" data-itinerary-note-edit="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">编辑</button><button type="button" data-itinerary-note-delete="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}">删除</button></div></article>`;
   };
-  const editingType = itineraryMoodTypeFor(editing);
-  const typeOptions = Object.entries(ITINERARY_MOOD_TYPES).map(([type, label]) => `<option value="${type}" ${editingType === type ? "selected" : ""}>${label}</option>`).join("");
-  return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>旅途心情</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map(noteMarkup).join("")}${editing ? `<form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><label><span>类型</span><select name="type" data-itinerary-mood-type aria-label="旅途心情类型">${typeOptions}</select></label><label data-itinerary-mood-name-row ${itineraryMoodNeedsName(editingType) ? "" : "hidden"}><span data-itinerary-mood-name-label>${itineraryMoodNameLabel(editingType)}</span><input name="name" data-itinerary-mood-name maxlength="80" value="${escapeHtml(editing.name || "")}" placeholder="填写${itineraryMoodNameLabel(editingType)}" aria-label="旅途心情名称"></label><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="旅途心情内容">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form>` : ""}</div></li>`;
+  return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>旅途心情</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map(noteMarkup).join("")}</div></li>`;
 }
 
 function openItineraryScenicMemo(group) {
@@ -779,8 +792,13 @@ function renderTimeline(preserveExpanded = false) {
   const today = currentTripDay();
   if (!preserveExpanded) state.expandedDay = today;
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
-  $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
+  $("#timeline").innerHTML = `${state.data.days.map(dayCard).join("")}${itineraryNoteDialogMarkup()}`;
   $("#timeline").onclick = (event) => {
+    if (event.target.matches("[data-itinerary-note-dialog]")) {
+      state.editingItineraryNote = null;
+      renderTimeline(true);
+      return;
+    }
     const scenicButton = event.target.closest("[data-itinerary-scenic-open]");
     if (scenicButton) {
       openItineraryScenicMemo(scenicButton.dataset.itineraryScenicOpen);
@@ -803,6 +821,7 @@ function renderTimeline(preserveExpanded = false) {
     if (addNote) {
       state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", type: "mood", name: "", text: "" };
       renderTimeline(true);
+      requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
       return;
     }
     const editNote = event.target.closest("[data-itinerary-note-edit]");
@@ -812,6 +831,7 @@ function renderTimeline(preserveExpanded = false) {
       if (!note) return;
       state.editingItineraryNote = { key, id: note.id, type: itineraryMoodTypeFor(note), name: note.name || "", text: note.text };
       renderTimeline(true);
+      requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
       return;
     }
     const deleteNote = event.target.closest("[data-itinerary-note-delete]");
@@ -823,7 +843,7 @@ function renderTimeline(preserveExpanded = false) {
       renderTimeline(true);
       return;
     }
-    if (event.target.closest("[data-itinerary-note-cancel]")) {
+    if (event.target.closest("[data-itinerary-note-cancel], [data-itinerary-note-dialog-close]")) {
       state.editingItineraryNote = null;
       renderTimeline(true);
       return;
@@ -1167,8 +1187,27 @@ function authoredTodosForMigration() {
 function todoLinksFor(item) {
   return (Array.isArray(item?.links) ? item.links : []).map((link) => {
     const url = safeExternalUrl(link?.url);
-    return { title: String(link?.title || "").trim(), url };
+    return { title: String(link?.title || "").trim(), url, featured: Boolean(link?.featured) };
   }).filter((link) => link.title && link.url);
+}
+
+function hideScenicLinkMenu() {
+  const menu = $("#scenic-link-menu");
+  if (menu) menu.hidden = true;
+  state.scenicLinkMenu = null;
+}
+
+function showScenicLinkMenu(row, x, y) {
+  const todo = row?.closest("[data-todo-id]");
+  const index = Number(row?.dataset.scenicLinkIndex);
+  const link = todoLinksFor(state.todos.find((item) => item.id === todo?.dataset.todoId)).at(index);
+  const menu = $("#scenic-link-menu");
+  if (!todo || !link || !menu) return;
+  state.scenicLinkMenu = { todoId: todo.dataset.todoId, index };
+  $("[data-scenic-link-feature]", menu).textContent = link.featured ? "取消加精" : "加精";
+  menu.hidden = false;
+  menu.style.left = `${Math.min(Math.max(8, x), window.innerWidth - menu.offsetWidth - 8)}px`;
+  menu.style.top = `${Math.min(Math.max(8, y), window.innerHeight - menu.offsetHeight - 8)}px`;
 }
 
 function parseScenicShareText(value) {
@@ -1614,7 +1653,7 @@ function renderTodoList(kind) {
       const links = todoLinksFor(todo);
       const isScenic = activeCategory === "scenic";
       const linkMarkup = (link, index) => isScenic
-        ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a></span>`
+        ? `<span class="notice-link-row" draggable="true" data-scenic-link-index="${index}" data-scenic-link-featured="${link.featured}"><span class="notice-link-row__handle" aria-label="拖动排序" title="拖动排序">⋮⋮</span>${link.featured ? `<b class="notice-link-row__featured" aria-label="已加精">⭐</b>` : ""}<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a></span>`
         : `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)} ↗</a>`;
       const copy = isScenic
         ? `<span class="todo-copy">${links.length ? `<span class="notice-links">${links.map(linkMarkup).join("")}</span>` : ""}</span>`
@@ -2327,6 +2366,46 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#notice-list").ondragend = () => { state.draggedScenicLink = null; };
+  const scenicLinkMenu = $("#scenic-link-menu");
+  scenicLinkMenu.onclick = (event) => {
+    const action = event.target.closest("[data-scenic-link-feature], [data-scenic-link-delete]");
+    const context = state.scenicLinkMenu;
+    if (!action || !context) return;
+    const todo = state.todos.find((item) => item.id === context.todoId);
+    if (!todo) return hideScenicLinkMenu();
+    todo.links = todoLinksFor(todo);
+    if (action.matches("[data-scenic-link-feature]")) todo.links[context.index].featured = !todo.links[context.index].featured;
+    else todo.links.splice(context.index, 1);
+    hideScenicLinkMenu();
+    saveSharedChange("todos", todo).catch(console.error);
+    renderAll();
+  };
+  $("#notice-list").oncontextmenu = (event) => {
+    const row = event.target.closest("[data-scenic-link-index]");
+    if (!row) return;
+    event.preventDefault();
+    showScenicLinkMenu(row, event.clientX, event.clientY);
+  };
+  let scenicLongPressTimer = null;
+  let scenicLongPressHandled = false;
+  const clearScenicLongPress = (event) => {
+    if (scenicLongPressTimer) clearTimeout(scenicLongPressTimer);
+    scenicLongPressTimer = null;
+    if (scenicLongPressHandled) event.preventDefault();
+    scenicLongPressHandled = false;
+  };
+  $("#notice-list").ontouchstart = (event) => {
+    const row = event.target.closest("[data-scenic-link-index]");
+    if (!row) return;
+    const touch = event.touches[0];
+    scenicLongPressTimer = setTimeout(() => {
+      scenicLongPressHandled = true;
+      showScenicLinkMenu(row, touch.clientX, touch.clientY);
+    }, 550);
+  };
+  $("#notice-list").ontouchend = clearScenicLongPress;
+  $("#notice-list").ontouchmove = clearScenicLongPress;
+  $("#notice-list").ontouchcancel = clearScenicLongPress;
   $("#notice-category-settings").onchange = (event) => {
     const input = event.target.closest("[data-notice-group-label]");
     if (!input) return;

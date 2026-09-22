@@ -244,6 +244,15 @@ test("daily itinerary records typed travel moods with ordered timestamps and sco
   assert.match(styles, /label\.scenic-link-title-field \{ margin-top: 18px/);
 });
 
+test("itinerary moods use a closable dialog and compact type-and-time metadata", () => {
+  assert.match(app, /function itineraryNoteTime\(value\)/);
+  assert.match(app, /data-itinerary-note-dialog/);
+  assert.match(app, /data-itinerary-note-dialog-close/);
+  assert.match(app, /itinerary-note__metadata/);
+  assert.match(styles, /\.itinerary-note-dialog \{/);
+  assert.match(styles, /\.itinerary-note__type \{[^}]*font-size: 12px/);
+});
+
 test("memo scenic category folds article links by scenic area without duplicate card copy", () => {
   const scenic = tripData.preTrip.packingItems.find((item) => item.id === "scenic-tianquan-service-area");
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
@@ -282,6 +291,18 @@ test("scenic reference entry can create a scenic destination and overview omits 
   assert.match(app, /Object\.values\(category\.tags\)\.filter\(\(tag\) => tag\.key\)/);
   assert.match(app, /text: scenicName/);
   assert.match(app, /data-scenic-link-submit.*textContent = "添加"/);
+});
+
+test("scenic reference links support featured and deletion actions from a context menu", () => {
+  assert.match(html, /id="scenic-link-menu"/);
+  assert.match(html, /data-scenic-link-feature/);
+  assert.match(html, /data-scenic-link-delete/);
+  assert.match(app, /featured: Boolean\(link\?\.featured\)/);
+  assert.match(app, /scenicLinkMenu/);
+  assert.match(app, /oncontextmenu/);
+  assert.match(app, /ontouchstart/);
+  assert.match(app, /data-scenic-link-featured/);
+  assert.match(styles, /\.scenic-link-menu \{/);
 });
 
 test("memo scenic category keeps Kangding Town references in its own folded area", () => {

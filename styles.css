@@ -238,14 +238,19 @@ main { overflow: hidden; }
 .schedule-interval__heading button, .itinerary-note > div:not(.itinerary-note__heading) button, .itinerary-note-form button { min-height: 26px; padding: 0 8px; border: 1px solid #b9d5d7; border-radius: 7px; color: #205e6b; background: white; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
 .itinerary-note { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #c5d8d7; }
 .itinerary-note__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 0; }
-.itinerary-note__heading > div { display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin: 0; }
+.itinerary-note__metadata { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0; }
 .itinerary-note__heading strong { color: var(--ink); font-size: 12px; }
-.itinerary-note__type { color: #386874; font-size: 10px; font-weight: 800; }
-.itinerary-note time { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.itinerary-note__type { min-height: 24px; padding: 3px 8px; display: inline-flex; align-items: center; border: 1px solid #b9d5d7; border-radius: 999px; color: #205e6b; background: white; font-size: 12px; font-weight: 800; line-height: 1; }
+.itinerary-note time { color: var(--muted); font-size: 12px; font-weight: 700; }
 .itinerary-note p { margin: 0; color: #40565b; font-size: 12px; line-height: 1.6; white-space: pre-line; }
 .itinerary-note__heading + p { margin-top: 5px; }
 .itinerary-note > div:not(.itinerary-note__heading) { display: flex; gap: 5px; margin-top: 6px; }
 .itinerary-note > div:not(.itinerary-note__heading) button[data-itinerary-note-delete] { color: #a44a3f; }
+.itinerary-note-dialog { position: fixed; z-index: 120; inset: 0; padding: 18px; display: grid; place-items: center; background: rgba(7,18,22,.48); }
+.itinerary-note-dialog > section { width: min(100%, 440px); max-height: calc(100dvh - 36px); overflow: auto; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: 0 22px 70px rgba(19,38,47,.28); }
+.itinerary-note-dialog__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.itinerary-note-dialog__heading strong { font-size: 16px; }
+.itinerary-note-dialog__heading button { width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; color: var(--muted); background: transparent; font: 400 25px/1 sans-serif; cursor: pointer; }
 .itinerary-note-form { display: grid; gap: 7px; margin-top: 8px; }
 .itinerary-note-form label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
 .itinerary-note-form select, .itinerary-note-form input { min-height: 34px; padding: 0 8px; border: 1px solid #b9d5d7; border-radius: 8px; color: var(--ink); background: white; font: inherit; }
@@ -656,9 +661,15 @@ label.scenic-link-title-field { margin-top: 18px; }
 .notice-links { display: grid; gap: 5px; margin-top: 3px; }
 .notice-links a { width: fit-content; color: var(--lake); font-size: 11px; font-weight: 750; line-height: 1.5; text-decoration: underline; text-underline-offset: 2px; }
 .notice-links a:hover { color: var(--terracotta); }
-.notice-link-row { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 5px; align-items: start; padding: 3px 0; cursor: grab; }
+.notice-link-row { display: grid; grid-template-columns: 14px auto minmax(0, 1fr); gap: 5px; align-items: start; padding: 3px 0; cursor: grab; }
 .notice-link-row:active { cursor: grabbing; }
 .notice-link-row__handle { padding-top: 1px; color: var(--muted); font: 800 12px/1 sans-serif; letter-spacing: -1px; user-select: none; }
+.notice-link-row__featured { padding-top: 1px; font-size: 12px; line-height: 1; }
+.scenic-link-menu { position: fixed; z-index: 130; min-width: 104px; padding: 5px; display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 10px; background: white; box-shadow: 0 12px 28px rgba(19,38,47,.2); }
+.scenic-link-menu[hidden] { display: none; }
+.scenic-link-menu button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--ink); background: transparent; text-align: left; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.scenic-link-menu button:hover { background: #edf6f5; }
+.scenic-link-menu button[data-scenic-link-delete] { color: #a13f34; }
 .notice-item--scenic { grid-template-columns: minmax(0, 1fr); }
 .notice-item--scenic::before { display: none; }
 .prep-group--trusted h3 { color: #43654a; }
