@@ -583,6 +583,11 @@ test("notices provide a single-category selector and drag-managed collapsible su
   assert.doesNotMatch(app, /data-notice-category-move/);
 });
 
+test("every memo category exposes a drag-managed subcategory order", () => {
+  assert.match(app, /管理子类别排序/);
+  assert.match(app, /state\.noticeGroupOrder\[state\.activeNoticeSubcategory\]/);
+});
+
 test("memos keep health, toilet, food, and scenic categories and reset subcategories to expanded by default", () => {
   assert.match(app, /notice: \{ health: "健康", toilet: "厕所", food: "美食", scenic: "景点" \}/);
   assert.doesNotMatch(app, /rental: "租车与验车"/);
