@@ -763,6 +763,8 @@ test("packing dictionary is restored before display and preserves item categorie
   assert.match(app, /const PACKING_DICTIONARY_STATE_ID = "packing-dictionary-state-v1"/);
   assert.match(app, /normalizePackingDictionaryState\(dictionaryRecord/);
   assert.match(app, /reconcilePackingDictionaryFromTodos\(state\.todos\)/);
+  assert.match(app, /const saved = saveSharedChange\("tickets", dictionary\);/);
+  assert.match(app, /if \(saved\?\.catch\) saved\.catch\(console\.error\);/);
   assert.doesNotMatch(app, /return categories\.includes\(category\) \? category : \(categories\.includes\("other"\)/);
 });
 

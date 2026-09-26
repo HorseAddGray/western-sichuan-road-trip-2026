@@ -1542,7 +1542,9 @@ function savePackingDictionaryState() {
   localStorage.setItem(packingTagAssociationsKey(), JSON.stringify(dictionary.tagAssociations));
   localStorage.setItem(packingLuggageSettingsKey(), JSON.stringify(dictionary.luggage.labels));
   localStorage.setItem(packingLuggageTreeSettingsKey(), JSON.stringify({ custom: dictionary.luggage.custom, deleted: dictionary.luggage.deleted, parents: dictionary.luggage.parents, icons: dictionary.luggage.icons }));
-  return saveSharedChange("tickets", dictionary).catch(console.error);
+  const saved = saveSharedChange("tickets", dictionary);
+  if (saved?.catch) saved.catch(console.error);
+  return saved;
 }
 function reconcilePackingDictionaryFromTodos(todos) {
   let changed = false;
@@ -1578,8 +1580,7 @@ function packingTagsForCategory(category) {
 }
 function packingDictionaryCategoryFor(todo) {
   const category = window.TravelPrep.normalizeTodoSubcategory(todo);
-  const categories = packingCategoryEntries().map(([key]) => key);
-  return categories.includes(category) ? category : category;
+  return category;
 }
 function packingDictionaryPropertyFor(todo, category = packingDictionaryCategoryFor(todo)) {
   const tags = packingTagsForCategory(category);
