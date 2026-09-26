@@ -517,6 +517,10 @@ main { overflow: hidden; }
 .packing-category-delete-dialog label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
 .packing-category-delete-code { width: max-content; padding: 4px 8px; border-radius: 6px; color: var(--ink); background: var(--sand); font-size: 16px; letter-spacing: .2em; }
 .packing-category-delete-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.packing-luggage-category-assign { display: flex; gap: 6px; align-items: center; padding: 0 10px 10px; }
+.packing-luggage-category-assign select { min-width: 0; flex: 1; }
+.todo-more__select { display: grid; gap: 4px; padding: 6px 9px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.todo-more__select select { min-width: 136px; }
 .packing-dictionary { display: grid; gap: 14px; }
 .packing-dictionary__heading { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .packing-dictionary__heading > div { display: grid; gap: 4px; }

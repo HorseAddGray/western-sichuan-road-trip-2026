@@ -95,7 +95,7 @@ test("packing keeps additions in a closable form and moves item actions into a f
   assert.match(app, /data-packing-find/);
   assert.match(app, /todo-more__menu/);
   assert.doesNotMatch(app, /packing-property">\$\{PACKING_PROPERTY_LABELS\[property\]\}<\//);
-  assert.doesNotMatch(app, /data-packing-container="\$\{escapeHtml\(todo\.id\)\}"/);
+  assert.match(app, /data-packing-container="\$\{escapeHtml\(todo\.id\)\}"/);
 });
 
 test("packing forms keep selectors together, names below, and synchronize workspace titles", () => {
@@ -772,6 +772,13 @@ test("deleting a populated packing category requires migration and a random four
   assert.match(app, /data-packing-category-delete-code/);
   assert.match(app, /generatePackingDeleteCode\(\)/);
   assert.match(app, /todo\.property = ""/);
+});
+
+test("packing supports category-to-luggage assignment and item transfer with dynamic luggage parents", () => {
+  assert.match(app, /data-packing-luggage-category-assign/);
+  assert.match(app, /data-packing-category-luggage/);
+  assert.match(app, /transferPackingTodoToLuggage\(todo, key\)/);
+  assert.match(app, /packingLuggageItem\(todo\.container\)\?\.parent/);
 });
 
 test("packing dictionary creates a tag from each category overflow menu instead of a top-level form", () => {

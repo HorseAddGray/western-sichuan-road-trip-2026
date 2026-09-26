@@ -1734,6 +1734,23 @@ function packingLuggageItems() {
 }
 function packingPrimaryLuggage() { return packingLuggageItems().filter((luggage) => !luggage.parent); }
 function packingLuggageItem(key) { return packingLuggageItems().find((luggage) => luggage.key === key); }
+function packingLuggageOptions(selected = "") {
+  return packingLuggageItems().map((luggage) => {
+    const prefix = luggage.parent ? "　↳ " : "";
+    return `<option value="${escapeHtml(luggage.key)}" ${selected === luggage.key ? "selected" : ""}>${prefix}${escapeHtml(luggage.label)}</option>`;
+  }).join("");
+}
+function transferPackingTodoToLuggage(todo, key) {
+  const destination = packingLuggageItem(key);
+  if (!todo || !destination) return;
+  todo.container = destination.key;
+  todo.luggage = packingLuggageItem(todo.container)?.parent || todo.container;
+}
+async function transferPackingCategoryToLuggage(category, key) {
+  const todos = packingTodosInCategory(category);
+  todos.forEach((todo) => transferPackingTodoToLuggage(todo, key));
+  await Promise.all(todos.map((todo) => saveSharedChange("todos", todo)));
+}
 function packingDictionaryLuggageFor(todo) {
   const luggage = packingLuggageFor(todo);
   const primary = packingPrimaryLuggage();
@@ -1895,7 +1912,7 @@ function renderTodoList(kind) {
         <span class="todo-check" aria-hidden="true">✓</span>
         <span class="todo-copy"><span class="packing-item-title"><strong class="todo-text">${escapeHtml(todo.text)}${packingQuantityFor(todo) > 1 ? ` <small class="packing-item-quantity">×${packingQuantityFor(todo)}</small>` : ""}</strong><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select>${property === "consumable" && usesTotal > 0 ? `<span class="packing-item-meta packing-item-meta--inline"><button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button></span>` : ""}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </label>
-      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
+      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><label class="todo-more__select">转移行囊<select data-packing-container="${escapeHtml(todo.id)}" aria-label="转移${escapeHtml(todo.text)}至行囊">${packingLuggageOptions(packingContainerFor(todo))}</select></label><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
     </div>${state.editingPackingTodoId === todo.id ? packingEditFormMarkup(todo) : ""}`;
   };
   $("#packing-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
@@ -1985,7 +2002,8 @@ function renderPackingDictionary() {
     const header = hasChildren ? `<summary>${title}</summary>` : `<div class="packing-luggage-branch__header">${title}</div>`;
     const actions = `<div class="packing-luggage-actions"><button type="button" data-packing-luggage-edit="${escapeHtml(luggage.key)}">编辑</button><button type="button" class="todo-delete" data-packing-luggage-delete="${escapeHtml(luggage.key)}">删除</button></div>`;
     const form = editing ? `<form class="packing-luggage-edit" data-packing-luggage-edit-form data-packing-luggage-key="${escapeHtml(luggage.key)}"><label><span>图标</span><select data-packing-luggage-icon>${iconOptions(luggage.icon)}</select></label>${luggage.parent ? `<label><span>收纳归属</span><select data-packing-luggage-parent>${parentOptions(luggage.parent, luggage.key)}</select></label>` : ""}<button type="submit">保存</button></form>` : "";
-    return `${hasChildren ? `<details class="packing-dictionary-branch packing-luggage-branch" open>` : `<article class="packing-dictionary-branch packing-luggage-branch">`}${header}${actions}${form}${hasChildren ? `<div class="packing-luggage-children">${children.map(luggageBranch).join("")}</div>` : ""}${hasChildren ? "</details>" : "</article>"}`;
+    const assignment = `<form class="packing-luggage-category-assign" data-packing-luggage-category-assign data-packing-luggage-key="${escapeHtml(luggage.key)}"><select name="category" data-packing-category-luggage aria-label="按类别放入${escapeHtml(luggage.label)}"><option value="">按类别放入…</option>${categories.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</select><button type="submit">放入</button></form>`;
+    return `${hasChildren ? `<details class="packing-dictionary-branch packing-luggage-branch" open>` : `<article class="packing-dictionary-branch packing-luggage-branch">`}${header}${actions}${form}${assignment}${hasChildren ? `<div class="packing-luggage-children">${children.map(luggageBranch).join("")}</div>` : ""}${hasChildren ? "</details>" : "</article>"}`;
   };
   const categoryPanel = `<div class="packing-dictionary-tree" role="tree"><p class="packing-dictionary-root">物品类别</p>${categories.map(([category, label]) => {
       const tags = packingTagsForCategory(category);
@@ -2285,6 +2303,15 @@ function renderTravelPrep() {
       if (!pending || !target || target === pending.category || code !== pending.code) return;
       await migratePackingCategory(pending.category, target);
       state.pendingPackingCategoryDeletion = null;
+      renderAll();
+      return;
+    }
+    if (event.target.matches("[data-packing-luggage-category-assign]")) {
+      event.preventDefault();
+      const category = String(new FormData(event.target).get("category") || "");
+      const luggage = event.target.dataset.packingLuggageKey || "";
+      if (!category || !luggage) return;
+      await transferPackingCategoryToLuggage(category, luggage);
       renderAll();
       return;
     }
@@ -3074,10 +3101,7 @@ function renderTravelPrep() {
     if (!todo) return;
     if (event.target.matches("[data-packing-owner]")) todo.owner = event.target.value;
     else if (event.target.matches("[data-packing-container]")) {
-      todo.container = event.target.value;
-      const parent = PACKING_CONTAINERS.find((container) => container.key === todo.container)?.parent;
-      if (parent) todo.luggage = parent;
-      else todo.luggage = todo.container;
+      transferPackingTodoToLuggage(todo, event.target.value);
     } else if (event.target.matches("input[type='checkbox']")) todo.completed = event.target.checked;
     else return;
     saveSharedChange("todos", todo).catch(console.error);
