@@ -34,6 +34,8 @@ const state = {
   deletedPackingCategories: new Set(),
   packingTagAssociations: {},
   packingCategoryOrder: [],
+  packingDictionaryLoaded: false,
+  packingDictionaryRecord: null,
   expandedPackingDictionaryCategories: new Set(),
   activePackingDictionaryTab: "categories",
   editingPackingDictionaryCategory: "",
@@ -64,6 +66,7 @@ const state = {
 const MODULE_NAMES = Object.freeze(["flights", "overview", "itinerary", "todo", "driving", "ledger"]);
 const SHARED_COLLECTIONS = Object.freeze(["todos", "tickets", "ledger"]);
 const ITINERARY_STATE_ID = "__itinerary_state__";
+const PACKING_DICTIONARY_STATE_ID = "packing-dictionary-state-v1";
 const ITINERARY_MOOD_TYPES = Object.freeze({ food: "美食", hotel: "酒店", scenic: "景点", mood: "心情" });
 const OBSOLETE_PACKING_ITEM_IDS = new Set([
   "packing-documents", "packing-clothes", "packing-medicines", "packing-hygiene",
@@ -1350,7 +1353,9 @@ async function loadSharedState() {
   const ticketRecords = Array.isArray(ticketSnapshot.tickets) ? ticketSnapshot.tickets : [];
   const itineraryRecord = ticketRecords.find((item) => item?.id === ITINERARY_STATE_ID);
   state.itineraryState = normalizeItineraryState(itineraryRecord);
-  state.purchasedTickets = new Set(ticketRecords.filter((item) => item.id !== ITINERARY_STATE_ID && item.completed).map((item) => item.id));
+  const dictionaryRecord = ticketRecords.find((item) => item?.id === PACKING_DICTIONARY_STATE_ID);
+  if (dictionaryRecord) applyPackingDictionaryState(normalizePackingDictionaryState(dictionaryRecord));
+  state.purchasedTickets = new Set(ticketRecords.filter((item) => item.id !== ITINERARY_STATE_ID && item.id !== PACKING_DICTIONARY_STATE_ID && item.completed).map((item) => item.id));
   const authoredTodos = authoredTodosForMigration();
   if (todoAdapter?.mode === "d1") {
     const existingIds = new Set(state.todos.map((item) => String(item.id)));
@@ -1409,6 +1414,10 @@ async function loadSharedState() {
       });
       await todoAdapter.applyChange("todos", legacyOxygenReminder, "upsert");
     }
+  }
+  if (state.packingDictionaryLoaded) {
+    reconcilePackingDictionaryFromTodos(state.todos);
+    savePackingDictionaryState();
   }
 }
 
@@ -1473,6 +1482,85 @@ function packingCategorySettingsKey() {
 function packingTagAssociationsKey() {
   return `travel-plan:${state.data.metadata.tripId}:packing-tag-associations`;
 }
+function normalizePackingDictionaryState(dictionaryRecord) {
+  const luggage = dictionaryRecord?.luggage && typeof dictionaryRecord.luggage === "object" ? dictionaryRecord.luggage : {};
+  return {
+    id: PACKING_DICTIONARY_STATE_ID,
+    customCategories: dictionaryRecord?.customCategories && typeof dictionaryRecord.customCategories === "object" ? dictionaryRecord.customCategories : {},
+    categoryLabels: dictionaryRecord?.categoryLabels && typeof dictionaryRecord.categoryLabels === "object" ? dictionaryRecord.categoryLabels : {},
+    deletedCategories: Array.isArray(dictionaryRecord?.deletedCategories) ? dictionaryRecord.deletedCategories : [],
+    categoryOrder: Array.isArray(dictionaryRecord?.categoryOrder) ? dictionaryRecord.categoryOrder : [],
+    tagAssociations: dictionaryRecord?.tagAssociations && typeof dictionaryRecord.tagAssociations === "object" ? dictionaryRecord.tagAssociations : {},
+    luggage: {
+      labels: luggage.labels && typeof luggage.labels === "object" ? luggage.labels : {},
+      custom: Array.isArray(luggage.custom) ? luggage.custom : [],
+      deleted: Array.isArray(luggage.deleted) ? luggage.deleted : [],
+      parents: luggage.parents && typeof luggage.parents === "object" ? luggage.parents : {},
+      icons: luggage.icons && typeof luggage.icons === "object" ? luggage.icons : {}
+    }
+  };
+}
+function applyPackingDictionaryState(dictionaryRecord) {
+  const dictionary = normalizePackingDictionaryState(dictionaryRecord);
+  state.packingCustomCategories = dictionary.customCategories;
+  state.packingCategoryLabels = dictionary.categoryLabels;
+  state.deletedPackingCategories = new Set(dictionary.deletedCategories);
+  state.packingCategoryOrder = dictionary.categoryOrder;
+  state.packingTagAssociations = dictionary.tagAssociations;
+  state.packingLuggageLabels = dictionary.luggage.labels;
+  state.packingCustomLuggage = dictionary.luggage.custom;
+  state.deletedPackingLuggage = new Set(dictionary.luggage.deleted);
+  state.packingLuggageParents = dictionary.luggage.parents;
+  state.packingLuggageIcons = dictionary.luggage.icons;
+  state.packingDictionaryRecord = dictionary;
+  state.packingDictionaryLoaded = true;
+}
+function packingDictionaryRecord() {
+  return {
+    id: PACKING_DICTIONARY_STATE_ID,
+    customCategories: state.packingCustomCategories,
+    categoryLabels: state.packingCategoryLabels,
+    deletedCategories: [...state.deletedPackingCategories],
+    categoryOrder: state.packingCategoryOrder,
+    tagAssociations: state.packingTagAssociations,
+    luggage: {
+      labels: state.packingLuggageLabels,
+      custom: state.packingCustomLuggage,
+      deleted: [...state.deletedPackingLuggage],
+      parents: state.packingLuggageParents,
+      icons: state.packingLuggageIcons
+    }
+  };
+}
+function savePackingDictionaryState() {
+  const dictionary = packingDictionaryRecord();
+  state.packingDictionaryRecord = dictionary;
+  state.packingDictionaryLoaded = true;
+  localStorage.setItem(packingCustomCategoriesKey(), JSON.stringify(dictionary.customCategories));
+  localStorage.setItem(packingCategorySettingsKey(), JSON.stringify({ labels: dictionary.categoryLabels, deleted: dictionary.deletedCategories, order: dictionary.categoryOrder }));
+  localStorage.setItem(packingTagAssociationsKey(), JSON.stringify(dictionary.tagAssociations));
+  localStorage.setItem(packingLuggageSettingsKey(), JSON.stringify(dictionary.luggage.labels));
+  localStorage.setItem(packingLuggageTreeSettingsKey(), JSON.stringify({ custom: dictionary.luggage.custom, deleted: dictionary.luggage.deleted, parents: dictionary.luggage.parents, icons: dictionary.luggage.icons }));
+  return saveSharedChange("tickets", dictionary).catch(console.error);
+}
+function reconcilePackingDictionaryFromTodos(todos) {
+  let changed = false;
+  window.TravelPrep.filterTodosByCategory(todos, "packing").forEach((todo) => {
+    const category = window.TravelPrep.normalizeTodoSubcategory(todo);
+    if (!Object.hasOwn(PREP_LABELS.packing, category) && !Object.hasOwn(state.packingCustomCategories, category)) {
+      state.packingCustomCategories[category] = category;
+      changed = true;
+    }
+    const tag = packingPropertyFor(todo);
+    if (!tag) return;
+    const tags = packingTagsForCategory(category);
+    if (!tags.includes(tag)) {
+      state.packingTagAssociations[category] = [...tags, tag];
+      changed = true;
+    }
+  });
+  return changed;
+}
 function packingCategoryEntries() {
   const entries = [...Object.entries(PREP_LABELS.packing), ...Object.entries(state.packingCustomCategories || {})]
     .filter(([category]) => !state.deletedPackingCategories.has(category))
@@ -1481,11 +1569,7 @@ function packingCategoryEntries() {
   return order.map((category) => entries.find(([key]) => key === category)).filter(Boolean);
 }
 function savePackingCategorySettings() {
-  localStorage.setItem(packingCategorySettingsKey(), JSON.stringify({
-    labels: state.packingCategoryLabels,
-    deleted: [...state.deletedPackingCategories],
-    order: state.packingCategoryOrder
-  }));
+  return savePackingDictionaryState();
 }
 function packingTagsForCategory(category) {
   if (Object.hasOwn(state.packingTagAssociations, category)) return state.packingTagAssociations[category].filter((tag) => tag && tag !== "none");
@@ -1494,7 +1578,7 @@ function packingTagsForCategory(category) {
 function packingDictionaryCategoryFor(todo) {
   const category = window.TravelPrep.normalizeTodoSubcategory(todo);
   const categories = packingCategoryEntries().map(([key]) => key);
-  return categories.includes(category) ? category : (categories.includes("other") ? "other" : categories[0] || category);
+  return categories.includes(category) ? category : category;
 }
 function packingDictionaryPropertyFor(todo, category = packingDictionaryCategoryFor(todo)) {
   const tags = packingTagsForCategory(category);
@@ -1506,7 +1590,7 @@ function defaultPackingTagAssociations() {
   return Object.fromEntries(packingCategoryEntries().map(([category]) => [category, [...(PACKING_TAGS_BY_CATEGORY[category] || [])]]));
 }
 function savePackingTagAssociations() {
-  localStorage.setItem(packingTagAssociationsKey(), JSON.stringify(state.packingTagAssociations));
+  return savePackingDictionaryState();
 }
 function attachPackingTagToCategory(tag, category) {
   const tags = new Set(packingTagsForCategory(category));
@@ -1645,12 +1729,7 @@ function packingDictionaryContainerFor(todo) {
   return packingLuggageItems().some((item) => item.key === container) ? container : packingDictionaryLuggageFor(todo);
 }
 function savePackingLuggageTree() {
-  localStorage.setItem(packingLuggageTreeSettingsKey(), JSON.stringify({
-    custom: state.packingCustomLuggage,
-    deleted: [...state.deletedPackingLuggage],
-    parents: state.packingLuggageParents,
-    icons: state.packingLuggageIcons
-  }));
+  return savePackingDictionaryState();
 }
 
 function packingOwnerFor(todo) { return PACKING_OWNER_LABELS[todo.owner] ? todo.owner : "unassigned"; }
@@ -1990,13 +2069,13 @@ function renderTravelPrep() {
   state.noticeGroupOrder = storedSettings?.order && typeof storedSettings.order === "object" ? storedSettings.order : {};
   state.noticeGroupLabels = storedSettings?.labels && typeof storedSettings.labels === "object" ? storedSettings.labels : {};
   state.collapsedNoticeGroups = new Set(Array.isArray(storedSettings?.collapsed) ? storedSettings.collapsed : []);
-  try {
+  if (!state.packingDictionaryLoaded) try {
     const luggageLabels = JSON.parse(localStorage.getItem(packingLuggageSettingsKey()) || "{}");
     state.packingLuggageLabels = luggageLabels && typeof luggageLabels === "object" ? luggageLabels : {};
   } catch {
     state.packingLuggageLabels = {};
   }
-  try {
+  if (!state.packingDictionaryLoaded) try {
     const luggageTree = JSON.parse(localStorage.getItem(packingLuggageTreeSettingsKey()) || "{}");
     state.packingCustomLuggage = Array.isArray(luggageTree?.custom) ? luggageTree.custom : [];
     state.deletedPackingLuggage = new Set(Array.isArray(luggageTree?.deleted) ? luggageTree.deleted : []);
@@ -2008,13 +2087,13 @@ function renderTravelPrep() {
     state.packingLuggageParents = {};
     state.packingLuggageIcons = {};
   }
-  try {
+  if (!state.packingDictionaryLoaded) try {
     const customCategories = JSON.parse(localStorage.getItem(packingCustomCategoriesKey()) || "{}");
     state.packingCustomCategories = customCategories && typeof customCategories === "object" ? customCategories : {};
   } catch {
     state.packingCustomCategories = {};
   }
-  try {
+  if (!state.packingDictionaryLoaded) try {
     const categorySettings = JSON.parse(localStorage.getItem(packingCategorySettingsKey()) || "{}");
     state.packingCategoryLabels = categorySettings?.labels && typeof categorySettings.labels === "object" ? categorySettings.labels : {};
     state.deletedPackingCategories = new Set(Array.isArray(categorySettings?.deleted) ? categorySettings.deleted : []);
@@ -2024,7 +2103,7 @@ function renderTravelPrep() {
     state.deletedPackingCategories = new Set();
     state.packingCategoryOrder = [];
   }
-  try {
+  if (!state.packingDictionaryLoaded) try {
     const savedAssociations = JSON.parse(localStorage.getItem(packingTagAssociationsKey()) || "null");
     state.packingTagAssociations = savedAssociations && typeof savedAssociations === "object" ? savedAssociations : defaultPackingTagAssociations();
     packingCategoryEntries().forEach(([category]) => {
@@ -2042,6 +2121,11 @@ function renderTravelPrep() {
     }
   } catch {
     state.packingTagAssociations = defaultPackingTagAssociations();
+  }
+  if (!state.packingDictionaryLoaded) {
+    state.packingDictionaryLoaded = true;
+    reconcilePackingDictionaryFromTodos(state.todos);
+    savePackingDictionaryState();
   }
   try {
     const authoredPurchases = (Array.isArray(state.data.preTrip?.purchaseItems) ? state.data.preTrip.purchaseItems : []).map((item, index) => ({

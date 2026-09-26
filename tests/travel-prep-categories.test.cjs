@@ -759,6 +759,13 @@ test("packing dictionary exposes category-to-tag associations and manages them",
   assert.match(app, /attachPackingTagToCategory/);
 });
 
+test("packing dictionary is restored before display and preserves item categories and tags", () => {
+  assert.match(app, /const PACKING_DICTIONARY_STATE_ID = "packing-dictionary-state-v1"/);
+  assert.match(app, /normalizePackingDictionaryState\(dictionaryRecord/);
+  assert.match(app, /reconcilePackingDictionaryFromTodos\(state\.todos\)/);
+  assert.doesNotMatch(app, /return categories\.includes\(category\) \? category : \(categories\.includes\("other"\)/);
+});
+
 test("packing dictionary creates a tag from each category overflow menu instead of a top-level form", () => {
   assert.doesNotMatch(app, /packing-dictionary__add/);
   assert.match(app, /data-packing-dictionary-tag-create/);
