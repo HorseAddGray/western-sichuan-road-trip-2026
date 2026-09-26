@@ -766,6 +766,14 @@ test("packing dictionary is restored before display and preserves item categorie
   assert.doesNotMatch(app, /return categories\.includes\(category\) \? category : \(categories\.includes\("other"\)/);
 });
 
+test("deleting a populated packing category requires migration and a random four digit code", () => {
+  assert.match(app, /data-packing-category-delete-dialog/);
+  assert.match(app, /data-packing-category-delete-target/);
+  assert.match(app, /data-packing-category-delete-code/);
+  assert.match(app, /generatePackingDeleteCode\(\)/);
+  assert.match(app, /todo\.property = ""/);
+});
+
 test("packing dictionary creates a tag from each category overflow menu instead of a top-level form", () => {
   assert.doesNotMatch(app, /packing-dictionary__add/);
   assert.match(app, /data-packing-dictionary-tag-create/);

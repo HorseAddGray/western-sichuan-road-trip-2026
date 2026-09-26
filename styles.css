@@ -511,6 +511,12 @@ main { overflow: hidden; }
 .packing-overview-dialog__items { display: grid; gap: 7px; margin-top: 12px; }
 .packing-overview-dialog__items p { margin: 0; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font-size: 13px; }
 .packing-overview-dialog__items p span { color: var(--lake); font-weight: 900; }
+.packing-category-delete-dialog { position: fixed; z-index: 130; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(16,31,39,.44); }
+.packing-category-delete-dialog form { width: min(440px, 100%); display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); box-shadow: 0 18px 50px rgba(16,31,39,.24); }
+.packing-category-delete-dialog p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.packing-category-delete-dialog label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.packing-category-delete-code { width: max-content; padding: 4px 8px; border-radius: 6px; color: var(--ink); background: var(--sand); font-size: 16px; letter-spacing: .2em; }
+.packing-category-delete-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .packing-dictionary { display: grid; gap: 14px; }
 .packing-dictionary__heading { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .packing-dictionary__heading > div { display: grid; gap: 4px; }

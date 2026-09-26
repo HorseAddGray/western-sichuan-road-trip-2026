@@ -40,6 +40,7 @@ const state = {
   activePackingDictionaryTab: "categories",
   editingPackingDictionaryCategory: "",
   addingPackingDictionaryTagCategory: "",
+  pendingPackingCategoryDeletion: null,
   packingDictionaryOutsideHandler: null,
   draggedPackingDictionaryTag: null,
   draggedPackingDictionaryCategory: "",
@@ -1630,17 +1631,15 @@ function rememberOpenPackingDictionaryBranches() {
     else state.expandedPackingDictionaryCategories.delete(category);
   });
 }
+function packingTodosInCategory(category) {
+  return window.TravelPrep.filterTodosByCategory(state.todos, "packing")
+    .filter((todo) => window.TravelPrep.normalizeTodoSubcategory(todo) === category);
+}
+function generatePackingDeleteCode() {
+  const digits = [..."0123456789"];
+  return Array.from({ length: 4 }, () => digits.splice(Math.floor(Math.random() * digits.length), 1)[0]).join("");
+}
 function deletePackingDictionaryCategory(category) {
-  const remaining = packingCategoryEntries().filter(([key]) => key !== category);
-  const fallback = remaining.find(([key]) => key === "other")?.[0] || remaining[0]?.[0];
-  if (!fallback) return;
-  window.TravelPrep.filterTodosByCategory(state.todos, "packing").forEach((todo) => {
-    if (window.TravelPrep.normalizeTodoSubcategory(todo) !== category) return;
-    todo.subcategory = fallback;
-    todo.luggage = packingLuggageFor(todo);
-    todo.container = packingLuggageFor(todo);
-    saveSharedChange("todos", todo).catch(console.error);
-  });
   if (Object.hasOwn(state.packingCustomCategories, category)) {
     delete state.packingCustomCategories[category];
     localStorage.setItem(packingCustomCategoriesKey(), JSON.stringify(state.packingCustomCategories));
@@ -1653,6 +1652,22 @@ function deletePackingDictionaryCategory(category) {
   state.editingPackingDictionaryCategory = "";
   savePackingCategorySettings();
   savePackingTagAssociations();
+}
+async function migratePackingCategory(source, target) {
+  const todos = packingTodosInCategory(source);
+  todos.forEach((todo) => {
+    todo.subcategory = target;
+    todo.property = "";
+  });
+  await Promise.all(todos.map((todo) => saveSharedChange("todos", todo)));
+  deletePackingDictionaryCategory(source);
+}
+function syncPackingCategoryDeletionForm(form) {
+  const pending = state.pendingPackingCategoryDeletion;
+  const target = $("[data-packing-category-delete-target]", form)?.value || "";
+  const code = $("[data-packing-category-delete-code]", form)?.value.trim() || "";
+  const confirm = $("[data-packing-category-delete-confirm]", form);
+  if (confirm) confirm.disabled = !pending || !target || target === pending.category || code !== pending.code;
 }
 function isCustomPackingProperty(property) {
   return typeof property === "string" && property.startsWith("custom:");
@@ -1978,12 +1993,14 @@ function renderPackingDictionary() {
       const addingTag = state.addingPackingDictionaryTagCategory === category;
       return `<details class="packing-dictionary-branch" draggable="true" data-packing-dictionary-category-drag="${escapeHtml(category)}" data-packing-dictionary-category="${escapeHtml(category)}" ${state.expandedPackingDictionaryCategories.has(category) ? "open" : ""}><summary data-packing-dictionary-drop="${escapeHtml(category)}" data-packing-dictionary-category-drop="${escapeHtml(category)}"><span>${editing ? `<input data-packing-dictionary-category-label="${escapeHtml(category)}" value="${escapeHtml(label)}" maxlength="24" aria-label="${escapeHtml(label)}类别名称">` : `<strong>${escapeHtml(label)}</strong>`}<i aria-hidden="true">⌄</i></span></summary><div class="packing-dictionary-branch__actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(label)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-dictionary-category-edit="${escapeHtml(category)}">编辑</button><button type="button" data-packing-dictionary-tag-create="${escapeHtml(category)}">新增</button><button type="button" class="todo-delete" data-packing-dictionary-category-delete="${escapeHtml(category)}">删除</button></div></details></div><div class="packing-dictionary-tags" data-packing-dictionary-drop="${escapeHtml(category)}">${tags.length ? tags.map((tag) => `<span class="packing-dictionary-tag" draggable="true" data-packing-dictionary-tag="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" data-packing-dictionary-tag-drop="${escapeHtml(tag)}" title="拖动标签调整位置"><span>${escapeHtml(packingPropertyLabel(tag))}</span><button type="button" data-packing-dictionary-unlink="${escapeHtml(tag)}" data-packing-dictionary-category="${escapeHtml(category)}" aria-label="从${escapeHtml(label)}移除${escapeHtml(packingPropertyLabel(tag))}">×</button></span>`).join("") : `<p>把标签拖到这里</p>`}</div>${addingTag ? `<form class="packing-dictionary-tag-add" data-packing-dictionary-tag-add data-packing-dictionary-category="${escapeHtml(category)}"><input name="tag" type="text" maxlength="24" placeholder="输入新标签名称" aria-label="${escapeHtml(label)}新增标签"><button type="submit">新增</button></form>` : ""}</details>`;
     }).join("")}</div>`;
+  const pendingDeletion = state.pendingPackingCategoryDeletion;
+  const deletionDialog = pendingDeletion ? `<div class="packing-category-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="packing-category-delete-title"><form data-packing-category-delete-dialog data-packing-category-delete-source="${escapeHtml(pendingDeletion.category)}"><div class="packing-form-heading"><strong id="packing-category-delete-title">迁移物品并删除类别</strong><button type="button" data-packing-category-delete-close aria-label="关闭删除类别">×</button></div><p>“${escapeHtml(packingCategoryLabel(pendingDeletion.category))}”下有 ${pendingDeletion.count} 件物品。请选择迁移类别，所有物品标签会改为无标签。</p><label><span>迁移至</span><select name="target" data-packing-category-delete-target><option value="">选择目标类别</option>${categories.filter(([key]) => key !== pendingDeletion.category).map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>确认数字</span><b class="packing-category-delete-code">${pendingDeletion.code}</b><input name="code" inputmode="numeric" maxlength="4" autocomplete="off" data-packing-category-delete-code placeholder="输入上方四位数字"></label><div class="packing-category-delete-actions"><button type="button" data-packing-category-delete-close>取消</button><button type="submit" class="todo-delete" data-packing-category-delete-confirm disabled>确认迁移并删除</button></div></form></div>` : "";
   const luggagePanel = `<div class="packing-dictionary-tree"><div class="packing-dictionary-luggage-heading"><p class="packing-dictionary-root">行囊用途</p><button type="button" class="packing-action-trigger" data-packing-luggage-add-open>新增</button></div><form class="packing-luggage-add" data-packing-luggage-add ${state.addingPackingLuggage ? "" : "hidden"}><label><span>类型</span><select name="kind"><option value="case">箱子</option><option value="pack">背包</option><option value="bag">挎包</option></select></label><label><span>图标</span><select name="icon">${iconOptions("🧳")}</select></label><label><span>名称</span><input name="label" maxlength="24" placeholder="例如：车载包" required></label><button type="submit">新增</button></form>${packingPrimaryLuggage().map(luggageBranch).join("") || `<p class="todo-empty">还没有行囊用途。</p>`}</div>`;
   dictionary.innerHTML = `<section class="packing-dictionary">
     <div class="packing-dictionary__heading"><div><p class="section-kicker">PACKING DICTIONARY</p><strong>${tab === "categories" ? "类别与标签" : "行囊用途"}</strong><small>${tab === "categories" ? "展开类别查看标签；拖动类别或标签即可调整位置。新增请使用对应类别的更多菜单。" : "设置箱子、背包、挎包的名称与图标；编辑收纳包可调整收纳归属。"}</small></div></div>
     ${tabs}
     ${tab === "categories" ? categoryPanel : luggagePanel}
-  </section>`;
+  </section>${deletionDialog}`;
 }
 
 function packingPurchaseEditMarkup(purchase) {
@@ -2258,7 +2275,19 @@ function renderTravelPrep() {
     state.packingOverviewOwner = owner.dataset.packingOverviewOwner;
     renderPackingWorkspace();
   };
-  $("#packing-dictionary").onsubmit = (event) => {
+  $("#packing-dictionary").onsubmit = async (event) => {
+    if (event.target.matches("[data-packing-category-delete-dialog]")) {
+      event.preventDefault();
+      const form = event.target;
+      const pending = state.pendingPackingCategoryDeletion;
+      const target = $("[data-packing-category-delete-target]", form)?.value || "";
+      const code = $("[data-packing-category-delete-code]", form)?.value.trim() || "";
+      if (!pending || !target || target === pending.category || code !== pending.code) return;
+      await migratePackingCategory(pending.category, target);
+      state.pendingPackingCategoryDeletion = null;
+      renderAll();
+      return;
+    }
     if (event.target.matches("[data-packing-luggage-add]")) {
       event.preventDefault();
       const form = new FormData(event.target);
@@ -2314,6 +2343,11 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#packing-dictionary").onclick = (event) => {
+    if (event.target.closest("[data-packing-category-delete-close]")) {
+      state.pendingPackingCategoryDeletion = null;
+      renderAll();
+      return;
+    }
     const tab = event.target.closest("[data-packing-dictionary-tab]");
     if (tab) {
       state.activePackingDictionaryTab = tab.dataset.packingDictionaryTab;
@@ -2407,6 +2441,12 @@ function renderTravelPrep() {
       const category = deleteCategory.dataset.packingDictionaryCategoryDelete;
       const label = packingCategoryLabel(category);
       const tags = packingTagsForCategory(category);
+      const todos = packingTodosInCategory(category);
+      if (todos.length) {
+        state.pendingPackingCategoryDeletion = { category, count: todos.length, code: generatePackingDeleteCode() };
+        renderAll();
+        return;
+      }
       if (tags.length && !window.confirm(`“${label}”类别内仍有 ${tags.length} 个标签，确认删除类别及这些关联标签吗？`)) return;
       rememberOpenPackingDictionaryBranches();
       deletePackingDictionaryCategory(category);
@@ -2425,6 +2465,11 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#packing-dictionary").onchange = (event) => {
+    const deletionForm = event.target.closest("[data-packing-category-delete-dialog]");
+    if (deletionForm) {
+      syncPackingCategoryDeletionForm(deletionForm);
+      return;
+    }
     const input = event.target.closest("[data-packing-dictionary-category-label]");
     if (!input) return;
     const category = input.dataset.packingDictionaryCategoryLabel;
@@ -2435,6 +2480,10 @@ function renderTravelPrep() {
     state.editingPackingDictionaryCategory = "";
     savePackingCategorySettings();
     renderAll();
+  };
+  $("#packing-dictionary").oninput = (event) => {
+    const deletionForm = event.target.closest("[data-packing-category-delete-dialog]");
+    if (deletionForm) syncPackingCategoryDeletionForm(deletionForm);
   };
   $("#packing-dictionary").ondragstart = (event) => {
     const tag = event.target.closest("[data-packing-dictionary-tag]");
