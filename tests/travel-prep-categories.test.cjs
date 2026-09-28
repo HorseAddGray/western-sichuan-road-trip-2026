@@ -264,6 +264,15 @@ test("daily itinerary records typed travel moods with ordered timestamps and sco
   assert.match(styles, /label\.scenic-link-title-field \{ margin-top: 18px/);
 });
 
+test("daily itinerary moods save a selected owner and show it before the content", () => {
+  assert.match(app, /const ITINERARY_MOOD_OWNERS = Object\.freeze\(\{ majia: "马甲", zaizai: "仔仔" \}\)/);
+  assert.match(app, /data-itinerary-mood-owner/);
+  assert.match(app, /owner: "majia"/);
+  assert.match(app, /const owner = itineraryMoodOwnerLabel\(formData\.get\("owner"\)\) \? String\(formData\.get\("owner"\)\) : "majia"/);
+  assert.match(app, /const owner = itineraryMoodOwnerLabel\(note\.owner\);/);
+  assert.match(app, /\$\{escapeHtml\(owner\)\}：/);
+});
+
 test("itinerary moods use a closable dialog and compact type-and-time metadata", () => {
   assert.match(app, /function itineraryNoteTime\(value\)/);
   assert.match(app, /data-itinerary-note-dialog/);

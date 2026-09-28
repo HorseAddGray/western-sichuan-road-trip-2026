@@ -69,6 +69,7 @@ const SHARED_COLLECTIONS = Object.freeze(["todos", "tickets", "ledger"]);
 const ITINERARY_STATE_ID = "__itinerary_state__";
 const PACKING_DICTIONARY_STATE_ID = "packing-dictionary-state-v1";
 const ITINERARY_MOOD_TYPES = Object.freeze({ food: "美食", hotel: "酒店", scenic: "景点", mood: "心情" });
+const ITINERARY_MOOD_OWNERS = Object.freeze({ majia: "马甲", zaizai: "仔仔" });
 const OBSOLETE_PACKING_ITEM_IDS = new Set([
   "packing-documents", "packing-clothes", "packing-medicines", "packing-hygiene",
   "packing-weather", "packing-electronics", "packing-supplies"
@@ -629,6 +630,10 @@ function itineraryMoodTypeFor(note) {
   return ITINERARY_MOOD_TYPES[note?.type] ? note.type : "mood";
 }
 
+function itineraryMoodOwnerLabel(owner) {
+  return ITINERARY_MOOD_OWNERS[owner] || "";
+}
+
 function itineraryMoodNeedsName(type) {
   return ["food", "hotel", "scenic"].includes(type);
 }
@@ -683,7 +688,9 @@ function itineraryNoteDialogMarkup() {
   if (!editing) return "";
   const type = itineraryMoodTypeFor(editing);
   const typeOptions = Object.entries(ITINERARY_MOOD_TYPES).map(([key, label]) => `<option value="${key}" ${type === key ? "selected" : ""}>${label}</option>`).join("");
-  return `<div class="itinerary-note-dialog" data-itinerary-note-dialog><section role="dialog" aria-modal="true" aria-labelledby="itinerary-note-dialog-title"><div class="itinerary-note-dialog__heading"><strong id="itinerary-note-dialog-title">${editing.id ? "编辑旅途心情" : "添加旅途心情"}</strong><button type="button" data-itinerary-note-dialog-close aria-label="关闭旅途心情">×</button></div><form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(editing.key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><label><span>类型</span><select name="type" data-itinerary-mood-type aria-label="旅途心情类型">${typeOptions}</select></label><label data-itinerary-mood-name-row ${itineraryMoodNeedsName(type) ? "" : "hidden"}><span data-itinerary-mood-name-label>${itineraryMoodNameLabel(type)}</span><input name="name" data-itinerary-mood-name maxlength="80" value="${escapeHtml(editing.name || "")}" placeholder="填写${itineraryMoodNameLabel(type)}" aria-label="旅途心情名称"></label><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="旅途心情内容">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form></section></div>`;
+  const owner = itineraryMoodOwnerLabel(editing.owner) ? editing.owner : "majia";
+  const ownerOptions = Object.entries(ITINERARY_MOOD_OWNERS).map(([key, label]) => `<option value="${key}" ${owner === key ? "selected" : ""}>${label}</option>`).join("");
+  return `<div class="itinerary-note-dialog" data-itinerary-note-dialog><section role="dialog" aria-modal="true" aria-labelledby="itinerary-note-dialog-title"><div class="itinerary-note-dialog__heading"><strong id="itinerary-note-dialog-title">${editing.id ? "编辑旅途心情" : "添加旅途心情"}</strong><button type="button" data-itinerary-note-dialog-close aria-label="关闭旅途心情">×</button></div><form class="itinerary-note-form" data-itinerary-note-form data-itinerary-note-key="${escapeHtml(editing.key)}" data-itinerary-note-id="${escapeHtml(editing.id || "")}"><label><span>类型</span><select name="type" data-itinerary-mood-type aria-label="旅途心情类型">${typeOptions}</select></label><label><span>心情归属</span><select name="owner" data-itinerary-mood-owner aria-label="旅途心情归属">${ownerOptions}</select></label><label data-itinerary-mood-name-row ${itineraryMoodNeedsName(type) ? "" : "hidden"}><span data-itinerary-mood-name-label>${itineraryMoodNameLabel(type)}</span><input name="name" data-itinerary-mood-name maxlength="80" value="${escapeHtml(editing.name || "")}" placeholder="填写${itineraryMoodNameLabel(type)}" aria-label="旅途心情名称"></label><textarea name="text" maxlength="600" placeholder="记录打卡、美食或游玩心得" aria-label="旅途心情内容">${escapeHtml(editing.text || "")}</textarea><div><button type="submit">保存</button><button type="button" data-itinerary-note-cancel>取消</button></div></form></section></div>`;
 }
 
 function itineraryNotesMarkup(key) {
@@ -691,7 +698,8 @@ function itineraryNotesMarkup(key) {
   const noteMarkup = (note) => {
     const type = itineraryMoodTypeFor(note);
     const name = String(note.name || "").trim();
-    return `<article class="itinerary-note itinerary-note--${type}" data-itinerary-note-id="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}"><div class="itinerary-note__heading"><div class="itinerary-note__metadata"><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}${note.createdAt ? `<time>${escapeHtml(itineraryNoteTime(note.createdAt))}</time>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${escapeHtml(note.text)}</p></article>`;
+    const owner = itineraryMoodOwnerLabel(note.owner);
+    return `<article class="itinerary-note itinerary-note--${type}" data-itinerary-note-id="${escapeHtml(note.id)}" data-itinerary-note-key="${escapeHtml(key)}"><div class="itinerary-note__heading"><div class="itinerary-note__metadata"><span class="itinerary-note__type">${escapeHtml(ITINERARY_MOOD_TYPES[type])}</span>${name ? `<strong>${escapeHtml(name)}</strong>` : ""}${note.createdAt ? `<time>${escapeHtml(itineraryNoteTime(note.createdAt))}</time>` : ""}</div>${itineraryMoodNeedsName(type) ? itineraryRatingMarkup(note.id) : ""}</div><p>${owner ? `${escapeHtml(owner)}：` : ""}${escapeHtml(note.text)}</p></article>`;
   };
   return `<li class="schedule-interval" data-itinerary-note-key="${escapeHtml(key)}"><div class="schedule-interval__content"><div class="schedule-interval__heading"><strong>旅途心情</strong><button type="button" data-itinerary-note-add="${escapeHtml(key)}">添加</button></div>${notes.map(noteMarkup).join("")}</div></li>`;
 }
@@ -880,7 +888,7 @@ function renderTimeline(preserveExpanded = false) {
     }
     const addNote = event.target.closest("[data-itinerary-note-add]");
     if (addNote) {
-      state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", type: "mood", name: "", text: "" };
+      state.editingItineraryNote = { key: addNote.dataset.itineraryNoteAdd, id: "", type: "mood", owner: "majia", name: "", text: "" };
       renderTimeline(true);
       requestAnimationFrame(() => $("[data-itinerary-note-dialog] textarea")?.focus());
       return;
@@ -929,6 +937,7 @@ function renderTimeline(preserveExpanded = false) {
       return;
     }
     const type = String(formData.get("type") || "mood");
+    const owner = itineraryMoodOwnerLabel(formData.get("owner")) ? String(formData.get("owner")) : "majia";
     const name = String(formData.get("name") || "").trim();
     if (itineraryMoodNeedsName(type) && !name) {
       $("[data-itinerary-mood-name]", form)?.focus();
@@ -938,7 +947,7 @@ function renderTimeline(preserveExpanded = false) {
     const id = form.dataset.itineraryNoteId || (globalThis.crypto?.randomUUID?.() || `note-${Date.now().toString(36)}`);
     const notes = [...itineraryNotesFor(key)];
     const index = notes.findIndex((note) => note.id === id);
-    const note = { id, type, name, text, createdAt: index >= 0 ? notes[index].createdAt : new Date().toISOString() };
+    const note = { id, type, owner, name, text, createdAt: index >= 0 ? notes[index].createdAt : new Date().toISOString() };
     if (index >= 0) notes[index] = note;
     else notes.push(note);
     state.itineraryState.notes[key] = notes;
