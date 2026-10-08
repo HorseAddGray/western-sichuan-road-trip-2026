@@ -14,7 +14,7 @@
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
   <script src="travel-prep.js?v=20260921-8" defer></script>
-  <script src="app.js?v=20260928-69" defer></script>
+  <script src="app.js?v=20261008-70" defer></script>
   <script src="ticket-pdf-preview.js?v=20260910-2" defer></script>
   <script src="ledger.js?v=20260910-3" defer></script>
   <script src="site-navigation.js?v=20260920-4" defer></script>
@@ -38,8 +38,6 @@
         <div class="travel-navigation-menu" role="menu" aria-label="行囊清单栏目">
           <a href="#packing-overview" role="menuitem" data-module="todo" hidden>总览</a>
           <a href="#packing-details" role="menuitem" data-module="todo" hidden>行囊</a>
-          <a href="#packing-purchase" role="menuitem" data-module="todo" hidden>采购</a>
-          <a href="#packing-check" role="menuitem" data-module="todo" hidden>检查</a>
           <a href="#packing-dictionary" role="menuitem" data-module="todo" hidden>字典</a>
         </div>
       </details>
@@ -117,7 +115,7 @@
       </div>
       <div id="packing-overview" hidden></div>
       <div id="packing-details">
-        <section class="packing-filter-section packing-filter-section--luggage"><div class="packing-filter-heading"><span><strong>行囊用途</strong><small>按物品所在箱包查看；在字典设置中管理用途</small></span><span class="packing-filter-actions"><button type="button" class="packing-action-trigger" data-packing-form-open>新增</button><button type="button" class="packing-action-trigger" data-packing-search-open>搜索</button><button type="button" class="packing-action-trigger" data-packing-filter-reset>重置</button></span></div><div class="packing-luggage-filters" id="packing-luggage-filters" aria-label="行李用途筛选"></div></section>
+        <div class="packing-filter-heading"><span></span><span class="packing-filter-actions"><button type="button" class="packing-action-trigger" data-packing-form-open>新增</button><button type="button" class="packing-action-trigger" data-packing-search-open>搜索</button><button type="button" class="packing-action-trigger" data-packing-filter-reset>重置</button></span></div>
         <form class="packing-search-form" id="packing-search-panel" aria-label="搜索物品" hidden>
           <div class="packing-form-heading"><strong>搜索物品</strong><button type="button" data-packing-search-close aria-label="关闭搜索">×</button></div>
           <div class="packing-form-selectors"><label><span>物品类别</span><select id="packing-category-filter-select" aria-label="按物品类别筛选"></select></label><label><span>物品标签</span><select id="packing-property-filter-select" aria-label="按物品标签筛选"></select></label><label><span>人物归属</span><select id="packing-owner-filter-select" aria-label="按人物归属筛选"></select></label></div>

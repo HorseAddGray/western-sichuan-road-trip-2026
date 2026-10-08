@@ -118,7 +118,7 @@ function applyModuleConfig() {
 
   const hashModules = {
     "#flights": "flights", "#route": "overview", "#itinerary": "itinerary",
-    "#drive": "driving", "#packing": "todo", "#packing-overview": "todo", "#packing-details": "todo", "#packing-purchase": "todo", "#packing-check": "todo", "#packing-dictionary": "todo", "#notices": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
+    "#drive": "driving", "#packing": "todo", "#packing-overview": "todo", "#packing-details": "todo", "#packing-dictionary": "todo", "#notices": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
   };
   const requestedModule = hashModules[location.hash];
   if (requestedModule && !moduleEnabled(requestedModule)) {
@@ -1802,7 +1802,7 @@ function packingEditFormMarkup(todo) {
   </form>`;
 }
 function packingWorkspaceFromHash(hash = location.hash) {
-  return { "#packing": "details", "#packing-overview": "overview", "#packing-details": "details", "#packing-purchase": "purchase", "#packing-check": "check", "#packing-dictionary": "dictionary" }[hash] || null;
+  return { "#packing": "details", "#packing-overview": "overview", "#packing-details": "details", "#packing-dictionary": "dictionary" }[hash] || null;
 }
 function packingWorkspaceKey() { return `travel-plan:${state.data.metadata.tripId}:packing-workspace`; }
 function savePackingWorkspace() {
@@ -1922,7 +1922,7 @@ function renderTodoList(kind) {
         <span class="todo-check" aria-hidden="true">✓</span>
         <span class="todo-copy"><span class="packing-item-title"><strong class="todo-text">${escapeHtml(todo.text)}${packingQuantityFor(todo) > 1 ? ` <small class="packing-item-quantity">×${packingQuantityFor(todo)}</small>` : ""}</strong><select data-packing-owner="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)}归属">${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${packingOwnerFor(todo) === key ? "selected" : ""}>${label}</option>`).join("")}</select>${property === "consumable" && usesTotal > 0 ? `<span class="packing-item-meta packing-item-meta--inline"><button type="button" data-todo-use="${escapeHtml(todo.id)}" ${exhausted ? "disabled" : ""}>${exhausted ? "已用尽" : `使用一次 · ${usesRemaining}/${usesTotal}`}</button></span>` : ""}</span>${todo.detail ? `<span class="todo-detail">${escapeHtml(todo.detail)}</span>` : ""}</span>
       </label>
-      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" data-packing-find="${escapeHtml(todo.id)}">查找</button><label class="todo-more__select">转移行囊<select data-packing-container="${escapeHtml(todo.id)}" aria-label="转移${escapeHtml(todo.text)}至行囊">${packingLuggageOptions(packingContainerFor(todo))}</select></label><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
+      <div class="todo-actions"><details class="todo-more"><summary aria-label="更多操作：${escapeHtml(todo.text)}">•••</summary><div class="todo-more__menu"><button type="button" class="todo-edit">编辑</button><button type="button" data-todo-copy>复制</button><button type="button" class="todo-delete">删除</button></div></details></div>
     </div>${state.editingPackingTodoId === todo.id ? packingEditFormMarkup(todo) : ""}`;
   };
   $("#packing-list").innerHTML = activeTodos.length ? Object.entries(labels).map(([key, label]) => {
@@ -2056,6 +2056,7 @@ function renderPackingWorkspace() {
   const checker = $("#packing-checker");
   const dictionary = $("#packing-dictionary");
   if (!overview || !details || !purchases || !checker || !dictionary) return;
+  if (!["overview", "details", "dictionary"].includes(state.activePackingWorkspace)) state.activePackingWorkspace = "details";
   $("#packing-title").textContent = PACKING_WORKSPACE_TITLES[state.activePackingWorkspace] || PACKING_WORKSPACE_TITLES.details;
   overview.hidden = state.activePackingWorkspace !== "overview";
   details.hidden = state.activePackingWorkspace !== "details";
@@ -2234,7 +2235,7 @@ function renderTravelPrep() {
   $("#notice-subcategory").value = state.activeNoticeSubcategory;
   const renderControls = () => {
     const packingTodos = window.TravelPrep.filterTodosByCategory(state.todos, "packing");
-    $("#packing-luggage-filters").innerHTML = packingPrimaryLuggage().map((luggage) => `<button type="button" class="packing-luggage-filter" data-packing-luggage="${luggage.key}" aria-pressed="${state.selectedPackingLuggage === luggage.key}"><b aria-hidden="true">${luggage.icon}</b><span>${escapeHtml(luggage.label)}</span></button>`).join("");
+    state.selectedPackingLuggage = "";
     state.selectedPackingContainer = "";
     $("#packing-owner-filter-select").innerHTML = `<option value="">全部归属</option>${Object.entries(PACKING_OWNER_LABELS).map(([key, label]) => `<option value="${key}" ${state.selectedPackingOwner === key ? "selected" : ""}>${label}</option>`).join("")}`;
     const packingPropertyFilterOptions = [...new Set(packingCategoryEntries().flatMap(([category]) => packingTagsForCategory(category)))]
@@ -2567,14 +2568,6 @@ function renderTravelPrep() {
     renderAll();
   };
   $("#packing-dictionary").ondragend = () => { state.draggedPackingDictionaryTag = null; state.draggedPackingDictionaryCategory = ""; };
-  $("#packing-luggage-filters").onclick = (event) => {
-    const button = event.target.closest("[data-packing-luggage]");
-    if (!button) return;
-    const key = button.dataset.packingLuggage;
-    state.selectedPackingLuggage = state.selectedPackingLuggage === key ? "" : key;
-    state.selectedPackingContainer = "";
-    renderAll();
-  };
   $("#packing-owner-filter-select").onchange = (event) => {
     state.selectedPackingOwner = event.target.value;
     renderAll();
@@ -3110,9 +3103,7 @@ function renderTravelPrep() {
     const todo = state.todos.find((entry) => entry.id === item.dataset.todoId);
     if (!todo) return;
     if (event.target.matches("[data-packing-owner]")) todo.owner = event.target.value;
-    else if (event.target.matches("[data-packing-container]")) {
-      transferPackingTodoToLuggage(todo, event.target.value);
-    } else if (event.target.matches("input[type='checkbox']")) todo.completed = event.target.checked;
+    else if (event.target.matches("input[type='checkbox']")) todo.completed = event.target.checked;
     else return;
     saveSharedChange("todos", todo).catch(console.error);
     renderAll();
@@ -3174,18 +3165,6 @@ function renderTravelPrep() {
       const key = categoryToggle.dataset.packingCategoryToggle;
       state.collapsedPackingCategories.has(key) ? state.collapsedPackingCategories.delete(key) : state.collapsedPackingCategories.add(key);
       renderTodoList("packing");
-      return;
-    }
-    const find = event.target.closest("[data-packing-find]");
-    if (find) {
-      const todo = state.todos.find((entry) => entry.id === find.dataset.packingFind);
-      const luggage = todo && packingLuggageItem(packingDictionaryLuggageFor(todo));
-      const filter = luggage && document.querySelector(`[data-packing-luggage="${luggage.key}"]`);
-      if (filter) {
-        filter.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-        filter.classList.add("is-highlighted");
-        setTimeout(() => filter.classList.remove("is-highlighted"), 2200);
-      }
       return;
     }
     const use = event.target.closest("[data-todo-use]");

@@ -43,33 +43,36 @@ test("memo navigation includes a food category and aligned luggage controls", ()
   assert.match(styles, /\.packing-check-start-actions > button/);
 });
 
-test("packing exposes five editable luggage filters", () => {
-  assert.match(html, /id="packing-luggage-filters"/);
+test("packing keeps luggage management inside dictionary settings", () => {
+  assert.doesNotMatch(html, /id="packing-luggage-filters"/);
   assert.match(app, /const PACKING_LUGGAGE = \[/);
-  assert.match(app, /data-packing-luggage/);
   assert.match(app, /data-packing-luggage-label/);
+  assert.match(app, /data-packing-dictionary-tab="luggage"/);
 });
 
-test("packing workspace uses concise navigation children for luggage, purchases, and checks", () => {
+test("packing workspace navigation keeps only overview, details, and dictionary", () => {
   assert.match(html, /id="packing-navigation"/);
+  assert.match(html, /href="#packing-overview"[^>]*>总览</);
   assert.match(html, /href="#packing-details"[^>]*>行囊</);
-  assert.match(html, /href="#packing-purchase"[^>]*>采购</);
-  assert.match(html, /href="#packing-check"[^>]*>检查</);
-  assert.match(html, /id="packing-purchase-list"/);
-  assert.match(html, /id="packing-checker"/);
+  assert.match(html, /href="#packing-dictionary"[^>]*>字典</);
+  assert.doesNotMatch(html, /href="#packing-purchase"/);
+  assert.doesNotMatch(html, /href="#packing-check"/);
   assert.match(app, /data-packing-owner/);
-  assert.match(app, /data-packing-container/);
-  assert.match(app, /data-purchase-submit/);
   assert.match(app, /data-todo-use/);
 });
 
-test("packing uses short bag names, a single owner filter, and selected-bag checking", () => {
+test("packing keeps only overview, details, and dictionary without luggage actions", () => {
+  assert.doesNotMatch(html, /href="#packing-purchase"/);
+  assert.doesNotMatch(html, /href="#packing-check"/);
+  assert.doesNotMatch(html, /id="packing-luggage-filters"/);
+  assert.doesNotMatch(app, /data-packing-find/);
+  assert.doesNotMatch(app, /data-packing-container/);
+});
+
+test("packing uses short bag names and a single owner filter", () => {
   assert.match(app, /label: "衣箱"/);
   assert.match(app, /label: "随包"/);
   assert.match(app, /selectedPackingOwner/);
-  assert.match(app, /data-packing-check-luggage/);
-  assert.match(app, /data-packing-check-reset/);
-  assert.match(app, /data-packing-check-reselect/);
 });
 
 test("packing filters use list selectors with a reset action and compact luggage controls", () => {
@@ -81,7 +84,7 @@ test("packing filters use list selectors with a reset action and compact luggage
   assert.match(app, /packing-item-title/);
 });
 
-test("packing keeps additions in a closable form and moves item actions into a findable overflow menu", () => {
+test("packing keeps additions in a closable form and item actions in an overflow menu", () => {
   assert.match(html, /data-packing-form-open/);
   assert.match(html, /id="packing-form-panel" hidden/);
   assert.match(html, /data-packing-form-close/);
@@ -92,10 +95,10 @@ test("packing keeps additions in a closable form and moves item actions into a f
   assert.match(html, /id="packing-property-filter-select"/);
   assert.match(app, /packingSearchText/);
   assert.match(app, /selectedPackingProperty/);
-  assert.match(app, /data-packing-find/);
   assert.match(app, /todo-more__menu/);
   assert.doesNotMatch(app, /packing-property">\$\{PACKING_PROPERTY_LABELS\[property\]\}<\//);
-  assert.match(app, /data-packing-container="\$\{escapeHtml\(todo\.id\)\}"/);
+  assert.doesNotMatch(app, /data-packing-find/);
+  assert.doesNotMatch(app, /data-packing-container/);
 });
 
 test("packing forms keep selectors together, names below, and synchronize workspace titles", () => {
@@ -161,15 +164,11 @@ test("authored purchase items seed the purchase list and retain local removals",
   assert.match(app, /removedPurchaseIds/);
 });
 
-test("purchase, packing checks, and notices expose the requested scoped workflows", () => {
-  assert.match(html, /id="packing-purchase-form-panel"[^>]*hidden/);
-  assert.match(html, /id="packing-purchase-description"/);
-  assert.match(app, /data-purchase-edit/);
-  assert.match(app, /data-purchase-submit/);
-  assert.match(app, /purchase\.subcategory/);
-  assert.match(app, /packingCheckOwner/);
-  assert.match(app, /data-packing-check-child/);
-  assert.match(app, />确认无误</);
+test("packing does not expose purchase or check routes while notices retain their workflow", () => {
+  assert.doesNotMatch(html, /href="#packing-purchase"/);
+  assert.doesNotMatch(html, /href="#packing-check"/);
+  assert.doesNotMatch(app, /"#packing-purchase": "purchase"/);
+  assert.doesNotMatch(app, /"#packing-check": "check"/);
   assert.match(html, /data-notice-form-open/);
   assert.match(html, /id="notice-title-input"/);
   assert.match(html, /id="notice-detail-input"/);
@@ -188,13 +187,17 @@ test("the first two days keep the supplied timed driving itinerary", () => {
   const [dayOne, dayTwo] = tripData.days;
   assert.equal(dayOne.schedule[0].time, "10:30");
   assert.ok(dayOne.schedule.some((item) => item.time === "13:00" && item.text.includes("抵达天全服务区") && item.detail.includes("打卡318标志")));
+  assert.ok(dayOne.schedule.some((item) => item.time === "17:15" && item.text === "从康定县城出发前往新都桥。"));
+  assert.ok(!dayOne.schedule.some((item) => item.text.includes("红海子")));
   assert.ok(dayOne.schedule.some((item) => item.time === "20:55" && item.text === "抵达新都桥。"));
   assert.ok(dayOne.schedule.some((item) => item.time === "22:55" && item.text.includes("回房休息")));
   assert.equal(dayTwo.schedule[0].time, "08:00");
-  assert.ok(dayTwo.schedule.some((item) => item.time === "11:57" && item.text.includes("抵达道孚县") && item.detail.includes("中国熊猫大道/G350")));
-  assert.ok(dayTwo.schedule.some((item) => item.time === "14:28" && item.text.includes("抵达炉霍县") && item.detail.includes("400米道路施工")));
-  assert.ok(dayTwo.schedule.some((item) => item.time === "16:40" && item.text.includes("抵达格萨尔王城")));
-  assert.equal(dayTwo.locations.at(-1), "格萨尔王城");
+  assert.deepEqual(dayTwo.locations, ["新都桥", "塔公镇", "炉霍县", "甘孜县"]);
+  assert.ok(dayTwo.schedule.some((item) => item.text === "抵达塔公镇。"));
+  assert.ok(dayTwo.schedule.some((item) => item.text === "从塔公镇出发前往炉霍县。"));
+  assert.ok(dayTwo.schedule.some((item) => item.time === "14:28" && item.text === "抵达炉霍县。"));
+  assert.ok(dayTwo.schedule.some((item) => item.text === "从炉霍县出发前往甘孜县。"));
+  assert.ok(dayTwo.schedule.some((item) => item.time === "16:40" && item.text === "抵达甘孜县。"));
   assert.match(app, /item\.detail \? `<div class="schedule-detail">/);
 });
 
@@ -681,7 +684,8 @@ test("packing overflow control is compact and does not draw a white square", () 
 });
 
 test("packing overflow menu can duplicate an item above delete without changing the original", () => {
-  assert.match(app, /data-packing-find[\s\S]*todo-edit[\s\S]*data-todo-copy[\s\S]*todo-delete/);
+  assert.match(app, /todo-edit[\s\S]*data-todo-copy[\s\S]*todo-delete/);
+  assert.doesNotMatch(app, /data-packing-find/);
   assert.match(app, /event\.target\.closest\("\[data-todo-copy\]"\)/);
   assert.match(app, /const duplicate = \{ \.\.\.todo,[\s\S]*completed: false/);
   assert.doesNotMatch(app, /text: `\$\{todo\.text\}（副本）`/);
@@ -750,10 +754,9 @@ test("packing overview resolves categories and tags through the dictionary and o
   assert.match(app, /data-packing-overview-dialog-close/);
 });
 
-test("packing supports untagged items, child-only luggage folding, and luggage reset before checking", () => {
+test("packing supports untagged items and child-only luggage folding in dictionary settings", () => {
   assert.match(app, /function packingDictionaryPropertyFor\(todo, category/);
   assert.match(app, /data-packing-luggage-add-open/);
-  assert.match(app, /data-packing-check-luggage-reset/);
   assert.match(app, /hasChildren \? `<details/);
   assert.match(app, /value=""[^>]*>无标签/);
   assert.match(app, /function packingDictionaryLuggageFor\(todo\)/);
